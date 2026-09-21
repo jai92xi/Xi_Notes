@@ -1,6 +1,4 @@
-Here is the **proper raw Markdown**. You can copy everything inside the block directly into your `.md` file.
 
-````
 # 🧠 Batch Normalization
 
 ## 🔹 What does Normalization mean?
