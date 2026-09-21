@@ -171,5 +171,3 @@ Input Features → Neural Network → Output
    "BatchNorm stabilizes intermediate activations and can make neural-network training faster and more stable."
 
 ```
-
-```
