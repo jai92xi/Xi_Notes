@@ -1,4 +1,3 @@
-
 # 🧠 Batch Normalization
 
 ## 🔹 What does Normalization mean?
@@ -72,8 +71,6 @@ Output
 [-0.8, -0.5, 0.2, 1.1, 0.3]
 ```
 
- > 💡 **Note:** The exact values are not important here. The main idea is that BatchNorm brings the activations into a more consistent distribution, which can make neural-network training **faster and more stable**.
-
 ---
 
  ## 💻 Simple Keras Example
@@ -96,76 +93,11 @@ model = Sequential([
 ])
 ```
 
- ### 🔍 Understanding the flow
-
-```
-Dense(32)
-    ↓
-BatchNormalization()
-    ↓
-ReLU()
-```
-
- This means:
-
- > The **Dense layer** produces 32 activations, **Batch Normalization normalizes those activations across the mini-batch**, and then **ReLU** is applied.
-
----
-
- ## 🎯 Why do we use Batch Normalization?
-
- Batch Normalization can help:
-
- - 🚀 **Speed up training**
-- 📉 Make training **more stable**
-- 🎯 Make optimization **easier**
-- 🔄 Keep intermediate activations more **consistent**
-- 🛡️ Sometimes provide a **regularization effect**
-
----
-
- ## 🆚 Feature Normalization vs Batch Normalization
-
- It is important not to confuse these two.
-
- | Feature Normalization | Batch Normalization |
-| --- | --- |
-| Applied to **input features** | Applied to **intermediate activations** |
-| Happens during **data preprocessing** | Happens **inside the neural network** |
-| Makes input features comparable in scale | Helps stabilize activations during training |
-| Example: Age and Salary | Example: Activations from a Dense layer |
-
-### 📊 Simple visualization
-
-```
-              Feature Normalization
-                      ↓
-Input Features → Neural Network → Output
-                      ↑
-                      |
-              Batch Normalization
-              (inside the network)
-```
-
----
-
- ## 🧠 In Simple Terms
-
- > **Normalization** brings values to a more **consistent and comparable scale**.
-
- > **Batch Normalization** applies this idea to the **intermediate activations of a neural network**, helping make training **more stable and often faster**.
-
----
+ __
 
  # ⚡ Quick Revision Points
 
  - 📏 **Normalization** → Brings values to a comparable scale.
 - 🎯 **Feature normalization** → Applied to input features.
 - 🧠 **BatchNorm** → Applied to intermediate activations.
-- 📦 **BatchNorm** works using mini-batch statistics during training.
 - 🚀 **BatchNorm** can make training faster and more stable.
-- ⚠️ **BatchNorm is not the same as input feature normalization.**
-- 🔑 **Interview answer:**\
-   "BatchNorm stabilizes intermediate activations and can make neural-network training faster and more stable."
-
-```
