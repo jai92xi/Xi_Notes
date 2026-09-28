@@ -78,6 +78,7 @@ function formatTopicName(filename) {
 /* ========================================
    SIDEBAR
 ======================================== */
+
 function createSidebar(items = topics) {
   const navigation =
     document.querySelector(".topic-navigation");
@@ -106,6 +107,13 @@ function createSidebar(items = topics) {
     button.type = "button";
     button.className = "topic-button";
 
+    /*
+      Show the actual filename.
+
+      Example:
+      ├── Early_Stopping.md
+      ├── imbalanced data handling.md
+    */
     button.innerHTML = `
       <span class="tree-symbol">├──</span>
       <span class="topic-name">
@@ -119,20 +127,6 @@ function createSidebar(items = topics) {
 
     navigation.appendChild(button);
   });
-
-  /*
-    Re-apply active state after rebuilding
-    the sidebar, for example after searching.
-  */
-  const currentFile =
-    currentTopicIndex >= 0 &&
-    topics[currentTopicIndex]
-      ? topics[currentTopicIndex].file
-      : null;
-
-  if (currentFile) {
-    updateActiveTopic(topics[currentTopicIndex]);
-  }
 }
 
 
@@ -143,15 +137,6 @@ async function loadMarkdown(topic) {
   try {
 
     showLoading();
-
-    /*
-      Find the actual position of this topic
-      in the complete topic list.
-    */
-    currentTopicIndex =
-      topics.findIndex(item =>
-        item.file === topic.file
-      );
 
     const response =
       await fetch(
@@ -173,13 +158,36 @@ async function loadMarkdown(topic) {
       );
     }
 
+    /*
+      Find current topic index.
+    */
+    currentTopicIndex =
+      topics.findIndex(
+        item => item.file === topic.file
+      );
+
+    /*
+      Render markdown first.
+    */
     content.innerHTML =
       marked.parse(markdown);
 
+    /*
+      Update page information.
+    */
     updateCurrentTopic(topic);
 
     updateActiveTopic(topic);
 
+    /*
+      Add Previous / Next navigation
+      at the TOP of the page.
+    */
+    addPageNavigation("top");
+
+    /*
+      Existing content enhancements.
+    */
     addCopyButtons();
 
     addHeadingIds();
@@ -188,12 +196,16 @@ async function loadMarkdown(topic) {
 
     /*
       Add Previous / Next navigation
-      after the Markdown content.
+      at the BOTTOM of the page.
     */
-    addTopicNavigation();
+    addPageNavigation("bottom");
 
     closeMobileSidebar();
 
+    /*
+      Always start the newly opened note
+      from the top.
+    */
     window.scrollTo({
       top: 0,
       behavior: "smooth"
@@ -206,6 +218,163 @@ async function loadMarkdown(topic) {
     showError(
       "Couldn’t open this note.",
       topic.file
+    );
+  }
+}
+
+
+/* ========================================
+   PAGE NAVIGATION
+======================================== */
+
+function addPageNavigation(position) {
+
+  /*
+    Remove an existing navigation bar
+    at this position if one exists.
+  */
+  const existing =
+    content.querySelector(
+      `.page-navigation-${position}`
+    );
+
+  if (existing) {
+    existing.remove();
+  }
+
+  /*
+    Do not show navigation if there is
+    only one note.
+  */
+  if (topics.length <= 1) {
+    return;
+  }
+
+  const navigation =
+    document.createElement("nav");
+
+  navigation.className =
+    `page-navigation page-navigation-${position}`;
+
+  navigation.setAttribute(
+    "aria-label",
+    position === "top"
+      ? "Previous and next page navigation"
+      : "Previous and next page navigation"
+  );
+
+  const previousTopic =
+    currentTopicIndex > 0
+      ? topics[currentTopicIndex - 1]
+      : null;
+
+  const nextTopic =
+    currentTopicIndex < topics.length - 1
+      ? topics[currentTopicIndex + 1]
+      : null;
+
+  /*
+    Previous button
+  */
+  const previousButton =
+    document.createElement("button");
+
+  previousButton.type = "button";
+  previousButton.className =
+    "page-nav-button previous-page";
+
+  if (previousTopic) {
+
+    previousButton.innerHTML = `
+      <span class="page-nav-arrow">←</span>
+      <span class="page-nav-label">
+        Previous
+      </span>
+      <span class="page-nav-title">
+        ${escapeHTML(previousTopic.name)}
+      </span>
+    `;
+
+    previousButton.addEventListener(
+      "click",
+      () => {
+        loadMarkdown(previousTopic);
+      }
+    );
+
+  } else {
+
+    previousButton.disabled = true;
+
+    previousButton.innerHTML = `
+      <span class="page-nav-arrow">←</span>
+      <span class="page-nav-label">
+        Previous
+      </span>
+    `;
+  }
+
+
+  /*
+    Next button
+  */
+  const nextButton =
+    document.createElement("button");
+
+  nextButton.type = "button";
+  nextButton.className =
+    "page-nav-button next-page";
+
+  if (nextTopic) {
+
+    nextButton.innerHTML = `
+      <span class="page-nav-label">
+        Next
+      </span>
+      <span class="page-nav-title">
+        ${escapeHTML(nextTopic.name)}
+      </span>
+      <span class="page-nav-arrow">→</span>
+    `;
+
+    nextButton.addEventListener(
+      "click",
+      () => {
+        loadMarkdown(nextTopic);
+      }
+    );
+
+  } else {
+
+    nextButton.disabled = true;
+
+    nextButton.innerHTML = `
+      <span class="page-nav-label">
+        Next
+      </span>
+      <span class="page-nav-arrow">→</span>
+    `;
+  }
+
+
+  navigation.appendChild(previousButton);
+  navigation.appendChild(nextButton);
+
+
+  /*
+    Insert at the requested position.
+  */
+  if (position === "top") {
+
+    content.insertBefore(
+      navigation,
+      content.firstChild
+    );
+
+  } else {
+
+    content.appendChild(
+      navigation
     );
   }
 }
@@ -250,148 +419,14 @@ function updateActiveTopic(selectedTopic) {
       topicName.textContent.trim() ===
       selectedTopic.file
     ) {
+
       button.classList.add("active");
+
     } else {
+
       button.classList.remove("active");
     }
   });
-}
-
-
-/* ========================================
-   PREVIOUS / NEXT TOPIC NAVIGATION
-======================================== */
-function addTopicNavigation() {
-
-  /*
-    Remove an old navigation block if one
-    somehow exists.
-  */
-  const oldNavigation =
-    content.querySelector(".topic-navigation-footer");
-
-  if (oldNavigation) {
-    oldNavigation.remove();
-  }
-
-  if (
-    currentTopicIndex < 0 ||
-    topics.length === 0
-  ) {
-    return;
-  }
-
-  const navigation =
-    document.createElement("div");
-
-  navigation.className =
-    "topic-navigation-footer";
-
-  const previousTopic =
-    currentTopicIndex > 0
-      ? topics[currentTopicIndex - 1]
-      : null;
-
-  const nextTopic =
-    currentTopicIndex < topics.length - 1
-      ? topics[currentTopicIndex + 1]
-      : null;
-
-
-  /* ----------------------------------------
-     PREVIOUS BUTTON
-  ---------------------------------------- */
-  const previousButton =
-    document.createElement("button");
-
-  previousButton.type = "button";
-  previousButton.className =
-    "topic-nav-button previous-topic";
-
-  if (previousTopic) {
-
-    previousButton.innerHTML = `
-      <span class="topic-nav-label">
-        ← Previous
-      </span>
-
-      <span class="topic-nav-title">
-        ${escapeHTML(previousTopic.name)}
-      </span>
-    `;
-
-    previousButton.addEventListener(
-      "click",
-      () => {
-        loadMarkdown(previousTopic);
-      }
-    );
-
-  } else {
-
-    previousButton.disabled = true;
-
-    previousButton.innerHTML = `
-      <span class="topic-nav-label">
-        ← Previous
-      </span>
-
-      <span class="topic-nav-title">
-        No previous topic
-      </span>
-    `;
-  }
-
-
-  /* ----------------------------------------
-     NEXT BUTTON
-  ---------------------------------------- */
-  const nextButton =
-    document.createElement("button");
-
-  nextButton.type = "button";
-  nextButton.className =
-    "topic-nav-button next-topic";
-
-  if (nextTopic) {
-
-    nextButton.innerHTML = `
-      <span class="topic-nav-label">
-        Next →
-      </span>
-
-      <span class="topic-nav-title">
-        ${escapeHTML(nextTopic.name)}
-      </span>
-    `;
-
-    nextButton.addEventListener(
-      "click",
-      () => {
-        loadMarkdown(nextTopic);
-      }
-    );
-
-  } else {
-
-    nextButton.disabled = true;
-
-    nextButton.innerHTML = `
-      <span class="topic-nav-label">
-        Next →
-      </span>
-
-      <span class="topic-nav-title">
-        No next topic
-      </span>
-    `;
-  }
-
-
-  navigation.appendChild(previousButton);
-  navigation.appendChild(nextButton);
-
-  content.appendChild(navigation);
 }
 
 
@@ -484,83 +519,53 @@ function setupKeyboardShortcuts() {
 
 
       /*
-        Left arrow = Previous topic
-        Right arrow = Next topic
+        Arrow Left = Previous page
+        Arrow Right = Next page
 
-        Don't trigger while typing in
-        the search box.
+        Do not trigger these while typing
+        in an input or textarea.
       */
-      if (
-        document.activeElement !== searchInput &&
-        !isTypingInInput(event)
-      ) {
+      const activeElement =
+        document.activeElement;
 
-        if (event.key === "ArrowLeft") {
-          navigateToPreviousTopic();
+      const isTyping =
+        activeElement &&
+        (
+          activeElement.tagName === "INPUT" ||
+          activeElement.tagName === "TEXTAREA" ||
+          activeElement.isContentEditable
+        );
+
+      if (!isTyping) {
+
+        if (
+          event.key === "ArrowLeft" &&
+          currentTopicIndex > 0
+        ) {
+
+          event.preventDefault();
+
+          loadMarkdown(
+            topics[currentTopicIndex - 1]
+          );
         }
 
-        if (event.key === "ArrowRight") {
-          navigateToNextTopic();
+
+        if (
+          event.key === "ArrowRight" &&
+          currentTopicIndex <
+            topics.length - 1
+        ) {
+
+          event.preventDefault();
+
+          loadMarkdown(
+            topics[currentTopicIndex + 1]
+          );
         }
       }
 
     }
-  );
-}
-
-
-/* ========================================
-   KEYBOARD NAVIGATION
-======================================== */
-function navigateToPreviousTopic() {
-
-  if (currentTopicIndex <= 0) {
-    return;
-  }
-
-  const previousTopic =
-    topics[currentTopicIndex - 1];
-
-  if (previousTopic) {
-    loadMarkdown(previousTopic);
-  }
-}
-
-
-function navigateToNextTopic() {
-
-  if (
-    currentTopicIndex < 0 ||
-    currentTopicIndex >= topics.length - 1
-  ) {
-    return;
-  }
-
-  const nextTopic =
-    topics[currentTopicIndex + 1];
-
-  if (nextTopic) {
-    loadMarkdown(nextTopic);
-  }
-}
-
-
-function isTypingInInput(event) {
-
-  const target =
-    event.target;
-
-  if (!target) {
-    return false;
-  }
-
-  const tagName =
-    target.tagName.toLowerCase();
-
-  return (
-    tagName === "input" ||
-    tagName === "textarea" ||
-    target.isContentEditable
   );
 }
 
@@ -736,6 +741,7 @@ function showLoading() {
 function showMessage(title, message) {
 
   content.innerHTML = `
+
     <div class="empty-state">
 
       <h1>
@@ -757,6 +763,7 @@ function showMessage(title, message) {
 function showError(title, message) {
 
   content.innerHTML = `
+
     <div class="error">
 
       <h1>
@@ -804,6 +811,7 @@ function setupMobileMenu() {
         );
 
         if (overlay) {
+
           overlay.classList.add(
             "active"
           );
@@ -903,164 +911,11 @@ function configureMarkdown() {
 
 
 /* ========================================
-   DESKTOP LAYOUT
-========================================
-   Keep the left pane compact so the
-   Markdown content gets more space.
-
-   This only applies to laptop/desktop.
-   Mobile layout is left untouched.
-======================================== */
-function configureDesktopLayout() {
-
-  const style =
-    document.createElement("style");
-
-  style.id =
-    "xi-notes-desktop-layout";
-
-  style.textContent = `
-
-    @media (min-width: 769px) {
-
-      /*
-        Smaller left sidebar.
-        If your current CSS uses a different
-        width, this overrides it.
-      */
-      #sidebar {
-        width: 220px !important;
-        min-width: 220px !important;
-        max-width: 220px !important;
-      }
-
-      /*
-        Give the note more room.
-      */
-      #content {
-        max-width: 900px;
-      }
-
-      /*
-        Previous / Next navigation.
-      */
-      .topic-navigation-footer {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 16px;
-        margin-top: 64px;
-        padding-top: 24px;
-        border-top: 1px solid rgba(255, 255, 255, 0.08);
-      }
-
-      .topic-nav-button {
-        appearance: none;
-        border: 1px solid rgba(255, 255, 255, 0.10);
-        background: transparent;
-        color: inherit;
-        padding: 16px 18px;
-        border-radius: 10px;
-        cursor: pointer;
-        text-align: left;
-        transition:
-          background 0.2s ease,
-          border-color 0.2s ease,
-          transform 0.2s ease;
-      }
-
-      .topic-nav-button:hover:not(:disabled) {
-        background: rgba(255, 255, 255, 0.04);
-        border-color: rgba(255, 255, 255, 0.18);
-        transform: translateY(-1px);
-      }
-
-      .topic-nav-button:disabled {
-        opacity: 0.35;
-        cursor: default;
-      }
-
-      .topic-nav-label {
-        display: block;
-        font-size: 12px;
-        opacity: 0.55;
-        margin-bottom: 6px;
-      }
-
-      .topic-nav-title {
-        display: block;
-        font-size: 14px;
-        font-weight: 500;
-      }
-
-      .next-topic {
-        text-align: right;
-      }
-    }
-
-
-    /*
-      Smaller screens:
-      Stack Previous / Next buttons.
-    */
-    @media (max-width: 768px) {
-
-      .topic-navigation-footer {
-        display: flex;
-        flex-direction: column;
-        gap: 10px;
-        margin-top: 40px;
-        padding-top: 20px;
-        border-top: 1px solid rgba(255, 255, 255, 0.08);
-      }
-
-      .topic-nav-button {
-        appearance: none;
-        width: 100%;
-        border: 1px solid rgba(255, 255, 255, 0.10);
-        background: transparent;
-        color: inherit;
-        padding: 14px 16px;
-        border-radius: 10px;
-        cursor: pointer;
-        text-align: left;
-      }
-
-      .topic-nav-button:disabled {
-        opacity: 0.35;
-        cursor: default;
-      }
-
-      .topic-nav-label {
-        display: block;
-        font-size: 12px;
-        opacity: 0.55;
-        margin-bottom: 5px;
-      }
-
-      .topic-nav-title {
-        display: block;
-        font-size: 14px;
-      }
-
-      .next-topic {
-        text-align: left;
-      }
-    }
-
-  `;
-
-  document.head.appendChild(style);
-}
-
-
-/* ========================================
    INITIALIZE
 ======================================== */
 function initialize() {
 
   configureMarkdown();
-
-  configureDesktopLayout();
 
   setupSearch();
 
