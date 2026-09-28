@@ -1,386 +1,181 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html> <html lang="en"> <head> <meta charset="UTF-8">
 
-<head>
+<meta
+name="viewport"
+content="width=device-width, initial-scale=1.0"
 
-  <meta charset="UTF-8">
+<meta
+name="description"
+content="Xi Notes — personal notes and knowledge."
 
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
-  >
+<title>Xi Notes</title> <link rel="stylesheet" href="style.css"> <!-- Markdown parser --> <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script> </head> <body> <div class="app">
+<!-- ================================
+     SIDEBAR
+================================= -->
 
-  <meta
-    name="description"
-    content="Xi Notes — personal notes and knowledge."
-  >
+<aside
+  class="sidebar"
+  id="sidebar"
+>
 
-  <title>Xi Notes</title>
+  <div class="sidebar-header">
 
-  <link
-    rel="stylesheet"
-    href="style.css"
-  >
-
-  <!-- Markdown parser -->
-  <script
-    src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"
-  ></script>
-
-</head>
-
-
-<body>
-
-  <!-- =====================================
-       APPLICATION
-  ====================================== -->
-
-  <div class="app">
-
-
-    <!-- =====================================
-         SIDEBAR
-    ====================================== -->
-
-    <aside
-      class="sidebar"
-      id="sidebar"
+    <a
+      href="#"
+      class="logo"
+      onclick="window.scrollTo({top: 0, behavior: 'smooth'}); return false;"
     >
-
-      <div class="sidebar-header">
-
-        <a
-          href="#"
-          class="logo"
-          onclick="
-            window.scrollTo({
-              top: 0,
-              behavior: 'smooth'
-            });
-            return false;
-          "
-        >
-          Xi Notes
-        </a>
-
-
-        <button
-          id="close-sidebar"
-          class="close-sidebar"
-          type="button"
-          aria-label="Close menu"
-        >
-          ×
-        </button>
-
-      </div>
-
-
-      <!-- ===================================
-           SEARCH
-      ==================================== -->
-
-      <div class="search-container">
-
-        <div class="search-box">
-
-          <span class="search-icon">
-            /
-          </span>
-
-
-          <input
-            id="search"
-            type="search"
-            placeholder="Search notes"
-            autocomplete="off"
-            spellcheck="false"
-            aria-label="Search notes"
-          >
-
-
-          <span class="search-shortcut">
-            ⌘K
-          </span>
-
-        </div>
-
-      </div>
-
-
-      <!-- ===================================
-           TOPIC LIST
-      ==================================== -->
-
-      <nav
-        class="topic-navigation"
-        aria-label="Notes"
-      >
-
-        <!--
-          app.js dynamically inserts
-          Markdown notes here.
-        -->
-
-      </nav>
-
-
-      <!-- ===================================
-           SIDEBAR FOOTER
-      ==================================== -->
-
-      <div class="sidebar-footer">
-
-        <span>
-          Personal notes
-        </span>
-
-      </div>
-
-    </aside>
-
-
-    <!-- =====================================
-         MAIN CONTENT
-    ====================================== -->
-
-    <main class="main">
-
-
-      <!-- ===================================
-           TOP BAR
-      ==================================== -->
-
-      <header class="topbar">
-
-
-        <!-- Mobile menu -->
-
-        <button
-          id="menu-button"
-          class="menu-button"
-          type="button"
-          aria-label="Open menu"
-          aria-controls="sidebar"
-          aria-expanded="false"
-        >
-          ☰
-        </button>
-
-
-        <!-- Breadcrumb -->
-
-        <div class="breadcrumb">
-
-          <span class="breadcrumb-home">
-            Xi Notes
-          </span>
-
-
-          <span class="breadcrumb-separator">
-            /
-          </span>
-
-
-          <span
-            id="current-topic"
-            class="current-topic"
-          >
-            Notes
-          </span>
-
-        </div>
-
-
-        <!-- =================================
-             DARK / LIGHT TOGGLE
-        ================================== -->
-
-        <button
-          id="theme-button"
-          class="theme-button"
-          type="button"
-          aria-label="Toggle theme"
-          title="Toggle theme"
-        >
-          ☾
-        </button>
-
-      </header>
-
-
-      <!-- =====================================
-           NOTE CONTENT
-      ====================================== -->
-
-      <div class="content-wrapper">
-
-        <article
-          id="content"
-          class="content"
-        >
-
-          <!--
-            Initial welcome screen.
-
-            app.js replaces this with the
-            selected Markdown note.
-
-            app.js also automatically inserts:
-
-            1. Previous / Next navigation
-               at the TOP of the note.
-
-            2. Previous / Next navigation
-               at the BOTTOM of the note.
-          -->
-
-          <div class="welcome">
-
-            <p class="welcome-label">
-              NOTES
-            </p>
-
-
-            <h1>
-              Xi Notes
-            </h1>
-
-
-            <p class="welcome-description">
-              A collection of notes, ideas,
-              concepts and things worth remembering.
-            </p>
-
-          </div>
-
-        </article>
-
-      </div>
-
-    </main>
+      Xi Notes
+    </a>
+
+    <button
+      id="close-sidebar"
+      class="close-sidebar"
+      type="button"
+      aria-label="Close menu"
+    >
+      ×
+    </button>
 
   </div>
 
 
-  <!-- =====================================
-       MOBILE OVERLAY
-  ====================================== -->
+  <!-- Search -->
 
-  <div
-    id="sidebar-overlay"
-    class="sidebar-overlay"
-  ></div>
+  <div class="search-container">
 
+    <div class="search-box">
 
-  <!-- =====================================
-       APPLICATION JAVASCRIPT
-  ====================================== -->
+      <span class="search-icon">/</span>
 
-  <script src="app.js"></script>
+      <input
+        id="search"
+        type="search"
+        placeholder="Search notes"
+        autocomplete="off"
+        spellcheck="false"
+        aria-label="Search notes"
+      >
 
+      <span class="search-shortcut">
+        ⌘K
+      </span>
 
-  <!-- =====================================
-       THEME
-  ====================================== -->
+    </div>
 
-  <script>
-
-    const themeButton =
-      document.getElementById(
-        "theme-button"
-      );
+  </div>
 
 
-    /*
-      Update theme icon and
-      accessibility label.
-    */
-    function updateThemeIcon() {
+  <!-- Notes -->
 
-      const isLight =
-        document.body.classList.contains(
-          "light-theme"
-        );
+  <nav
+    class="topic-navigation"
+    aria-label="Notes"
+  >
+    <!-- app.js loads notes here -->
+  </nav>
 
 
-      themeButton.textContent =
-        isLight
-          ? "☾"
-          : "☀";
+  <!-- Sidebar footer -->
+
+  <div class="sidebar-footer">
+    <span>Personal notes</span>
+  </div>
+
+</aside>
 
 
-      themeButton.setAttribute(
-        "aria-label",
-        isLight
-          ? "Switch to dark mode"
-          : "Switch to light mode"
-      );
+<!-- ================================
+     MAIN
+================================= -->
 
-    }
+<main class="main">
 
+  <!-- Top bar -->
 
-    /*
-      Load saved theme.
-    */
-    const savedTheme =
-      localStorage.getItem(
-        "xi-notes-theme"
-      );
+  <header class="topbar">
 
-
-    if (
-      savedTheme === "light"
-    ) {
-
-      document.body.classList.add(
-        "light-theme"
-      );
-
-    }
+    <button
+      id="menu-button"
+      class="menu-button"
+      type="button"
+      aria-label="Open menu"
+      aria-controls="sidebar"
+      aria-expanded="false"
+    >
+      ☰
+    </button>
 
 
-    /*
-      Set initial icon.
-    */
-    updateThemeIcon();
+    <div class="breadcrumb">
+
+      <span class="breadcrumb-home">
+        Xi Notes
+      </span>
+
+      <span class="breadcrumb-separator">
+        /
+      </span>
+
+      <span
+        id="current-topic"
+        class="current-topic"
+      >
+        Notes
+      </span>
+
+    </div>
 
 
-    /*
-      Toggle theme.
-    */
-    themeButton.addEventListener(
-      "click",
-      () => {
+    <!-- Theme -->
 
-        document.body.classList.toggle(
-          "light-theme"
-        );
+    <button
+      id="theme-button"
+      class="theme-button"
+      type="button"
+      aria-label="Toggle theme"
+      title="Toggle theme"
+    >
+      ☾
+    </button>
 
-
-        const isLight =
-          document.body.classList.contains(
-            "light-theme"
-          );
+  </header>
 
 
-        localStorage.setItem(
-          "xi-notes-theme",
-          isLight
-            ? "light"
-            : "dark"
-        );
+  <!-- ================================
+       CONTENT
+  ================================= -->
 
+  <div class="content-wrapper">
 
-        updateThemeIcon();
+    <article
+      id="content"
+      class="content"
+    >
 
-      }
-    );
+      <!-- Initial screen -->
 
-  </script>
+      <div class="welcome">
 
+        <p class="welcome-label">
+          NOTES
+        </p>
 
-</body>
+        <h1>
+          Xi Notes
+        </h1>
 
-</html>
+        <p class="welcome-description">
+          A collection of notes, ideas,
+          concepts and things worth remembering.
+        </p>
+
+      </div>
+
+    </article>
+
+  </div>
+
+</main>
+
+</div> <!-- ================================ MOBILE OVERLAY ================================= --> <div id="sidebar-overlay" class="sidebar-overlay" ></div> <!-- ================================ APP JAVASCRIPT ================================= --> <script src="app.js"></script> <!-- ================================ THEME HANDLING ================================= --> <script> const themeButton = document.getElementById("theme-button"); function updateThemeIcon() { const isLight = document.body.classList.contains( "light-theme" ); themeButton.textContent = isLight ? "☾" : "☀"; themeButton.setAttribute( "aria-label", isLight ? "Switch to dark mode" : "Switch to light mode" ); } /* Restore saved theme */ const savedTheme = localStorage.getItem( "xi-notes-theme" ); if (savedTheme === "light") { document.body.classList.add( "light-theme" ); } updateThemeIcon(); /* Toggle theme */ themeButton.addEventListener( "click", () => { document.body.classList.toggle( "light-theme" ); const isLight = document.body.classList.contains( "light-theme" ); localStorage.setItem( "xi-notes-theme", isLight ? "light" : "dark" ); updateThemeIcon(); } ); </script> </body> </html>
