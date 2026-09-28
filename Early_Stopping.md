@@ -1,4 +1,3 @@
-````
 ## Early Stopping
 
 Early stopping is a **regularization technique** used to **reduce overfitting** during model training.
@@ -49,7 +48,5 @@ model.fit(
 - **Early Stopping** → Limits training once validation performance stops improving.
 
  > **Key idea:** These techniques can be used **together** to improve **generalization** and **reduce overfitting**.
-
-```
 
 ```
