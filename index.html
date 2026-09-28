@@ -2,7 +2,6 @@
 <html lang="en">
 
 <head>
-
   <meta charset="UTF-8">
 
   <meta
@@ -12,23 +11,24 @@
 
   <meta
     name="description"
-    content="Xi Notes — personal notes and knowledge."
-  >
-
-  <meta
-    name="theme-color"
-    content="#09090b"
+    content="Xi Notes - Machine Learning, Deep Learning and Data Science notes"
   >
 
   <title>Xi Notes</title>
 
-  <!-- Main stylesheet -->
+  <!-- Favicon -->
+  <link
+    rel="icon"
+    href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E📚%3C/text%3E%3C/svg%3E"
+  >
+
+  <!-- Styles -->
   <link
     rel="stylesheet"
     href="style.css"
   >
 
-  <!-- Markdown parser -->
+  <!-- Marked.js -->
   <script
     src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"
   ></script>
@@ -38,41 +38,102 @@
 
 <body>
 
-  <div class="app">
+  <!-- ======================================
+       MOBILE SIDEBAR OVERLAY
+  ======================================= -->
+
+  <div
+    id="sidebar-overlay"
+    class="sidebar-overlay"
+  ></div>
 
 
-    <!-- =====================================
+  <!-- ======================================
+       HEADER
+  ======================================= -->
+
+  <header class="site-header">
+
+    <div class="header-left">
+
+      <!-- Mobile menu button -->
+      <button
+        id="menu-button"
+        class="menu-button"
+        type="button"
+        aria-label="Open navigation"
+        aria-controls="sidebar"
+        aria-expanded="false"
+      >
+        ☰
+      </button>
+
+
+      <!-- Site title -->
+      <a
+        href="./"
+        class="site-title"
+        aria-label="Xi Notes home"
+      >
+        Xi Notes
+      </a>
+
+    </div>
+
+
+    <!-- Search -->
+    <div class="search-container">
+
+      <input
+        id="search"
+        type="search"
+        placeholder="Search notes..."
+        autocomplete="off"
+        aria-label="Search notes"
+      >
+
+      <span
+        class="search-shortcut"
+        aria-hidden="true"
+      >
+        Ctrl K
+      </span>
+
+    </div>
+
+  </header>
+
+
+  <!-- ======================================
+       MAIN LAYOUT
+  ======================================= -->
+
+  <div class="app-layout">
+
+
+    <!-- ====================================
          SIDEBAR
-    ====================================== -->
+    ===================================== -->
 
     <aside
-      class="sidebar"
       id="sidebar"
+      class="sidebar"
+      aria-label="Notes navigation"
     >
 
-      <!-- SIDEBAR HEADER -->
+      <!-- Sidebar header -->
 
       <div class="sidebar-header">
 
-        <a
-          href="#"
-          class="logo"
-          onclick="
-            window.scrollTo({
-              top: 0,
-              behavior: 'smooth'
-            });
-            return false;
-          "
-        >
-          Xi Notes
-        </a>
+        <div class="sidebar-title">
+          Notes
+        </div>
 
         <button
           id="close-sidebar"
           class="close-sidebar"
           type="button"
-          aria-label="Close menu"
+          aria-label="Close navigation"
         >
           ×
         </button>
@@ -80,307 +141,91 @@
       </div>
 
 
-      <!-- SEARCH -->
+      <!-- Current topic -->
 
-      <div class="search-container">
-
-        <div class="search-box">
-
-          <span
-            class="search-icon"
-            aria-hidden="true"
-          >
-            /
-          </span>
-
-          <input
-            id="search"
-            type="search"
-            placeholder="Search notes"
-            autocomplete="off"
-            spellcheck="false"
-            aria-label="Search notes"
-          >
-
-          <span
-            class="search-shortcut"
-            aria-hidden="true"
-          >
-            ⌘K
-          </span>
-
-        </div>
-
+      <div
+        id="current-topic"
+        class="current-topic"
+      >
+        Select a note
       </div>
 
 
-      <!-- =====================================
-           TOPIC LIST
-
-           app.js automatically reads the
-           Markdown files from /notes and
-           inserts the topics here.
-      ====================================== -->
+      <!-- Topic navigation -->
 
       <nav
         class="topic-navigation"
         aria-label="Notes"
       >
-
-        <!-- Topics are inserted by app.js -->
-
+        <!--
+          app.js populates this area.
+        -->
       </nav>
-
-
-      <!-- SIDEBAR FOOTER -->
-
-      <div class="sidebar-footer">
-
-        <span>
-          Personal notes
-        </span>
-
-      </div>
 
     </aside>
 
 
-    <!-- =====================================
-         MAIN CONTENT
-    ====================================== -->
+    <!-- ====================================
+         CONTENT
+    ===================================== -->
 
-    <main class="main">
+    <main
+      id="main-content"
+      class="main-content"
+    >
 
+      <article
+        id="content"
+        class="content"
+      >
 
-      <!-- TOP BAR -->
+        <!--
+          app.js loads Markdown content here.
 
-      <header class="topbar">
+          The Previous / Next navigation is
+          automatically inserted:
 
+              1. At the top
+              2. At the bottom
+        -->
 
-        <!-- MOBILE MENU -->
+        <div class="loading">
 
-        <button
-          id="menu-button"
-          class="menu-button"
-          type="button"
-          aria-label="Open menu"
-          aria-controls="sidebar"
-        >
-          ☰
-        </button>
+          <div class="loading-line"></div>
 
+          <div class="loading-line short"></div>
 
-        <!-- BREADCRUMB -->
-
-        <div
-          class="breadcrumb"
-          aria-label="Breadcrumb"
-        >
-
-          <span class="breadcrumb-home">
-            Xi Notes
-          </span>
-
-          <span
-            class="breadcrumb-separator"
-            aria-hidden="true"
-          >
-            /
-          </span>
-
-          <span
-            id="current-topic"
-            class="current-topic"
-          >
-            Notes
-          </span>
+          <div class="loading-line"></div>
 
         </div>
 
-
-        <!-- THEME TOGGLE -->
-
-        <button
-          id="theme-button"
-          class="theme-button"
-          type="button"
-          aria-label="Toggle theme"
-          title="Toggle theme"
-        >
-          ☾
-        </button>
-
-      </header>
-
-
-      <!-- =====================================
-           NOTE CONTENT
-
-           Markdown files are rendered here
-           by app.js.
-      ====================================== -->
-
-      <div class="content-wrapper">
-
-        <article
-          id="content"
-          class="content"
-        >
-
-          <!-- Initial page before a note loads -->
-
-          <div class="welcome">
-
-            <p class="welcome-label">
-              NOTES
-            </p>
-
-            <h1>
-              Xi Notes
-            </h1>
-
-            <p class="welcome-description">
-              A collection of notes, ideas,
-              concepts and things worth remembering.
-            </p>
-
-          </div>
-
-        </article>
-
-      </div>
+      </article>
 
     </main>
 
   </div>
 
 
-  <!-- =====================================
-       MOBILE OVERLAY
-  ====================================== -->
+  <!-- ======================================
+       FOOTER
+  ======================================= -->
 
-  <div
-    id="sidebar-overlay"
-    class="sidebar-overlay"
-    aria-hidden="true"
-  ></div>
+  <footer class="site-footer">
 
+    <span>
+      Xi Notes
+    </span>
 
-  <!-- =====================================
-       APPLICATION
-  ====================================== -->
-
-  <script src="app.js"></script>
+  </footer>
 
 
-  <!-- =====================================
-       THEME
-  ====================================== -->
+  <!-- ======================================
+       APP JAVASCRIPT
+  ======================================= -->
 
-  <script>
-
-    const themeButton =
-      document.getElementById(
-        "theme-button"
-      );
-
-
-    /*
-      Update the theme button icon.
-    */
-
-    function updateThemeIcon() {
-
-      const isLight =
-        document.body.classList.contains(
-          "light-theme"
-        );
-
-
-      themeButton.textContent =
-        isLight
-          ? "☾"
-          : "☀";
-
-
-      themeButton.setAttribute(
-        "aria-label",
-        isLight
-          ? "Switch to dark mode"
-          : "Switch to light mode"
-      );
-
-
-      themeButton.setAttribute(
-        "title",
-        isLight
-          ? "Switch to dark mode"
-          : "Switch to light mode"
-      );
-
-    }
-
-
-    /*
-      Load saved theme.
-    */
-
-    const savedTheme =
-      localStorage.getItem(
-        "xi-notes-theme"
-      );
-
-
-    if (savedTheme === "light") {
-
-      document.body.classList.add(
-        "light-theme"
-      );
-
-    }
-
-
-    /*
-      Set initial icon.
-    */
-
-    updateThemeIcon();
-
-
-    /*
-      Toggle theme.
-    */
-
-    themeButton.addEventListener(
-      "click",
-      () => {
-
-        document.body.classList.toggle(
-          "light-theme"
-        );
-
-
-        const isLight =
-          document.body.classList.contains(
-            "light-theme"
-          );
-
-
-        localStorage.setItem(
-          "xi-notes-theme",
-          isLight
-            ? "light"
-            : "dark"
-        );
-
-
-        updateThemeIcon();
-
-      }
-    );
-
-  </script>
-
+  <script
+    src="app.js"
+  ></script>
 
 </body>
 
