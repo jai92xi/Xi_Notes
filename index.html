@@ -1,27 +1,45 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
+
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
 
   <meta
     name="description"
     content="Xi Notes — personal notes and knowledge."
   >
 
+  <meta
+    name="theme-color"
+    content="#09090b"
+  >
+
   <title>Xi Notes</title>
 
-  <link rel="stylesheet" href="style.css">
+  <!-- Main stylesheet -->
+  <link
+    rel="stylesheet"
+    href="style.css"
+  >
 
   <!-- Markdown parser -->
   <script
     src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"
   ></script>
+
 </head>
+
 
 <body>
 
   <div class="app">
+
 
     <!-- =====================================
          SIDEBAR
@@ -32,12 +50,20 @@
       id="sidebar"
     >
 
+      <!-- SIDEBAR HEADER -->
+
       <div class="sidebar-header">
 
         <a
           href="#"
           class="logo"
-          onclick="window.scrollTo({top: 0, behavior: 'smooth'}); return false;"
+          onclick="
+            window.scrollTo({
+              top: 0,
+              behavior: 'smooth'
+            });
+            return false;
+          "
         >
           Xi Notes
         </a>
@@ -60,7 +86,10 @@
 
         <div class="search-box">
 
-          <span class="search-icon">
+          <span
+            class="search-icon"
+            aria-hidden="true"
+          >
             /
           </span>
 
@@ -73,7 +102,10 @@
             aria-label="Search notes"
           >
 
-          <span class="search-shortcut">
+          <span
+            class="search-shortcut"
+            aria-hidden="true"
+          >
             ⌘K
           </span>
 
@@ -82,20 +114,32 @@
       </div>
 
 
-      <!-- TOPIC LIST -->
+      <!-- =====================================
+           TOPIC LIST
+
+           app.js automatically reads the
+           Markdown files from /notes and
+           inserts the topics here.
+      ====================================== -->
 
       <nav
         class="topic-navigation"
         aria-label="Notes"
       >
-        <!-- app.js dynamically inserts .md files here -->
+
+        <!-- Topics are inserted by app.js -->
+
       </nav>
 
 
       <!-- SIDEBAR FOOTER -->
 
       <div class="sidebar-footer">
-        <span>Personal notes</span>
+
+        <span>
+          Personal notes
+        </span>
+
       </div>
 
     </aside>
@@ -108,27 +152,39 @@
     <main class="main">
 
 
-      <!-- TOP NAVIGATION -->
+      <!-- TOP BAR -->
 
       <header class="topbar">
+
+
+        <!-- MOBILE MENU -->
 
         <button
           id="menu-button"
           class="menu-button"
           type="button"
           aria-label="Open menu"
+          aria-controls="sidebar"
         >
           ☰
         </button>
 
 
-        <div class="breadcrumb">
+        <!-- BREADCRUMB -->
+
+        <div
+          class="breadcrumb"
+          aria-label="Breadcrumb"
+        >
 
           <span class="breadcrumb-home">
             Xi Notes
           </span>
 
-          <span class="breadcrumb-separator">
+          <span
+            class="breadcrumb-separator"
+            aria-hidden="true"
+          >
             /
           </span>
 
@@ -142,7 +198,7 @@
         </div>
 
 
-        <!-- DARK / LIGHT TOGGLE -->
+        <!-- THEME TOGGLE -->
 
         <button
           id="theme-button"
@@ -159,6 +215,9 @@
 
       <!-- =====================================
            NOTE CONTENT
+
+           Markdown files are rendered here
+           by app.js.
       ====================================== -->
 
       <div class="content-wrapper">
@@ -167,6 +226,8 @@
           id="content"
           class="content"
         >
+
+          <!-- Initial page before a note loads -->
 
           <div class="welcome">
 
@@ -201,6 +262,7 @@
   <div
     id="sidebar-overlay"
     class="sidebar-overlay"
+    aria-hidden="true"
   ></div>
 
 
@@ -218,8 +280,14 @@
   <script>
 
     const themeButton =
-      document.getElementById("theme-button");
+      document.getElementById(
+        "theme-button"
+      );
 
+
+    /*
+      Update the theme button icon.
+    */
 
     function updateThemeIcon() {
 
@@ -228,11 +296,23 @@
           "light-theme"
         );
 
+
       themeButton.textContent =
-        isLight ? "☾" : "☀";
+        isLight
+          ? "☾"
+          : "☀";
+
 
       themeButton.setAttribute(
         "aria-label",
+        isLight
+          ? "Switch to dark mode"
+          : "Switch to light mode"
+      );
+
+
+      themeButton.setAttribute(
+        "title",
         isLight
           ? "Switch to dark mode"
           : "Switch to light mode"
@@ -260,6 +340,10 @@
     }
 
 
+    /*
+      Set initial icon.
+    */
+
     updateThemeIcon();
 
 
@@ -275,10 +359,12 @@
           "light-theme"
         );
 
+
         const isLight =
           document.body.classList.contains(
             "light-theme"
           );
+
 
         localStorage.setItem(
           "xi-notes-theme",
@@ -287,6 +373,7 @@
             : "dark"
         );
 
+
         updateThemeIcon();
 
       }
@@ -294,5 +381,7 @@
 
   </script>
 
+
 </body>
+
 </html>
