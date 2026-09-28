@@ -78,7 +78,6 @@ function formatTopicName(filename) {
 /* ========================================
    SIDEBAR
 ======================================== */
-
 function createSidebar(items = topics) {
   const navigation =
     document.querySelector(".topic-navigation");
@@ -107,13 +106,6 @@ function createSidebar(items = topics) {
     button.type = "button";
     button.className = "topic-button";
 
-    /*
-      Show the actual filename.
-
-      Example:
-      ├── Early_Stopping.md
-      ├── imbalanced data handling.md
-    */
     button.innerHTML = `
       <span class="tree-symbol">├──</span>
       <span class="topic-name">
@@ -138,6 +130,17 @@ async function loadMarkdown(topic) {
 
     showLoading();
 
+    /*
+      Find the current note in the complete
+      topic list.
+
+      This is used by Previous / Next.
+    */
+    currentTopicIndex =
+      topics.findIndex(
+        item => item.file === topic.file
+      );
+
     const response =
       await fetch(
         `notes/${encodeURIComponent(topic.file)}`
@@ -159,34 +162,25 @@ async function loadMarkdown(topic) {
     }
 
     /*
-      Find current topic index.
-    */
-    currentTopicIndex =
-      topics.findIndex(
-        item => item.file === topic.file
-      );
-
-    /*
-      Render markdown first.
+      Render the Markdown first.
     */
     content.innerHTML =
       marked.parse(markdown);
 
     /*
-      Update page information.
+      Update current topic information.
     */
     updateCurrentTopic(topic);
 
     updateActiveTopic(topic);
 
     /*
-      Add Previous / Next navigation
-      at the TOP of the page.
+      Add navigation at the TOP.
     */
     addPageNavigation("top");
 
     /*
-      Existing content enhancements.
+      Existing content features.
     */
     addCopyButtons();
 
@@ -195,16 +189,19 @@ async function loadMarkdown(topic) {
     setupExternalLinks();
 
     /*
-      Add Previous / Next navigation
-      at the BOTTOM of the page.
+      Add navigation at the BOTTOM.
     */
     addPageNavigation("bottom");
 
+    /*
+      Close mobile sidebar after
+      selecting a note.
+    */
     closeMobileSidebar();
 
     /*
-      Always start the newly opened note
-      from the top.
+      Scroll to the top whenever a new
+      page/note is opened.
     */
     window.scrollTo({
       top: 0,
@@ -224,31 +221,32 @@ async function loadMarkdown(topic) {
 
 
 /* ========================================
-   PAGE NAVIGATION
+   PREVIOUS / NEXT PAGE NAVIGATION
 ======================================== */
-
 function addPageNavigation(position) {
 
   /*
-    Remove an existing navigation bar
-    at this position if one exists.
+    Remove any existing navigation for
+    this position.
   */
-  const existing =
+  const existingNavigation =
     content.querySelector(
       `.page-navigation-${position}`
     );
 
-  if (existing) {
-    existing.remove();
+  if (existingNavigation) {
+    existingNavigation.remove();
   }
 
+
   /*
-    Do not show navigation if there is
+    Don't show navigation if there is
     only one note.
   */
   if (topics.length <= 1) {
     return;
   }
+
 
   const navigation =
     document.createElement("nav");
@@ -258,11 +256,13 @@ function addPageNavigation(position) {
 
   navigation.setAttribute(
     "aria-label",
-    position === "top"
-      ? "Previous and next page navigation"
-      : "Previous and next page navigation"
+    "Page navigation"
   );
 
+
+  /*
+    Find Previous and Next notes.
+  */
   const previousTopic =
     currentTopicIndex > 0
       ? topics[currentTopicIndex - 1]
@@ -273,27 +273,43 @@ function addPageNavigation(position) {
       ? topics[currentTopicIndex + 1]
       : null;
 
-  /*
-    Previous button
-  */
+
+  /* ======================================
+     PREVIOUS BUTTON
+  ====================================== */
+
   const previousButton =
     document.createElement("button");
 
   previousButton.type = "button";
+
   previousButton.className =
     "page-nav-button previous-page";
+
 
   if (previousTopic) {
 
     previousButton.innerHTML = `
-      <span class="page-nav-arrow">←</span>
+      <span
+        class="page-nav-arrow"
+        aria-hidden="true"
+      >
+        ←
+      </span>
+
       <span class="page-nav-label">
         Previous
       </span>
+
       <span class="page-nav-title">
         ${escapeHTML(previousTopic.name)}
       </span>
     `;
+
+    previousButton.setAttribute(
+      "aria-label",
+      `Previous: ${previousTopic.name}`
+    );
 
     previousButton.addEventListener(
       "click",
@@ -307,23 +323,37 @@ function addPageNavigation(position) {
     previousButton.disabled = true;
 
     previousButton.innerHTML = `
-      <span class="page-nav-arrow">←</span>
+      <span
+        class="page-nav-arrow"
+        aria-hidden="true"
+      >
+        ←
+      </span>
+
       <span class="page-nav-label">
         Previous
       </span>
     `;
+
+    previousButton.setAttribute(
+      "aria-label",
+      "No previous page"
+    );
   }
 
 
-  /*
-    Next button
-  */
+  /* ======================================
+     NEXT BUTTON
+  ====================================== */
+
   const nextButton =
     document.createElement("button");
 
   nextButton.type = "button";
+
   nextButton.className =
     "page-nav-button next-page";
+
 
   if (nextTopic) {
 
@@ -331,11 +361,23 @@ function addPageNavigation(position) {
       <span class="page-nav-label">
         Next
       </span>
+
       <span class="page-nav-title">
         ${escapeHTML(nextTopic.name)}
       </span>
-      <span class="page-nav-arrow">→</span>
+
+      <span
+        class="page-nav-arrow"
+        aria-hidden="true"
+      >
+        →
+      </span>
     `;
+
+    nextButton.setAttribute(
+      "aria-label",
+      `Next: ${nextTopic.name}`
+    );
 
     nextButton.addEventListener(
       "click",
@@ -352,17 +394,40 @@ function addPageNavigation(position) {
       <span class="page-nav-label">
         Next
       </span>
-      <span class="page-nav-arrow">→</span>
+
+      <span
+        class="page-nav-arrow"
+        aria-hidden="true"
+      >
+        →
+      </span>
     `;
+
+    nextButton.setAttribute(
+      "aria-label",
+      "No next page"
+    );
   }
 
 
-  navigation.appendChild(previousButton);
-  navigation.appendChild(nextButton);
+  /*
+    Add buttons to navigation.
+  */
+  navigation.appendChild(
+    previousButton
+  );
+
+  navigation.appendChild(
+    nextButton
+  );
 
 
   /*
-    Insert at the requested position.
+    TOP:
+      Insert before Markdown content.
+
+    BOTTOM:
+      Append after Markdown content.
   */
   if (position === "top") {
 
@@ -448,10 +513,27 @@ function setupSearch() {
           .toLowerCase()
           .trim();
 
+
       if (!query) {
+
         createSidebar(topics);
+
+        /*
+          Restore active item after search
+          is cleared.
+        */
+        if (
+          currentTopicIndex >= 0 &&
+          topics[currentTopicIndex]
+        ) {
+          updateActiveTopic(
+            topics[currentTopicIndex]
+          );
+        }
+
         return;
       }
+
 
       const filtered =
         topics.filter(topic => {
@@ -467,6 +549,7 @@ function setupSearch() {
           );
 
         });
+
 
       createSidebar(filtered);
     }
@@ -496,7 +579,9 @@ function setupKeyboardShortcuts() {
         event.preventDefault();
 
         if (searchInput) {
+
           searchInput.focus();
+
           searchInput.select();
         }
       }
@@ -508,7 +593,9 @@ function setupKeyboardShortcuts() {
       if (event.key === "Escape") {
 
         if (searchInput) {
+
           searchInput.value = "";
+
           searchInput.blur();
         }
 
@@ -519,27 +606,16 @@ function setupKeyboardShortcuts() {
 
 
       /*
-        Arrow Left = Previous page
-        Arrow Right = Next page
-
-        Do not trigger these while typing
-        in an input or textarea.
+        Left arrow:
+        Previous page
       */
-      const activeElement =
-        document.activeElement;
 
-      const isTyping =
-        activeElement &&
-        (
-          activeElement.tagName === "INPUT" ||
-          activeElement.tagName === "TEXTAREA" ||
-          activeElement.isContentEditable
-        );
-
-      if (!isTyping) {
+      if (
+        event.key === "ArrowLeft" &&
+        !isTypingInField(event)
+      ) {
 
         if (
-          event.key === "ArrowLeft" &&
           currentTopicIndex > 0
         ) {
 
@@ -549,10 +625,21 @@ function setupKeyboardShortcuts() {
             topics[currentTopicIndex - 1]
           );
         }
+      }
 
+
+      /*
+        Right arrow:
+        Next page
+      */
+
+      if (
+        event.key === "ArrowRight" &&
+        !isTypingInField(event)
+      ) {
 
         if (
-          event.key === "ArrowRight" &&
+          currentTopicIndex >= 0 &&
           currentTopicIndex <
             topics.length - 1
         ) {
@@ -566,6 +653,31 @@ function setupKeyboardShortcuts() {
       }
 
     }
+  );
+}
+
+
+/* ========================================
+   CHECK IF USER IS TYPING
+======================================== */
+function isTypingInField(event) {
+
+  const element =
+    event.target;
+
+  if (!element) {
+    return false;
+  }
+
+  const tag =
+    element.tagName
+      ? element.tagName.toLowerCase()
+      : "";
+
+  return (
+    tag === "input" ||
+    tag === "textarea" ||
+    element.isContentEditable
   );
 }
 
@@ -586,12 +698,18 @@ function addCopyButtons() {
       return;
     }
 
+
     const button =
       document.createElement("button");
 
     button.type = "button";
-    button.className = "copy-button";
-    button.textContent = "Copy";
+
+    button.className =
+      "copy-button";
+
+    button.textContent =
+      "Copy";
+
 
     button.addEventListener(
       "click",
@@ -604,11 +722,13 @@ function addCopyButtons() {
           return;
         }
 
+
         try {
 
           await navigator.clipboard.writeText(
             code.innerText
           );
+
 
           button.textContent =
             "Copied";
@@ -616,6 +736,7 @@ function addCopyButtons() {
           button.classList.add(
             "copied"
           );
+
 
           setTimeout(() => {
 
@@ -628,12 +749,14 @@ function addCopyButtons() {
 
           }, 1400);
 
+
         } catch (error) {
 
           console.error(error);
 
           button.textContent =
             "Failed";
+
 
           setTimeout(() => {
 
@@ -644,6 +767,7 @@ function addCopyButtons() {
         }
       }
     );
+
 
     pre.appendChild(button);
   });
@@ -660,7 +784,9 @@ function addHeadingIds() {
       "h1, h2, h3, h4"
     );
 
-  const usedIds = new Set();
+  const usedIds =
+    new Set();
+
 
   headings.forEach(heading => {
 
@@ -668,24 +794,43 @@ function addHeadingIds() {
       heading.textContent
         .toLowerCase()
         .trim()
-        .replace(/[^\w\s-]/g, "")
-        .replace(/\s+/g, "-");
+        .replace(
+          /[^\w\s-]/g,
+          ""
+        )
+        .replace(
+          /\s+/g,
+          "-"
+        );
+
 
     if (!baseId) {
       return;
     }
 
-    let id = baseId;
-    let counter = 2;
 
-    while (usedIds.has(id)) {
-      id = `${baseId}-${counter}`;
+    let id =
+      baseId;
+
+    let counter =
+      2;
+
+
+    while (
+      usedIds.has(id)
+    ) {
+
+      id =
+        `${baseId}-${counter}`;
+
       counter++;
     }
 
+
     usedIds.add(id);
 
-    heading.id = id;
+    heading.id =
+      id;
   });
 }
 
@@ -698,10 +843,12 @@ function setupExternalLinks() {
   const links =
     content.querySelectorAll("a");
 
+
   links.forEach(link => {
 
     const href =
       link.getAttribute("href");
+
 
     if (
       href &&
@@ -711,7 +858,8 @@ function setupExternalLinks() {
       )
     ) {
 
-      link.target = "_blank";
+      link.target =
+        "_blank";
 
       link.rel =
         "noopener noreferrer";
@@ -727,9 +875,13 @@ function showLoading() {
 
   content.innerHTML = `
     <div class="loading">
+
       <div class="loading-line"></div>
+
       <div class="loading-line short"></div>
+
       <div class="loading-line"></div>
+
     </div>
   `;
 }
@@ -738,10 +890,12 @@ function showLoading() {
 /* ========================================
    MESSAGE
 ======================================== */
-function showMessage(title, message) {
+function showMessage(
+  title,
+  message
+) {
 
   content.innerHTML = `
-
     <div class="empty-state">
 
       <h1>
@@ -760,10 +914,12 @@ function showMessage(title, message) {
 /* ========================================
    ERROR
 ======================================== */
-function showError(title, message) {
+function showError(
+  title,
+  message
+) {
 
   content.innerHTML = `
-
     <div class="error">
 
       <h1>
@@ -810,12 +966,14 @@ function setupMobileMenu() {
           "mobile-open"
         );
 
+
         if (overlay) {
 
           overlay.classList.add(
             "active"
           );
         }
+
 
         document.body.classList.add(
           "sidebar-open"
@@ -844,6 +1002,9 @@ function setupMobileMenu() {
 }
 
 
+/* ========================================
+   CLOSE MOBILE SIDEBAR
+======================================== */
 function closeMobileSidebar() {
 
   if (sidebar) {
@@ -853,10 +1014,12 @@ function closeMobileSidebar() {
     );
   }
 
+
   const overlay =
     document.getElementById(
       "sidebar-overlay"
     );
+
 
   if (overlay) {
 
@@ -864,6 +1027,7 @@ function closeMobileSidebar() {
       "active"
     );
   }
+
 
   document.body.classList.remove(
     "sidebar-open"
@@ -881,7 +1045,8 @@ function escapeHTML(value) {
       "div"
     );
 
-  div.textContent = value;
+  div.textContent =
+    value;
 
   return div.innerHTML;
 }
@@ -902,6 +1067,7 @@ function configureMarkdown() {
 
     return;
   }
+
 
   marked.setOptions({
     gfm: true,
