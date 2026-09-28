@@ -11,7 +11,7 @@ let topics = [];
 
 
 /* ========================================
-   LOAD ALL MARKDOWN FILES
+   GET ALL MARKDOWN FILES
 ======================================== */
 
 async function loadTopics() {
@@ -22,7 +22,7 @@ async function loadTopics() {
     const response = await fetch(apiUrl);
 
     if (!response.ok) {
-      throw new Error("Could not access GitHub repository");
+      throw new Error("Could not load notes from GitHub.");
     }
 
     const files = await response.json();
@@ -33,8 +33,9 @@ async function loadTopics() {
         file.name.toLowerCase().endsWith(".md")
       )
       .map(file => ({
+        file: file.name,
         name: formatTopicName(file.name),
-        file: file.name
+        url: file.download_url
       }))
       .sort((a, b) =>
         a.name.localeCompare(b.name)
@@ -45,39 +46,28 @@ async function loadTopics() {
     if (topics.length > 0) {
       loadMarkdown(topics[0]);
     } else {
-      content.innerHTML = `
-        <div class="welcome">
-          <div class="welcome-icon">✦</div>
-          <h1>No notes yet</h1>
-          <p>Add Markdown files to the notes folder.</p>
-        </div>
-      `;
+      showMessage(
+        "No notes yet",
+        "Add Markdown files to the notes folder."
+      );
     }
 
   } catch (error) {
-
     console.error(error);
 
-    content.innerHTML = `
-      <div class="error">
-        <div class="error-icon">😵</div>
-        <h2>Couldn't load notes</h2>
-        <p>
-          Make sure your Markdown files are inside the
-          <code>notes</code> folder.
-        </p>
-      </div>
-    `;
+    showError(
+      "Couldn’t load your notes.",
+      "Check that the notes folder exists in your GitHub repository."
+    );
   }
 }
 
 
 /* ========================================
-   FILE NAME → TOPIC NAME
+   FILE NAME → DISPLAY NAME
 ======================================== */
 
 function formatTopicName(filename) {
-
   return filename
     .replace(/\.md$/i, "")
     .replace(/_/g, " ")
@@ -91,7 +81,6 @@ function formatTopicName(filename) {
 ======================================== */
 
 function createSidebar(items = topics) {
-
   const navigation =
     document.querySelector(".topic-navigation");
 
@@ -102,10 +91,9 @@ function createSidebar(items = topics) {
   navigation.innerHTML = "";
 
   if (items.length === 0) {
-
     navigation.innerHTML = `
       <div class="no-results">
-        No notes found 😶
+        No notes found
       </div>
     `;
 
@@ -117,18 +105,23 @@ function createSidebar(items = topics) {
     const button =
       document.createElement("button");
 
-    button.className = "topic-button";
     button.type = "button";
+    button.className = "topic-button";
 
     /*
-      Display the actual filename.
+      Show the actual filename.
 
       Example:
-      Early_Stopping.md
-      imbalanced data handling.md
+      ├── Early_Stopping.md
+      ├── imbalanced data handling.md
     */
 
-    button.textContent = topic.file;
+    button.innerHTML = `
+      <span class="tree-symbol">├──</span>
+      <span class="topic-name">
+        ${escapeHTML(topic.file)}
+      </span>
+    `;
 
     button.addEventListener("click", () => {
       loadMarkdown(topic);
@@ -140,42 +133,38 @@ function createSidebar(items = topics) {
 
 
 /* ========================================
-   LOAD MARKDOWN
+   LOAD MARKDOWN NOTE
 ======================================== */
 
 async function loadMarkdown(topic) {
-
   try {
 
-    content.innerHTML = `
-      <div class="loading">
-        <div class="loading-spinner"></div>
-        <p>Loading note...</p>
-      </div>
-    `;
-
-    const fileUrl =
-      `notes/${encodeURIComponent(topic.file)}`;
+    showLoading();
 
     const response =
-      await fetch(fileUrl);
+      await fetch(
+        `notes/${encodeURIComponent(topic.file)}`
+      );
 
     if (!response.ok) {
       throw new Error(
-        `Could not load ${topic.file}`
+        `Unable to load ${topic.file}`
       );
     }
 
     const markdown =
       await response.text();
 
+    if (typeof marked === "undefined") {
+      throw new Error(
+        "Markdown parser is not available."
+      );
+    }
+
     content.innerHTML =
       marked.parse(markdown);
 
-    if (currentTopic) {
-      currentTopic.textContent =
-        topic.name;
-    }
+    updateCurrentTopic(topic);
 
     updateActiveTopic(topic);
 
@@ -183,9 +172,9 @@ async function loadMarkdown(topic) {
 
     addHeadingIds();
 
-    setupCodeHighlighting();
+    setupExternalLinks();
 
-    closeMobileMenu();
+    closeMobileSidebar();
 
     window.scrollTo({
       top: 0,
@@ -196,25 +185,31 @@ async function loadMarkdown(topic) {
 
     console.error(error);
 
-    content.innerHTML = `
-      <div class="error">
-        <div class="error-icon">😵</div>
-
-        <h2>Couldn't load this note</h2>
-
-        <p>
-          The file
-          <strong>${escapeHTML(topic.file)}</strong>
-          could not be loaded.
-        </p>
-      </div>
-    `;
+    showError(
+      "Couldn’t open this note.",
+      topic.file
+    );
   }
 }
 
 
 /* ========================================
-   ACTIVE TOPIC
+   CURRENT TOPIC
+======================================== */
+
+function updateCurrentTopic(topic) {
+
+  if (!currentTopic) {
+    return;
+  }
+
+  currentTopic.textContent =
+    topic.name;
+}
+
+
+/* ========================================
+   ACTIVE SIDEBAR ITEM
 ======================================== */
 
 function updateActiveTopic(selectedTopic) {
@@ -226,133 +221,23 @@ function updateActiveTopic(selectedTopic) {
 
   buttons.forEach(button => {
 
+    const topicName =
+      button.querySelector(
+        ".topic-name"
+      );
+
+    if (!topicName) {
+      return;
+    }
+
     if (
-      button.textContent.trim() ===
+      topicName.textContent.trim() ===
       selectedTopic.file
     ) {
       button.classList.add("active");
     } else {
       button.classList.remove("active");
     }
-
-  });
-}
-
-
-/* ========================================
-   COPY CODE
-======================================== */
-
-function addCopyButtons() {
-
-  const codeBlocks =
-    content.querySelectorAll("pre");
-
-  codeBlocks.forEach(pre => {
-
-    if (
-      pre.querySelector(".copy-button")
-    ) {
-      return;
-    }
-
-    const button =
-      document.createElement("button");
-
-    button.className = "copy-button";
-    button.type = "button";
-    button.textContent = "Copy";
-
-    button.addEventListener(
-      "click",
-      async () => {
-
-        const code =
-          pre.querySelector("code");
-
-        if (!code) {
-          return;
-        }
-
-        try {
-
-          await navigator.clipboard.writeText(
-            code.innerText
-          );
-
-          button.textContent =
-            "Copied ✓";
-
-          button.classList.add("copied");
-
-          setTimeout(() => {
-
-            button.textContent = "Copy";
-
-            button.classList.remove("copied");
-
-          }, 1500);
-
-        } catch (error) {
-
-          button.textContent = "Failed";
-
-          setTimeout(() => {
-            button.textContent = "Copy";
-          }, 1500);
-        }
-      }
-    );
-
-    pre.appendChild(button);
-  });
-}
-
-
-/* ========================================
-   HEADING IDS
-======================================== */
-
-function addHeadingIds() {
-
-  const headings =
-    content.querySelectorAll(
-      "h1, h2, h3"
-    );
-
-  headings.forEach(heading => {
-
-    if (heading.id) {
-      return;
-    }
-
-    const id =
-      heading.textContent
-        .toLowerCase()
-        .trim()
-        .replace(/[^\w\s-]/g, "")
-        .replace(/\s+/g, "-");
-
-    if (id) {
-      heading.id = id;
-    }
-  });
-}
-
-
-/* ========================================
-   CODE BLOCKS
-======================================== */
-
-function setupCodeHighlighting() {
-
-  const codeBlocks =
-    content.querySelectorAll(
-      "pre code"
-    );
-
-  codeBlocks.forEach(code => {
-    code.classList.add("code-block");
   });
 }
 
@@ -412,9 +297,14 @@ function setupKeyboardShortcuts() {
     "keydown",
     event => {
 
+      /*
+        Cmd + K / Ctrl + K
+        Focus search
+      */
+
       if (
-        (event.ctrlKey ||
-          event.metaKey) &&
+        (event.metaKey ||
+          event.ctrlKey) &&
         event.key.toLowerCase() === "k"
       ) {
 
@@ -426,6 +316,11 @@ function setupKeyboardShortcuts() {
         }
       }
 
+
+      /*
+        Escape
+      */
+
       if (event.key === "Escape") {
 
         if (searchInput) {
@@ -434,6 +329,8 @@ function setupKeyboardShortcuts() {
         }
 
         createSidebar(topics);
+
+        closeMobileSidebar();
       }
 
     }
@@ -442,19 +339,239 @@ function setupKeyboardShortcuts() {
 
 
 /* ========================================
-   MOBILE MENU
+   COPY CODE BUTTON
+======================================== */
+
+function addCopyButtons() {
+
+  const codeBlocks =
+    content.querySelectorAll("pre");
+
+  codeBlocks.forEach(pre => {
+
+    if (
+      pre.querySelector(".copy-button")
+    ) {
+      return;
+    }
+
+    const button =
+      document.createElement("button");
+
+    button.type = "button";
+    button.className = "copy-button";
+    button.textContent = "Copy";
+
+    button.addEventListener(
+      "click",
+      async () => {
+
+        const code =
+          pre.querySelector("code");
+
+        if (!code) {
+          return;
+        }
+
+        try {
+
+          await navigator.clipboard.writeText(
+            code.innerText
+          );
+
+          button.textContent =
+            "Copied";
+
+          button.classList.add(
+            "copied"
+          );
+
+          setTimeout(() => {
+
+            button.textContent =
+              "Copy";
+
+            button.classList.remove(
+              "copied"
+            );
+
+          }, 1400);
+
+        } catch (error) {
+
+          console.error(error);
+
+          button.textContent =
+            "Failed";
+
+          setTimeout(() => {
+
+            button.textContent =
+              "Copy";
+
+          }, 1400);
+        }
+      }
+    );
+
+    pre.appendChild(button);
+  });
+}
+
+
+/* ========================================
+   HEADING IDS
+======================================== */
+
+function addHeadingIds() {
+
+  const headings =
+    content.querySelectorAll(
+      "h1, h2, h3, h4"
+    );
+
+  const usedIds = new Set();
+
+  headings.forEach(heading => {
+
+    let baseId =
+      heading.textContent
+        .toLowerCase()
+        .trim()
+        .replace(/[^\w\s-]/g, "")
+        .replace(/\s+/g, "-");
+
+    if (!baseId) {
+      return;
+    }
+
+    let id = baseId;
+    let counter = 2;
+
+    while (usedIds.has(id)) {
+      id = `${baseId}-${counter}`;
+      counter++;
+    }
+
+    usedIds.add(id);
+
+    heading.id = id;
+  });
+}
+
+
+/* ========================================
+   EXTERNAL LINKS
+======================================== */
+
+function setupExternalLinks() {
+
+  const links =
+    content.querySelectorAll("a");
+
+  links.forEach(link => {
+
+    const href =
+      link.getAttribute("href");
+
+    if (
+      href &&
+      (
+        href.startsWith("http://") ||
+        href.startsWith("https://")
+      )
+    ) {
+
+      link.target = "_blank";
+
+      link.rel =
+        "noopener noreferrer";
+    }
+  });
+}
+
+
+/* ========================================
+   LOADING STATE
+======================================== */
+
+function showLoading() {
+
+  content.innerHTML = `
+    <div class="loading">
+      <div class="loading-line"></div>
+      <div class="loading-line short"></div>
+      <div class="loading-line"></div>
+    </div>
+  `;
+}
+
+
+/* ========================================
+   MESSAGE
+======================================== */
+
+function showMessage(title, message) {
+
+  content.innerHTML = `
+    <div class="empty-state">
+
+      <h1>
+        ${escapeHTML(title)}
+      </h1>
+
+      <p>
+        ${escapeHTML(message)}
+      </p>
+
+    </div>
+  `;
+}
+
+
+/* ========================================
+   ERROR
+======================================== */
+
+function showError(title, message) {
+
+  content.innerHTML = `
+    <div class="error">
+
+      <h1>
+        ${escapeHTML(title)}
+      </h1>
+
+      <p>
+        ${escapeHTML(message)}
+      </p>
+
+    </div>
+  `;
+}
+
+
+/* ========================================
+   MOBILE SIDEBAR
 ======================================== */
 
 function setupMobileMenu() {
 
   const menuButton =
-    document.getElementById("menu-button");
+    document.getElementById(
+      "menu-button"
+    );
 
   const closeButton =
-    document.getElementById("close-sidebar");
+    document.getElementById(
+      "close-sidebar"
+    );
 
   const overlay =
-    document.getElementById("sidebar-overlay");
+    document.getElementById(
+      "sidebar-overlay"
+    );
+
 
   if (menuButton) {
 
@@ -467,7 +584,9 @@ function setupMobileMenu() {
         );
 
         if (overlay) {
-          overlay.classList.add("active");
+          overlay.classList.add(
+            "active"
+          );
         }
 
         document.body.classList.add(
@@ -477,25 +596,30 @@ function setupMobileMenu() {
     );
   }
 
+
   if (closeButton) {
+
     closeButton.addEventListener(
       "click",
-      closeMobileMenu
+      closeMobileSidebar
     );
   }
 
+
   if (overlay) {
+
     overlay.addEventListener(
       "click",
-      closeMobileMenu
+      closeMobileSidebar
     );
   }
 }
 
 
-function closeMobileMenu() {
+function closeMobileSidebar() {
 
   if (sidebar) {
+
     sidebar.classList.remove(
       "mobile-open"
     );
@@ -507,7 +631,10 @@ function closeMobileMenu() {
     );
 
   if (overlay) {
-    overlay.classList.remove("active");
+
+    overlay.classList.remove(
+      "active"
+    );
   }
 
   document.body.classList.remove(
@@ -517,13 +644,15 @@ function closeMobileMenu() {
 
 
 /* ========================================
-   HTML ESCAPE
+   ESCAPE HTML
 ======================================== */
 
 function escapeHTML(value) {
 
   const div =
-    document.createElement("div");
+    document.createElement(
+      "div"
+    );
 
   div.textContent = value;
 
@@ -532,7 +661,7 @@ function escapeHTML(value) {
 
 
 /* ========================================
-   MARKDOWN CONFIG
+   MARKDOWN CONFIGURATION
 ======================================== */
 
 function configureMarkdown() {
@@ -540,6 +669,7 @@ function configureMarkdown() {
   if (
     typeof marked === "undefined"
   ) {
+
     console.error(
       "Marked.js was not loaded."
     );
@@ -571,6 +701,10 @@ function initialize() {
   loadTopics();
 }
 
+
+/* ========================================
+   START
+======================================== */
 
 if (
   document.readyState === "loading"
