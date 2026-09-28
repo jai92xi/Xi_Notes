@@ -1,78 +1,63 @@
-# Early Stopping
-
-**Early stopping** is a **regularization technique** used to **reduce overfitting** during model training.
-
-## Example
-
-| Epoch | Train Loss | Val Loss | Status |
-|------:|-----------:|---------:|:-------|
-| 1 | 0.80 | 0.75 | 📈 Improving |
-| 2 | 0.60 | 0.55 | 📈 Improving |
-| 3 | 0.45 | **0.40** | ⭐ Best |
-| 4 | 0.35 | 0.43 | ⚠️ No improvement |
-| 5 | 0.28 | 0.47 | ⚠️ No improvement |
-| 6 | 0.22 | 0.52 | 🛑 Stop |
-
-### What is happening?
-
-In the above example:
-
-- **Training loss keeps decreasing** ✅
-- **Validation loss starts increasing** ❌
-- This indicates that the model may be **overfitting**.
-
-Therefore, **early stopping stops training when validation performance stops improving**.
-
-This helps to:
-
-- 🛡️ **Reduce overfitting**
-- ⏱️ **Save training time and computation**
-- ⭐ **Keep the model weights from the best validation performance**
+> 🧠 **EARLY STOPPING**
+> A regularization technique that **stops training when validation performance stops improving**, helping reduce overfitting and save computation.
 
 ---
 
-## Sample Code
+### 📊 Simple Example
+
+| Epoch | Train Loss | Val Loss | Status |
+|:---:|---:|---:|:---|
+| 1 | 0.80 | 0.75 | 📈 Improving |
+| 2 | 0.60 | 0.55 | 📈 Improving |
+| 3 | 0.45 | **0.40 ⭐** | 🏆 Best |
+| 4 | 0.35 | 0.43 | ⚠️ Worse |
+| 5 | 0.28 | 0.47 | ⚠️ Worse |
+| 6 | 0.22 | 0.52 | 🛑 Stop |
+
+**Pattern:** Training loss ↓ but Validation loss ↑ → ⚠️ **Possible overfitting**
+
+---
+
+### 🧪 Keras
 
 ```python
 early_stop = callbacks.EarlyStopping(
-    monitor="val_loss",              # Which metric to watch? → validation loss
-    patience=5,                      # How many epochs to wait without improvement?
-    min_delta=1e-4,                  # Minimum change required to count as improvement
-    mode="min",                      # min for loss, max for accuracy
-    restore_best_weights=True,       # Restore weights from epoch with best monitored value
+    monitor="val_loss",
+    patience=5,
+    min_delta=1e-4,
+    mode="min",
+    restore_best_weights=True
 )
 
 model.fit(
-    x_train,
-    y_train,
+    x_train, y_train,
     validation_data=(x_val, y_val),
     epochs=200,
     batch_size=64,
-    callbacks=[early_stop]           # ← Early stopping
+    callbacks=[early_stop]
 )
 ````
 
-### `restore_best_weights=True`
+ ### ⚙️ Key Parameters
 
-In the example above, **Epoch 3** has the lowest validation loss:
+ | Parameter | Meaning |
+| --- | --- |
+| `monitor="val_loss"` | 👀 Monitor validation loss |
+| `patience=5` | ⏳ Wait 5 epochs without improvement |
+| `min_delta=1e-4` | 🔎 Minimum change considered an improvement |
+| `mode="min"` | 📉 Lower value is better |
+| `restore_best_weights=True` | ⭐ Restore weights from the best epoch |
 
-> **Epoch 3 → Validation Loss = 0.40 ⭐**
-
-Therefore, when training stops, the model's weights are restored to the weights from **Epoch 3** rather than keeping the weights from the final epoch.
+> ⭐ **Important:** In the example, Epoch 3 has the lowest `val_loss (0.40)`, so `restore_best_weights=True` restores the **Epoch 3 weights**.
 
 ---
 
-# Early Stopping + Other Regularization Techniques
+ ### 🧩 Can Be Combined With
 
-Early stopping can be combined with other regularization techniques:
+ **Dropout** → Randomly removes neurons\
+ **L2 / Weight Decay** → Penalizes large weights\
+ **Data Augmentation** → Creates varied training examples\
+ **Early Stopping** → Stops when validation performance worsens
 
-| Technique | Purpose |
-| --- | --- |
-| **Dropout** | Randomly removes neurons during training to reduce dependency on specific neurons |
-| **Weight Decay / L2 Regularization** | Penalizes large weights to control model complexity |
-| **Data Augmentation** | Creates varied training examples to improve generalization |
-| **Early Stopping** | Stops training when validation performance stops improving |
-
-### Key Takeaway
-
-> **Early stopping prevents unnecessary training once the model stops improving on validation data, helping reduce overfitting while also saving computation.**
+ > 🎯 **Takeaway:**\
+>  **Train → Monitor Validation → Detect Overfitting → Stop → Restore Best Weights**
