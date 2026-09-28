@@ -1,39 +1,108 @@
-const topics = [
-  {
-    name: "Early Stopping",
-    file: "Early_Stopping.md",
-    category: "Machine Learning"
-  },
-  {
-    name: "Imbalanced Data Handling",
-    file: "imbalanced data handling.md",
-    category: "Machine Learning"
-  }
-];
+const GITHUB_USER = "jai92xi";
+const GITHUB_REPO = "Xi_Notes";
+const NOTES_FOLDER = "notes";
 
 const sidebar = document.getElementById("sidebar");
 const content = document.getElementById("content");
 const searchInput = document.getElementById("search");
 const currentTopic = document.getElementById("current-topic");
 
-function getNavigationContainer() {
-  let navigation = document.querySelector(".topic-navigation");
+let topics = [];
 
-  if (!navigation) {
-    navigation = document.createElement("nav");
-    navigation.className = "topic-navigation";
-    sidebar.appendChild(navigation);
+
+/* ========================================
+   LOAD ALL MARKDOWN FILES
+======================================== */
+
+async function loadTopics() {
+  try {
+    const apiUrl =
+      `https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}/contents/${NOTES_FOLDER}`;
+
+    const response = await fetch(apiUrl);
+
+    if (!response.ok) {
+      throw new Error("Could not access GitHub repository");
+    }
+
+    const files = await response.json();
+
+    topics = files
+      .filter(file =>
+        file.type === "file" &&
+        file.name.toLowerCase().endsWith(".md")
+      )
+      .map(file => ({
+        name: formatTopicName(file.name),
+        file: file.name
+      }))
+      .sort((a, b) =>
+        a.name.localeCompare(b.name)
+      );
+
+    createSidebar(topics);
+
+    if (topics.length > 0) {
+      loadMarkdown(topics[0]);
+    } else {
+      content.innerHTML = `
+        <div class="welcome">
+          <div class="welcome-icon">✦</div>
+          <h1>No notes yet</h1>
+          <p>Add Markdown files to the notes folder.</p>
+        </div>
+      `;
+    }
+
+  } catch (error) {
+
+    console.error(error);
+
+    content.innerHTML = `
+      <div class="error">
+        <div class="error-icon">😵</div>
+        <h2>Couldn't load notes</h2>
+        <p>
+          Make sure your Markdown files are inside the
+          <code>notes</code> folder.
+        </p>
+      </div>
+    `;
   }
-
-  return navigation;
 }
 
+
+/* ========================================
+   FILE NAME → TOPIC NAME
+======================================== */
+
+function formatTopicName(filename) {
+
+  return filename
+    .replace(/\.md$/i, "")
+    .replace(/_/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+
+/* ========================================
+   SIDEBAR
+======================================== */
+
 function createSidebar(items = topics) {
-  const navigation = getNavigationContainer();
+
+  const navigation =
+    document.querySelector(".topic-navigation");
+
+  if (!navigation) {
+    return;
+  }
 
   navigation.innerHTML = "";
 
   if (items.length === 0) {
+
     navigation.innerHTML = `
       <div class="no-results">
         No notes found 😶
@@ -43,48 +112,39 @@ function createSidebar(items = topics) {
     return;
   }
 
-  const categories = {};
-
   items.forEach(topic => {
-    if (!categories[topic.category]) {
-      categories[topic.category] = [];
-    }
 
-    categories[topic.category].push(topic);
+    const button =
+      document.createElement("button");
+
+    button.className = "topic-button";
+    button.type = "button";
+
+    /*
+      Display the actual filename.
+
+      Example:
+      Early_Stopping.md
+      imbalanced data handling.md
+    */
+
+    button.textContent = topic.file;
+
+    button.addEventListener("click", () => {
+      loadMarkdown(topic);
+    });
+
+    navigation.appendChild(button);
   });
-
-  Object.entries(categories).forEach(
-    ([category, categoryTopics]) => {
-
-      const categoryTitle =
-        document.createElement("div");
-
-      categoryTitle.className = "category-title";
-      categoryTitle.textContent = category;
-
-      navigation.appendChild(categoryTitle);
-
-      categoryTopics.forEach(topic => {
-
-        const button =
-          document.createElement("button");
-
-        button.className = "topic-button";
-        button.type = "button";
-        button.textContent = topic.name;
-
-        button.addEventListener("click", () => {
-          loadMarkdown(topic);
-        });
-
-        navigation.appendChild(button);
-      });
-    }
-  );
 }
 
 
+/* ========================================
+   LOAD MARKDOWN
+======================================== */
+
 async function loadMarkdown(topic) {
+
   try {
 
     content.innerHTML = `
@@ -94,10 +154,11 @@ async function loadMarkdown(topic) {
       </div>
     `;
 
+    const fileUrl =
+      `notes/${encodeURIComponent(topic.file)}`;
+
     const response =
-      await fetch(
-        `notes/${encodeURIComponent(topic.file)}`
-      );
+      await fetch(fileUrl);
 
     if (!response.ok) {
       throw new Error(
@@ -124,6 +185,8 @@ async function loadMarkdown(topic) {
 
     setupCodeHighlighting();
 
+    closeMobileMenu();
+
     window.scrollTo({
       top: 0,
       behavior: "smooth"
@@ -144,16 +207,15 @@ async function loadMarkdown(topic) {
           <strong>${escapeHTML(topic.file)}</strong>
           could not be loaded.
         </p>
-
-        <p>
-          Make sure the file exists inside the
-          <code>notes</code> folder.
-        </p>
       </div>
     `;
   }
 }
 
+
+/* ========================================
+   ACTIVE TOPIC
+======================================== */
 
 function updateActiveTopic(selectedTopic) {
 
@@ -166,7 +228,7 @@ function updateActiveTopic(selectedTopic) {
 
     if (
       button.textContent.trim() ===
-      selectedTopic.name
+      selectedTopic.file
     ) {
       button.classList.add("active");
     } else {
@@ -176,6 +238,10 @@ function updateActiveTopic(selectedTopic) {
   });
 }
 
+
+/* ========================================
+   COPY CODE
+======================================== */
 
 function addCopyButtons() {
 
@@ -217,31 +283,22 @@ function addCopyButtons() {
           button.textContent =
             "Copied ✓";
 
-          button.classList.add(
-            "copied"
-          );
+          button.classList.add("copied");
 
           setTimeout(() => {
 
-            button.textContent =
-              "Copy";
+            button.textContent = "Copy";
 
-            button.classList.remove(
-              "copied"
-            );
+            button.classList.remove("copied");
 
           }, 1500);
 
         } catch (error) {
 
-          console.error(error);
-
-          button.textContent =
-            "Failed";
+          button.textContent = "Failed";
 
           setTimeout(() => {
-            button.textContent =
-              "Copy";
+            button.textContent = "Copy";
           }, 1500);
         }
       }
@@ -251,6 +308,10 @@ function addCopyButtons() {
   });
 }
 
+
+/* ========================================
+   HEADING IDS
+======================================== */
 
 function addHeadingIds() {
 
@@ -265,25 +326,23 @@ function addHeadingIds() {
       return;
     }
 
-    const text =
+    const id =
       heading.textContent
         .toLowerCase()
         .trim()
-        .replace(
-          /[^\w\s-]/g,
-          ""
-        )
-        .replace(
-          /\s+/g,
-          "-"
-        );
+        .replace(/[^\w\s-]/g, "")
+        .replace(/\s+/g, "-");
 
-    if (text) {
-      heading.id = text;
+    if (id) {
+      heading.id = id;
     }
   });
 }
 
+
+/* ========================================
+   CODE BLOCKS
+======================================== */
 
 function setupCodeHighlighting() {
 
@@ -293,14 +352,14 @@ function setupCodeHighlighting() {
     );
 
   codeBlocks.forEach(code => {
-
-    code.classList.add(
-      "code-block"
-    );
-
+    code.classList.add("code-block");
   });
 }
 
+
+/* ========================================
+   SEARCH
+======================================== */
 
 function setupSearch() {
 
@@ -318,34 +377,34 @@ function setupSearch() {
           .trim();
 
       if (!query) {
-        createSidebar();
+        createSidebar(topics);
         return;
       }
 
-      const filteredTopics =
+      const filtered =
         topics.filter(topic => {
 
           return (
-            topic.name
-              .toLowerCase()
-              .includes(query) ||
-
-            topic.category
-              .toLowerCase()
-              .includes(query) ||
-
             topic.file
+              .toLowerCase()
+              .includes(query) ||
+
+            topic.name
               .toLowerCase()
               .includes(query)
           );
 
         });
 
-      createSidebar(filteredTopics);
+      createSidebar(filtered);
     }
   );
 }
 
+
+/* ========================================
+   KEYBOARD SHORTCUTS
+======================================== */
 
 function setupKeyboardShortcuts() {
 
@@ -367,7 +426,6 @@ function setupKeyboardShortcuts() {
         }
       }
 
-
       if (event.key === "Escape") {
 
         if (searchInput) {
@@ -375,7 +433,7 @@ function setupKeyboardShortcuts() {
           searchInput.blur();
         }
 
-        createSidebar();
+        createSidebar(topics);
       }
 
     }
@@ -383,64 +441,50 @@ function setupKeyboardShortcuts() {
 }
 
 
+/* ========================================
+   MOBILE MENU
+======================================== */
+
 function setupMobileMenu() {
 
   const menuButton =
-    document.getElementById(
-      "menu-button"
-    );
+    document.getElementById("menu-button");
 
   const closeButton =
-    document.getElementById(
-      "close-sidebar"
-    );
+    document.getElementById("close-sidebar");
 
   const overlay =
-    document.getElementById(
-      "sidebar-overlay"
-    );
+    document.getElementById("sidebar-overlay");
 
+  if (menuButton) {
 
-  if (
-    !menuButton ||
-    !sidebar
-  ) {
-    return;
-  }
+    menuButton.addEventListener(
+      "click",
+      () => {
 
+        sidebar.classList.add(
+          "mobile-open"
+        );
 
-  menuButton.addEventListener(
-    "click",
-    () => {
+        if (overlay) {
+          overlay.classList.add("active");
+        }
 
-      sidebar.classList.add(
-        "mobile-open"
-      );
-
-      if (overlay) {
-        overlay.classList.add(
-          "active"
+        document.body.classList.add(
+          "sidebar-open"
         );
       }
-
-      document.body.classList.add(
-        "sidebar-open"
-      );
-    }
-  );
-
+    );
+  }
 
   if (closeButton) {
-
     closeButton.addEventListener(
       "click",
       closeMobileMenu
     );
   }
 
-
   if (overlay) {
-
     overlay.addEventListener(
       "click",
       closeMobileMenu
@@ -451,9 +495,11 @@ function setupMobileMenu() {
 
 function closeMobileMenu() {
 
-  sidebar.classList.remove(
-    "mobile-open"
-  );
+  if (sidebar) {
+    sidebar.classList.remove(
+      "mobile-open"
+    );
+  }
 
   const overlay =
     document.getElementById(
@@ -461,9 +507,7 @@ function closeMobileMenu() {
     );
 
   if (overlay) {
-    overlay.classList.remove(
-      "active"
-    );
+    overlay.classList.remove("active");
   }
 
   document.body.classList.remove(
@@ -472,18 +516,24 @@ function closeMobileMenu() {
 }
 
 
+/* ========================================
+   HTML ESCAPE
+======================================== */
+
 function escapeHTML(value) {
 
   const div =
-    document.createElement(
-      "div"
-    );
+    document.createElement("div");
 
   div.textContent = value;
 
   return div.innerHTML;
 }
 
+
+/* ========================================
+   MARKDOWN CONFIG
+======================================== */
 
 function configureMarkdown() {
 
@@ -504,11 +554,13 @@ function configureMarkdown() {
 }
 
 
+/* ========================================
+   INITIALIZE
+======================================== */
+
 function initialize() {
 
   configureMarkdown();
-
-  createSidebar();
 
   setupSearch();
 
@@ -516,9 +568,7 @@ function initialize() {
 
   setupMobileMenu();
 
-  if (topics.length > 0) {
-    loadMarkdown(topics[0]);
-  }
+  loadTopics();
 }
 
 
