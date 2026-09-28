@@ -35,7 +35,7 @@ model.fit(
     batch_size=64,
     callbacks=[early_stop]
 )
-
+```
  **`restore_best_weights=True`** → ⭐ In the above example, **Epoch 3 weights** will be restored because Epoch 3 had the **lowest validation loss (0.40)**.
 
  ### Early Stopping + Other Regularization
