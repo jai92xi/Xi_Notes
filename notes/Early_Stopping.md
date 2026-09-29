@@ -1,12 +1,12 @@
 <div style="display:flex; flex-direction:row; align-items:center; gap:30px; width:100%; margin:30px 0;">
 
-  <div style="flex:1; min-width:0;">
+  <div style="flex:1; min-width:0; padding:18px 20px; border-left:4px solid #7657e8; border-radius:0 10px 10px 0; background:#f0ecff;">
 
-    <p style="margin:0;">
+    <p style="margin:0 0 8px;">
       🧠 <strong>EARLY STOPPING</strong>
     </p>
 
-    <p>
+    <p style="margin:0;">
       Early stopping is a <strong>regularization technique</strong>
       that <strong>prevents overfitting</strong> by stopping training
       when <strong>validation performance stops improving</strong>.
