@@ -15,6 +15,18 @@
 
   <title>AI & ML Key Concepts</title>
 
+  <!-- Markdown renderer -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+  <!-- Syntax highlighting -->
+  <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/highlight.js@11.11.1/styles/github.min.css"
+  >
+
+  <script src="https://cdn.jsdelivr.net/npm/highlight.js@11.11.1/lib/highlight.min.js"></script>
+
+  <!-- Main stylesheet -->
   <link
     rel="stylesheet"
     href="style.css"
@@ -28,6 +40,7 @@
        ===================================================== -->
 
   <header>
+
     <div class="header-spacer"></div>
 
     <div class="header-actions">
@@ -45,6 +58,7 @@
       </button>
 
     </div>
+
   </header>
 
 
@@ -54,7 +68,7 @@
 
   <div class="app">
 
-    <!-- Sidebar overlay for mobile -->
+    <!-- Mobile sidebar overlay -->
     <div
       id="sidebar-overlay"
       class="sidebar-overlay"
@@ -76,9 +90,10 @@
         id="contents-toggle"
         class="contents-toggle"
         type="button"
-        aria-label="Toggle contents"
+        aria-label="Hide contents"
         aria-controls="sidebar"
         aria-expanded="true"
+        title="Hide contents"
       >
         <span></span>
         <span></span>
@@ -101,35 +116,67 @@
       </div>
 
 
-      <!-- Notes list -->
+      <!-- =================================================
+           NOTES LIST
+
+           app.js automatically loads the actual filenames
+           from the GitHub notes/ directory.
+
+           Example:
+
+           Early_Stopping.md
+           ->
+           Early Stopping
+
+           batch-normalization.md
+           ->
+           Batch Normalization
+           ================================================= -->
+
       <nav
         id="topic-navigation"
         class="topic-navigation"
         aria-label="AI and ML concepts"
       >
-        <!-- app.js populates this -->
+        <div class="no-results">
+          Loading concepts...
+        </div>
       </nav>
 
 
       <!-- Footer -->
       <div class="sidebar-footer">
+
         <span>Made with</span>
-        <span class="footer-love">♥</span>
-        <span>&</span>
+
+        <span
+          class="footer-love"
+          aria-hidden="true"
+        >
+          ♥
+        </span>
+
+        <span>&amp;</span>
+
         <span>curiosity</span>
+
       </div>
 
     </aside>
 
 
     <!-- ===================================================
-         MAIN CONTENT
+         MAIN
          =================================================== -->
 
     <main id="main">
 
+
       <!-- =================================================
            PREVIOUS / NEXT NAVIGATION
+
+           This is the ONLY previous/next navigation.
+           There is intentionally no bottom navigation.
            ================================================= -->
 
       <nav
@@ -138,11 +185,11 @@
         aria-label="Post navigation"
       >
 
-        <!-- Previous -->
+        <!-- app.js populates Previous / Next -->
         <button
-          id="previous-button"
           class="page-nav-button previous-page"
           type="button"
+          disabled
         >
 
           <span
@@ -158,10 +205,7 @@
               Previous
             </span>
 
-            <span
-              id="previous-title"
-              class="page-nav-title"
-            >
+            <span class="page-nav-title">
               —
             </span>
 
@@ -170,11 +214,10 @@
         </button>
 
 
-        <!-- Next -->
         <button
-          id="next-button"
           class="page-nav-button next-page"
           type="button"
+          disabled
         >
 
           <span class="page-nav-copy">
@@ -183,10 +226,7 @@
               Next
             </span>
 
-            <span
-              id="next-title"
-              class="page-nav-title"
-            >
+            <span class="page-nav-title">
               —
             </span>
 
@@ -213,12 +253,15 @@
         <article
           id="content"
           class="content"
+          aria-live="polite"
         >
 
           <div class="loading">
 
             <div class="loading-line"></div>
+
             <div class="loading-line"></div>
+
             <div class="loading-line short"></div>
 
           </div>
@@ -240,8 +283,8 @@
     id="theme-button"
     class="theme-button"
     type="button"
-    aria-label="Switch theme"
-    title="Switch theme"
+    aria-label="Switch to dark theme"
+    title="Switch to dark theme"
   >
     ☾
   </button>
@@ -252,6 +295,39 @@
        ===================================================== -->
 
   <script src="app.js"></script>
+
+
+  <!-- =====================================================
+       HIGHLIGHT.JS
+       ===================================================== -->
+
+  <script>
+    document.addEventListener(
+      "DOMContentLoaded",
+      () => {
+
+        if (
+          typeof hljs !== "undefined"
+        ) {
+
+          hljs.configure({
+            languages: [
+              "javascript",
+              "python",
+              "bash",
+              "json",
+              "yaml",
+              "html",
+              "css",
+              "sql"
+            ]
+          });
+
+        }
+
+      }
+    );
+  </script>
 
 </body>
 </html>
