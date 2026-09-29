@@ -11,11 +11,6 @@ const NOTES_FOLDER = "notes";
 let topics = [];
 let currentTopicIndex = -1;
 
-
-/* =========================================================
-   DOM
-   ========================================================= */
-
 let sidebar;
 let content;
 let searchInput;
@@ -34,7 +29,7 @@ let nextTitle;
 
 
 /* =========================================================
-   INITIALIZE
+   DOM READY
    ========================================================= */
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -42,42 +37,27 @@ document.addEventListener("DOMContentLoaded", () => {
   sidebar = document.getElementById("sidebar");
   content = document.getElementById("content");
   searchInput = document.getElementById("search");
+
   themeButton = document.getElementById("theme-button");
   menuButton = document.getElementById("menu-button");
   closeSidebarButton = document.getElementById("close-sidebar");
   sidebarOverlay = document.getElementById("sidebar-overlay");
 
-  contentsToggle =
-    document.getElementById("contents-toggle");
+  contentsToggle = document.getElementById("contents-toggle");
+  topicNavigation = document.getElementById("topic-navigation");
 
-  topicNavigation =
-    document.getElementById("topic-navigation");
+  previousButton = document.getElementById("previous-button");
+  nextButton = document.getElementById("next-button");
 
-  previousButton =
-    document.getElementById("previous-button");
-
-  nextButton =
-    document.getElementById("next-button");
-
-  previousTitle =
-    document.getElementById("previous-title");
-
-  nextTitle =
-    document.getElementById("next-title");
-
+  previousTitle = document.getElementById("previous-title");
+  nextTitle = document.getElementById("next-title");
 
   configureMarkdown();
-
   setupTheme();
-
   setupSearch();
-
   setupKeyboardShortcuts();
-
   setupContentsToggle();
-
   setupMobileMenu();
-
   setupTopNavigation();
 
   loadTopics();
@@ -92,11 +72,7 @@ document.addEventListener("DOMContentLoaded", () => {
 function configureMarkdown() {
 
   if (typeof marked === "undefined") {
-
-    console.error(
-      "Marked.js was not loaded."
-    );
-
+    console.error("Marked.js was not loaded.");
     return;
   }
 
@@ -120,85 +96,50 @@ async function loadTopics() {
 
     const apiURL =
       `https://api.github.com/repos/` +
-      `${GITHUB_USER}/` +
-      `${GITHUB_REPO}/contents/` +
+      `${GITHUB_USER}/${GITHUB_REPO}/contents/` +
       `${NOTES_FOLDER}?ref=${GITHUB_BRANCH}`;
 
-
-    const response =
-      await fetch(
-        apiURL,
-        {
-          cache: "no-cache"
-        }
-      );
-
+    const response = await fetch(
+      apiURL,
+      {
+        cache: "no-cache"
+      }
+    );
 
     if (!response.ok) {
-
       throw new Error(
         `GitHub API error: ${response.status}`
       );
-
     }
 
+    const files = await response.json();
 
-    const files =
-      await response.json();
-
-
-    if (!Array.isArray(files)) {
-
-      throw new Error(
-        "Invalid GitHub API response."
+    topics = files
+      .filter(
+        file =>
+          file.type === "file" &&
+          file.name.toLowerCase().endsWith(".md")
+      )
+      .map(
+        file => ({
+          file: file.name,
+          name: formatTopicName(file.name),
+          url: file.download_url
+        })
+      )
+      .sort(
+        (a, b) =>
+          a.name.localeCompare(
+            b.name,
+            undefined,
+            {
+              numeric: true,
+              sensitivity: "base"
+            }
+          )
       );
 
-    }
-
-
-    topics =
-      files
-        .filter(
-          file =>
-            file &&
-            file.type === "file" &&
-            typeof file.name === "string" &&
-            file.name
-              .toLowerCase()
-              .endsWith(".md")
-        )
-        .map(
-          file => ({
-            file: file.name,
-
-            name:
-              formatTopicName(
-                file.name
-              ),
-
-            url:
-              file.download_url
-          })
-        )
-        .sort(
-          (a, b) =>
-            a.name.localeCompare(
-              b.name,
-              undefined,
-              {
-                numeric: true,
-                sensitivity: "base"
-              }
-            )
-        );
-
-
-    currentTopicIndex = -1;
-
     createSidebar(topics);
-
-    updateTopNavigation();
-
 
     if (topics.length > 0) {
 
@@ -241,28 +182,12 @@ function formatTopicName(filename) {
 
   let name =
     filename
-      .replace(
-        /\.md$/i,
-        ""
-      )
-      .replace(
-        /[_-]+/g,
-        " "
-      )
-      .replace(
-        /([a-z0-9])([A-Z])/g,
-        "$1 $2"
-      )
-      .replace(
-        /([A-Z]+)([A-Z][a-z])/g,
-        "$1 $2"
-      )
-      .replace(
-        /\s+/g,
-        " "
-      )
+      .replace(/\.md$/i, "")
+      .replace(/[_-]+/g, " ")
+      .replace(/([a-z0-9])([A-Z])/g, "$1 $2")
+      .replace(/([A-Z]+)([A-Z][a-z])/g, "$1 $2")
+      .replace(/\s+/g, " ")
       .trim();
-
 
   name =
     name
@@ -275,7 +200,6 @@ function formatTopicName(filename) {
           word.slice(1)
       )
       .join(" ");
-
 
   const replacements = {
 
@@ -332,7 +256,6 @@ function formatTopicName(filename) {
 
   };
 
-
   return name
     .split(" ")
     .map(
@@ -354,14 +277,9 @@ function createSidebar(items) {
     return;
   }
 
-
   topicNavigation.innerHTML = "";
 
-
-  if (
-    !Array.isArray(items) ||
-    items.length === 0
-  ) {
+  if (items.length === 0) {
 
     topicNavigation.innerHTML = `
       <div class="no-results">
@@ -372,21 +290,15 @@ function createSidebar(items) {
     return;
   }
 
-
   items.forEach(topic => {
 
     const button =
-      document.createElement(
-        "button"
-      );
+      document.createElement("button");
 
+    button.type = "button";
+    button.className = "topic-button";
 
-    button.type =
-      "button";
-
-    button.className =
-      "topic-button";
-
+    button.dataset.file = topic.file;
 
     button.innerHTML = `
       <span class="topic-dot">✦</span>
@@ -395,13 +307,9 @@ function createSidebar(items) {
       </span>
     `;
 
-
     button.addEventListener(
       "click",
-      event => {
-
-        event.preventDefault();
-        event.stopPropagation();
+      () => {
 
         loadMarkdown(
           topic,
@@ -413,13 +321,9 @@ function createSidebar(items) {
       }
     );
 
-
-    topicNavigation.appendChild(
-      button
-    );
+    topicNavigation.appendChild(button);
 
   });
-
 
   if (
     currentTopicIndex >= 0 &&
@@ -444,52 +348,30 @@ async function loadMarkdown(
   scrollToTop = true
 ) {
 
-  if (
-    !topic ||
-    !content
-  ) {
-
+  if (!topic || !content) {
     return;
   }
-
-
-  const index =
-    topics.findIndex(
-      item =>
-        item.file === topic.file
-    );
-
-
-  if (index === -1) {
-    return;
-  }
-
-
-  /*
-   * Update the current index BEFORE
-   * fetching the Markdown file.
-   *
-   * This keeps Previous / Next
-   * navigation synchronized.
-   */
-
-  currentTopicIndex =
-    index;
-
-
-  updateTopNavigation();
-
-  updateActiveTopic(topic);
-
 
   try {
 
     showLoading();
 
+    const index =
+      topics.findIndex(
+        item =>
+          item.file === topic.file
+      );
+
+    if (index === -1) {
+      return;
+    }
+
+    currentTopicIndex = index;
+
+    updateTopNavigation();
 
     const markdownURL =
       getMarkdownURL(topic);
-
 
     const response =
       await fetch(
@@ -498,7 +380,6 @@ async function loadMarkdown(
           cache: "no-cache"
         }
       );
-
 
     if (!response.ok) {
 
@@ -509,10 +390,8 @@ async function loadMarkdown(
 
     }
 
-
     const markdown =
       await response.text();
-
 
     if (
       typeof marked === "undefined"
@@ -524,34 +403,22 @@ async function loadMarkdown(
 
     }
 
-
     const html =
-      marked.parse(
-        markdown
-      );
+      marked.parse(markdown);
 
-
-    content.innerHTML =
-      html;
-
+    content.innerHTML = html;
 
     content.classList.add(
       "note-loaded"
     );
 
-
     fixMarkdownImages();
-
     addHeadingIds();
-
     addCopyButtons();
-
     setupExternalLinks();
 
     updateActiveTopic(topic);
-
     updateTopNavigation();
-
 
     if (scrollToTop) {
 
@@ -569,22 +436,10 @@ async function loadMarkdown(
       error
     );
 
-
     showError(
       "Couldn’t open this note.",
       topic.file
     );
-
-
-    /*
-     * Keep navigation state even
-     * when note loading fails.
-     */
-
-    currentTopicIndex =
-      index;
-
-    updateTopNavigation();
 
   }
 
@@ -619,53 +474,31 @@ function fixMarkdownImages() {
     return;
   }
 
-
   const images =
-    content.querySelectorAll(
-      "img"
-    );
-
+    content.querySelectorAll("img");
 
   images.forEach(image => {
 
     const source =
-      image.getAttribute(
-        "src"
-      );
-
+      image.getAttribute("src");
 
     if (!source) {
       return;
     }
 
-
     if (
-      source.startsWith(
-        "http://"
-      ) ||
-      source.startsWith(
-        "https://"
-      ) ||
-      source.startsWith(
-        "//"
-      ) ||
-      source.startsWith(
-        "data:"
-      ) ||
-      source.startsWith(
-        "blob:"
-      )
+      source.startsWith("http://") ||
+      source.startsWith("https://") ||
+      source.startsWith("//") ||
+      source.startsWith("data:") ||
+      source.startsWith("blob:")
     ) {
 
-      image.loading =
-        "lazy";
-
-      image.decoding =
-        "async";
+      image.loading = "lazy";
+      image.decoding = "async";
 
       return;
     }
-
 
     try {
 
@@ -676,13 +509,11 @@ function fixMarkdownImages() {
         `${GITHUB_BRANCH}/` +
         `${NOTES_FOLDER}/`;
 
-
       const imageURL =
         new URL(
           source,
           notesBaseURL
         );
-
 
       image.src =
         imageURL.href;
@@ -697,12 +528,8 @@ function fixMarkdownImages() {
 
     }
 
-
-    image.loading =
-      "lazy";
-
-    image.decoding =
-      "async";
+    image.loading = "lazy";
+    image.decoding = "async";
 
   });
 
@@ -715,92 +542,57 @@ function fixMarkdownImages() {
 
 function setupTopNavigation() {
 
-  if (
-    !previousButton ||
-    !nextButton
-  ) {
+  if (previousButton) {
 
-    console.warn(
-      "Navigation buttons not found."
+    previousButton.addEventListener(
+      "click",
+      event => {
+
+        event.preventDefault();
+        event.stopPropagation();
+
+        goToPrevious();
+
+      }
     );
 
-    return;
   }
 
+  if (nextButton) {
 
-  previousButton.type =
-    "button";
+    nextButton.addEventListener(
+      "click",
+      event => {
 
-  nextButton.type =
-    "button";
+        event.preventDefault();
+        event.stopPropagation();
 
+        goToNext();
 
-  previousButton.addEventListener(
-    "click",
-    event => {
+      }
+    );
 
-      event.preventDefault();
-      event.stopPropagation();
-
-      goToPrevious();
-
-    }
-  );
-
-
-  nextButton.addEventListener(
-    "click",
-    event => {
-
-      event.preventDefault();
-      event.stopPropagation();
-
-      goToNext();
-
-    }
-  );
-
+  }
 
   updateTopNavigation();
 
 }
 
 
-/* =========================================================
-   PREVIOUS
-   ========================================================= */
-
 function goToPrevious() {
 
-  if (
-    !Array.isArray(topics) ||
-    topics.length === 0
-  ) {
-
+  if (currentTopicIndex <= 0) {
     return;
   }
-
-
-  if (
-    currentTopicIndex <= 0
-  ) {
-
-    return;
-  }
-
-
-  const previousIndex =
-    currentTopicIndex - 1;
-
 
   const previous =
-    topics[previousIndex];
-
+    topics[
+      currentTopicIndex - 1
+    ];
 
   if (!previous) {
     return;
   }
-
 
   loadMarkdown(
     previous,
@@ -810,43 +602,23 @@ function goToPrevious() {
 }
 
 
-/* =========================================================
-   NEXT
-   ========================================================= */
-
 function goToNext() {
 
   if (
-    !Array.isArray(topics) ||
-    topics.length === 0
-  ) {
-
-    return;
-  }
-
-
-  if (
     currentTopicIndex < 0 ||
-    currentTopicIndex >=
-      topics.length - 1
+    currentTopicIndex >= topics.length - 1
   ) {
-
     return;
   }
-
-
-  const nextIndex =
-    currentTopicIndex + 1;
-
 
   const next =
-    topics[nextIndex];
-
+    topics[
+      currentTopicIndex + 1
+    ];
 
   if (!next) {
     return;
   }
-
 
   loadMarkdown(
     next,
@@ -856,56 +628,20 @@ function goToNext() {
 }
 
 
-/* =========================================================
-   UPDATE TOP NAVIGATION
-   ========================================================= */
-
 function updateTopNavigation() {
 
   if (
     !previousButton ||
     !nextButton
   ) {
-
     return;
   }
 
-
-  const validIndex =
-    Number.isInteger(
-      currentTopicIndex
-    ) &&
-    currentTopicIndex >= 0 &&
-    currentTopicIndex <
-      topics.length;
-
-
   const hasPrevious =
-    validIndex &&
     currentTopicIndex > 0;
-
-
-  const hasNext =
-    validIndex &&
-    currentTopicIndex <
-      topics.length - 1;
-
-
-  /*
-   * Previous
-   */
 
   previousButton.disabled =
     !hasPrevious;
-
-
-  previousButton.setAttribute(
-    "aria-disabled",
-    hasPrevious
-      ? "false"
-      : "true"
-  );
-
 
   if (previousTitle) {
 
@@ -914,26 +650,16 @@ function updateTopNavigation() {
         ? topics[
             currentTopicIndex - 1
           ].name
-        : "Start";
+        : "";
 
   }
 
-
-  /*
-   * Next
-   */
+  const hasNext =
+    currentTopicIndex >= 0 &&
+    currentTopicIndex < topics.length - 1;
 
   nextButton.disabled =
     !hasNext;
-
-
-  nextButton.setAttribute(
-    "aria-disabled",
-    hasNext
-      ? "false"
-      : "true"
-  );
-
 
   if (nextTitle) {
 
@@ -942,7 +668,7 @@ function updateTopNavigation() {
         ? topics[
             currentTopicIndex + 1
           ].name
-        : "You're caught up ✦";
+        : "";
 
   }
 
@@ -953,47 +679,41 @@ function updateTopNavigation() {
    ACTIVE TOPIC
    ========================================================= */
 
-function updateActiveTopic(
-  topic
-) {
+function updateActiveTopic(topic) {
 
-  if (
-    !topicNavigation ||
-    !topic
-  ) {
-
+  if (!topicNavigation) {
     return;
   }
-
 
   const buttons =
     topicNavigation.querySelectorAll(
       ".topic-button"
     );
 
-
   buttons.forEach(button => {
 
-    const name =
-      button.querySelector(
-        ".topic-name"
-      );
-
-
-    if (!name) {
-      return;
-    }
-
-
     const active =
-      name.textContent.trim() ===
-      topic.name;
-
+      button.dataset.file === topic.file;
 
     button.classList.toggle(
       "active",
       active
     );
+
+    if (active) {
+
+      button.setAttribute(
+        "aria-current",
+        "page"
+      );
+
+    } else {
+
+      button.removeAttribute(
+        "aria-current"
+      );
+
+    }
 
   });
 
@@ -1010,7 +730,6 @@ function setupSearch() {
     return;
   }
 
-
   searchInput.addEventListener(
     "input",
     event => {
@@ -1019,7 +738,6 @@ function setupSearch() {
         event.target.value
           .toLowerCase()
           .trim();
-
 
       if (!query) {
 
@@ -1030,19 +748,15 @@ function setupSearch() {
         return;
       }
 
-
       const filtered =
         topics.filter(
           topic => {
 
             const name =
-              topic.name
-                .toLowerCase();
+              topic.name.toLowerCase();
 
             const filename =
-              topic.file
-                .toLowerCase();
-
+              topic.file.toLowerCase();
 
             return (
               name.includes(query) ||
@@ -1051,7 +765,6 @@ function setupSearch() {
 
           }
         );
-
 
       createSidebar(
         filtered
@@ -1073,44 +786,28 @@ function setupKeyboardShortcuts() {
     "keydown",
     event => {
 
-      /*
-       * CMD / CTRL + K
-       */
-
       if (
         (event.ctrlKey ||
           event.metaKey) &&
-        event.key.toLowerCase() ===
-          "k"
+        event.key.toLowerCase() === "k"
       ) {
 
         event.preventDefault();
 
-
         if (searchInput) {
 
           searchInput.focus();
-
           searchInput.select();
 
         }
 
       }
 
-
-      /*
-       * ESC
-       */
-
-      if (
-        event.key ===
-        "Escape"
-      ) {
+      if (event.key === "Escape") {
 
         if (searchInput) {
 
           searchInput.value = "";
-
           searchInput.blur();
 
           createSidebar(
@@ -1119,25 +816,16 @@ function setupKeyboardShortcuts() {
 
         }
 
-
         closeMobileSidebar();
 
       }
 
-
-      /*
-       * LEFT
-       */
-
       if (
-        event.key ===
-          "ArrowLeft" &&
+        event.key === "ArrowLeft" &&
         !isTyping(event)
       ) {
 
-        if (
-          currentTopicIndex > 0
-        ) {
+        if (currentTopicIndex > 0) {
 
           event.preventDefault();
 
@@ -1147,21 +835,14 @@ function setupKeyboardShortcuts() {
 
       }
 
-
-      /*
-       * RIGHT
-       */
-
       if (
-        event.key ===
-          "ArrowRight" &&
+        event.key === "ArrowRight" &&
         !isTyping(event)
       ) {
 
         if (
           currentTopicIndex >= 0 &&
-          currentTopicIndex <
-            topics.length - 1
+          currentTopicIndex < topics.length - 1
         ) {
 
           event.preventDefault();
@@ -1188,36 +869,27 @@ function setupContentsToggle() {
     !contentsToggle ||
     !sidebar
   ) {
-
-    console.warn(
-      "Contents toggle or sidebar not found."
-    );
-
     return;
   }
-
-
-  contentsToggle.type =
-    "button";
-
-
-  /*
-   * Initial state.
-   */
 
   sidebar.classList.remove(
     "contents-hidden"
   );
 
-
-  setContentsToggleState(
-    false
+  contentsToggle.setAttribute(
+    "aria-expanded",
+    "true"
   );
 
+  contentsToggle.setAttribute(
+    "aria-label",
+    "Hide contents"
+  );
 
-  /*
-   * Click.
-   */
+  contentsToggle.setAttribute(
+    "title",
+    "Hide contents"
+  );
 
   contentsToggle.addEventListener(
     "click",
@@ -1226,67 +898,31 @@ function setupContentsToggle() {
       event.preventDefault();
       event.stopPropagation();
 
-
       const hidden =
-        sidebar.classList.contains(
+        sidebar.classList.toggle(
           "contents-hidden"
         );
 
+      contentsToggle.setAttribute(
+        "aria-expanded",
+        hidden ? "false" : "true"
+      );
 
-      setContentsToggleState(
-        !hidden
+      contentsToggle.setAttribute(
+        "aria-label",
+        hidden
+          ? "Show contents"
+          : "Hide contents"
+      );
+
+      contentsToggle.setAttribute(
+        "title",
+        hidden
+          ? "Show contents"
+          : "Hide contents"
       );
 
     }
-  );
-
-}
-
-
-/* =========================================================
-   SET CONTENTS STATE
-   ========================================================= */
-
-function setContentsToggleState(
-  hidden
-) {
-
-  if (
-    !sidebar ||
-    !contentsToggle
-  ) {
-
-    return;
-  }
-
-
-  sidebar.classList.toggle(
-    "contents-hidden",
-    hidden
-  );
-
-
-  contentsToggle.setAttribute(
-    "aria-expanded",
-    hidden
-      ? "false"
-      : "true"
-  );
-
-
-  contentsToggle.setAttribute(
-    "aria-label",
-    hidden
-      ? "Show contents"
-      : "Hide contents"
-  );
-
-
-  contentsToggle.setAttribute(
-    "title",
-    hidden
-      ? "Show contents"
-      : "Hide contents"
   );
 
 }
@@ -1300,16 +936,11 @@ function setupMobileMenu() {
 
   if (menuButton) {
 
-    menuButton.type =
-      "button";
-
-
     menuButton.addEventListener(
       "click",
       event => {
 
         event.preventDefault();
-        event.stopPropagation();
 
         openMobileSidebar();
 
@@ -1318,19 +949,13 @@ function setupMobileMenu() {
 
   }
 
-
   if (closeSidebarButton) {
-
-    closeSidebarButton.type =
-      "button";
-
 
     closeSidebarButton.addEventListener(
       "click",
       event => {
 
         event.preventDefault();
-        event.stopPropagation();
 
         closeMobileSidebar();
 
@@ -1339,28 +964,17 @@ function setupMobileMenu() {
 
   }
 
-
   if (sidebarOverlay) {
 
     sidebarOverlay.addEventListener(
       "click",
-      event => {
-
-        event.preventDefault();
-
-        closeMobileSidebar();
-
-      }
+      closeMobileSidebar
     );
 
   }
 
 }
 
-
-/* =========================================================
-   OPEN MOBILE SIDEBAR
-   ========================================================= */
 
 function openMobileSidebar() {
 
@@ -1372,7 +986,6 @@ function openMobileSidebar() {
 
   }
 
-
   if (sidebarOverlay) {
 
     sidebarOverlay.classList.add(
@@ -1381,27 +994,12 @@ function openMobileSidebar() {
 
   }
 
-
-  if (menuButton) {
-
-    menuButton.setAttribute(
-      "aria-expanded",
-      "true"
-    );
-
-  }
-
-
   document.body.classList.add(
     "sidebar-open"
   );
 
 }
 
-
-/* =========================================================
-   CLOSE MOBILE SIDEBAR
-   ========================================================= */
 
 function closeMobileSidebar() {
 
@@ -1413,7 +1011,6 @@ function closeMobileSidebar() {
 
   }
 
-
   if (sidebarOverlay) {
 
     sidebarOverlay.classList.remove(
@@ -1421,17 +1018,6 @@ function closeMobileSidebar() {
     );
 
   }
-
-
-  if (menuButton) {
-
-    menuButton.setAttribute(
-      "aria-expanded",
-      "false"
-    );
-
-  }
-
 
   document.body.classList.remove(
     "sidebar-open"
@@ -1450,20 +1036,12 @@ function setupTheme() {
     return;
   }
 
-
-  themeButton.type =
-    "button";
-
-
   const saved =
     localStorage.getItem(
       "shared-ai-notes-theme"
     );
 
-
-  if (
-    saved === "dark"
-  ) {
+  if (saved === "dark") {
 
     document.body.classList.add(
       "dark-theme"
@@ -1477,36 +1055,27 @@ function setupTheme() {
 
   }
 
-
   updateThemeButton();
-
 
   themeButton.addEventListener(
     "click",
     event => {
 
       event.preventDefault();
-      event.stopPropagation();
-
 
       document.body.classList.toggle(
         "dark-theme"
       );
-
 
       const dark =
         document.body.classList.contains(
           "dark-theme"
         );
 
-
       localStorage.setItem(
         "shared-ai-notes-theme",
-        dark
-          ? "dark"
-          : "light"
+        dark ? "dark" : "light"
       );
-
 
       updateThemeButton();
 
@@ -1516,28 +1085,19 @@ function setupTheme() {
 }
 
 
-/* =========================================================
-   UPDATE THEME BUTTON
-   ========================================================= */
-
 function updateThemeButton() {
 
   if (!themeButton) {
     return;
   }
 
-
   const dark =
     document.body.classList.contains(
       "dark-theme"
     );
 
-
   themeButton.textContent =
-    dark
-      ? "☀"
-      : "☾";
-
+    dark ? "☀" : "☾";
 
   themeButton.setAttribute(
     "aria-label",
@@ -1545,7 +1105,6 @@ function updateThemeButton() {
       ? "Switch to light theme"
       : "Switch to dark theme"
   );
-
 
   themeButton.setAttribute(
     "title",
@@ -1567,44 +1126,32 @@ function addCopyButtons() {
     return;
   }
 
-
   const codeBlocks =
     content.querySelectorAll(
       "pre > code"
     );
-
 
   codeBlocks.forEach(code => {
 
     const pre =
       code.parentElement;
 
-
     if (
       pre.querySelector(
         ".copy-button"
       )
     ) {
-
       return;
     }
-
 
     const button =
       document.createElement(
         "button"
       );
 
-
-    button.type =
-      "button";
-
-    button.className =
-      "copy-button";
-
-    button.textContent =
-      "Copy";
-
+    button.type = "button";
+    button.className = "copy-button";
+    button.textContent = "Copy";
 
     button.addEventListener(
       "click",
@@ -1613,30 +1160,13 @@ function addCopyButtons() {
         event.preventDefault();
         event.stopPropagation();
 
-
         try {
 
-          if (
-            navigator.clipboard &&
-            window.isSecureContext
-          ) {
-
-            await navigator.clipboard.writeText(
-              code.innerText
-            );
-
-          } else {
-
-            throw new Error(
-              "Clipboard API unavailable."
-            );
-
-          }
-
-
-          showCopied(
-            button
+          await navigator.clipboard.writeText(
+            code.innerText
           );
+
+          showCopiedState(button);
 
         } catch (error) {
 
@@ -1650,42 +1180,23 @@ function addCopyButtons() {
       }
     );
 
-
-    pre.appendChild(
-      button
-    );
+    pre.appendChild(button);
 
   });
 
 }
 
 
-/* =========================================================
-   COPIED STATE
-   ========================================================= */
+function showCopiedState(button) {
 
-function showCopied(
-  button
-) {
-
-  button.textContent =
-    "Copied ✦";
-
-
-  button.classList.add(
-    "copied"
-  );
-
+  button.textContent = "Copied ✦";
+  button.classList.add("copied");
 
   setTimeout(
     () => {
 
-      button.textContent =
-        "Copy";
-
-      button.classList.remove(
-        "copied"
-      );
+      button.textContent = "Copy";
+      button.classList.remove("copied");
 
     },
     1400
@@ -1708,55 +1219,22 @@ function fallbackCopy(
       "textarea"
     );
 
+  textarea.value = text;
 
-  textarea.value =
-    text;
-
-
-  textarea.style.position =
-    "fixed";
-
-  textarea.style.left =
-    "-9999px";
-
-  textarea.style.top =
-    "0";
-
-  textarea.style.opacity =
-    "0";
-
+  textarea.style.position = "fixed";
+  textarea.style.left = "-9999px";
 
   document.body.appendChild(
     textarea
   );
 
-
-  textarea.focus();
-
   textarea.select();
-
 
   try {
 
-    const successful =
-      document.execCommand(
-        "copy"
-      );
+    document.execCommand("copy");
 
-
-    if (successful) {
-
-      showCopied(
-        button
-      );
-
-    } else {
-
-      console.error(
-        "Copy command failed."
-      );
-
-    }
+    showCopiedState(button);
 
   } catch (error) {
 
@@ -1766,7 +1244,6 @@ function fallbackCopy(
     );
 
   }
-
 
   textarea.remove();
 
@@ -1783,16 +1260,13 @@ function addHeadingIds() {
     return;
   }
 
-
   const headings =
     content.querySelectorAll(
       "h1, h2, h3, h4"
     );
 
-
   const used =
     new Set();
-
 
   headings.forEach(
     heading => {
@@ -1801,7 +1275,6 @@ function addHeadingIds() {
         heading.textContent
           .toLowerCase()
           .trim();
-
 
       let id =
         text
@@ -1814,19 +1287,13 @@ function addHeadingIds() {
             "-"
           );
 
-
       if (!id) {
         return;
       }
 
+      const original = id;
 
-      const original =
-        id;
-
-
-      let counter =
-        2;
-
+      let counter = 2;
 
       while (
         used.has(id)
@@ -1839,11 +1306,9 @@ function addHeadingIds() {
 
       }
 
-
       used.add(id);
 
-      heading.id =
-        id;
+      heading.id = id;
 
     }
   );
@@ -1861,37 +1326,24 @@ function setupExternalLinks() {
     return;
   }
 
-
   const links =
-    content.querySelectorAll(
-      "a"
-    );
-
+    content.querySelectorAll("a");
 
   links.forEach(
     link => {
 
       const href =
-        link.getAttribute(
-          "href"
-        );
-
+        link.getAttribute("href");
 
       if (
         href &&
         (
-          href.startsWith(
-            "http://"
-          ) ||
-          href.startsWith(
-            "https://"
-          )
+          href.startsWith("http://") ||
+          href.startsWith("https://")
         )
       ) {
 
-        link.target =
-          "_blank";
-
+        link.target = "_blank";
 
         link.rel =
           "noopener noreferrer";
@@ -1913,17 +1365,14 @@ function isTyping(event) {
   const element =
     event.target;
 
-
   if (!element) {
     return false;
   }
-
 
   const tag =
     element.tagName
       ? element.tagName.toLowerCase()
       : "";
-
 
   return (
     tag === "input" ||
@@ -1944,13 +1393,6 @@ function showLoading() {
     return;
   }
 
-
-  content.setAttribute(
-    "aria-busy",
-    "true"
-  );
-
-
   content.innerHTML = `
     <div class="loading">
 
@@ -1963,7 +1405,6 @@ function showLoading() {
     </div>
   `;
 
-
   content.classList.remove(
     "note-loaded"
   );
@@ -1971,16 +1412,11 @@ function showLoading() {
 }
 
 
-/* =========================================================
-   LOADING SIDEBAR
-   ========================================================= */
-
 function showLoadingSidebar() {
 
   if (!topicNavigation) {
     return;
   }
-
 
   topicNavigation.innerHTML = `
     <div class="no-results">
@@ -2003,13 +1439,6 @@ function showMessage(
   if (!content) {
     return;
   }
-
-
-  content.setAttribute(
-    "aria-busy",
-    "false"
-  );
-
 
   content.innerHTML = `
     <div class="empty-state">
@@ -2041,13 +1470,6 @@ function showError(
     return;
   }
 
-
-  content.setAttribute(
-    "aria-busy",
-    "false"
-  );
-
-
   content.innerHTML = `
     <div class="error">
 
@@ -2069,19 +1491,13 @@ function showError(
    ESCAPE HTML
    ========================================================= */
 
-function escapeHTML(
-  value
-) {
+function escapeHTML(value) {
 
   const div =
-    document.createElement(
-      "div"
-    );
-
+    document.createElement("div");
 
   div.textContent =
     String(value);
-
 
   return div.innerHTML;
 
