@@ -4,24 +4,24 @@
    ========================================================= */
 
 :root {
-  --bg: #f8f7ff;
+  --bg: #f7f8fc;
   --surface: #ffffff;
-  --surface-soft: #f2efff;
-  --surface-hover: #ebe7ff;
+  --surface-soft: #f5f2ff;
+  --surface-hover: #eeeaff;
 
   --text: #20202a;
-  --text-soft: #686678;
+  --text-soft: #626071;
   --text-muted: #9692a5;
 
   --border: #ddd9e9;
-  --border-strong: #c9c3da;
+  --border-strong: #c7c1d8;
 
   --accent: #7657f6;
   --accent-dark: #6040dc;
   --accent-soft: #eeeaff;
 
   --pink: #ff6fae;
-  --cyan: #36c6d7;
+  --cyan: #35bfd1;
 
   --code-bg: #f3f2f7;
 
@@ -29,11 +29,11 @@
     0 2px 10px rgba(65, 50, 120, 0.05);
 
   --shadow-md:
-    0 8px 25px rgba(65, 50, 120, 0.08);
+    0 8px 25px rgba(65, 50, 120, 0.10);
 
   --radius-sm: 9px;
   --radius-md: 14px;
-  --radius-lg: 20px;
+  --radius-lg: 18px;
 
   --sidebar-width: 250px;
 }
@@ -122,7 +122,7 @@ img {
 
 
 /* =========================================================
-   HEADER
+   MOBILE HEADER
    ========================================================= */
 
 header {
@@ -153,17 +153,8 @@ header {
   pointer-events: auto;
 }
 
-.header-spacer {
+.menu-button {
   display: none;
-}
-
-
-/* =========================================================
-   APP
-   ========================================================= */
-
-.app {
-  min-height: 100vh;
 }
 
 
@@ -186,9 +177,7 @@ header {
   flex-direction: column;
 
   padding:
-    10px
-    12px
-    14px;
+    10px 12px 14px;
 
   background: var(--surface);
 
@@ -205,7 +194,7 @@ header {
 
 
 /* =========================================================
-   CONTENTS TOGGLE
+   THREE-LINE CONTENTS BUTTON
    ========================================================= */
 
 .contents-toggle {
@@ -213,12 +202,10 @@ header {
   height: 28px;
 
   margin:
-    0
-    0
-    7px
-    0;
+    0 0 7px 0;
 
-  padding: 5px 6px;
+  padding:
+    5px 6px;
 
   display: flex;
   flex-direction: column;
@@ -242,7 +229,8 @@ header {
 }
 
 .contents-toggle:hover {
-  background: var(--surface-hover);
+  background:
+    var(--surface-hover);
 
   border-color:
     var(--border-strong);
@@ -280,19 +268,15 @@ header {
 
 .sidebar-header {
   margin:
-    0
-    0
-    6px;
+    0 0 6px;
 }
 
 .search-input {
   width: 100%;
-
   height: 34px;
 
   padding:
-    0
-    10px;
+    0 10px;
 
   border:
     1px solid var(--border);
@@ -326,11 +310,7 @@ header {
 
   box-shadow:
     0 0 0 3px
-    color-mix(
-      in srgb,
-      var(--accent) 12%,
-      transparent
-    );
+    rgba(118, 87, 246, 0.10);
 
   background:
     var(--surface);
@@ -345,7 +325,7 @@ header {
   display: flex;
   flex-direction: column;
 
-  gap: 0;
+  gap: 1px;
 
   flex: 1;
 
@@ -355,7 +335,7 @@ header {
 .topic-button {
   width: 100%;
 
-  min-height: 31px;
+  min-height: 30px;
 
   display: flex;
   align-items: center;
@@ -363,8 +343,7 @@ header {
   gap: 7px;
 
   padding:
-    3px
-    7px;
+    3px 7px;
 
   border:
     1px solid transparent;
@@ -409,16 +388,11 @@ header {
     var(--accent-dark);
 
   border-color:
-    color-mix(
-      in srgb,
-      var(--accent) 16%,
-      transparent
-    );
+    rgba(118, 87, 246, 0.16);
 }
 
 .topic-dot {
-  flex:
-    0 0 auto;
+  flex: 0 0 auto;
 
   color:
     var(--accent);
@@ -448,9 +422,7 @@ header {
   margin-top: 7px;
 
   padding:
-    7px
-    4px
-    0;
+    7px 4px 0;
 
   border-top:
     1px solid var(--border);
@@ -506,20 +478,14 @@ main {
     margin-left 0.25s ease;
 }
 
-.sidebar.contents-hidden ~ #main {
+.sidebar.contents-hidden ~ main {
   margin-left:
     54px;
 }
 
 
 /* =========================================================
-   PREVIOUS / NEXT NAVIGATION
-
-   IMPORTANT:
-   - No outer box
-   - No outer border
-   - No large surrounding spacing
-   - Aligned with the content box
+   TOP PREVIOUS / NEXT NAVIGATION
    ========================================================= */
 
 .page-navigation {
@@ -536,13 +502,10 @@ main {
     );
 
   margin:
-    0
-    auto;
+    0 auto;
 
   padding:
-    5px
-    0
-    4px;
+    5px 0 4px;
 
   display: grid;
 
@@ -560,22 +523,16 @@ main {
 
   box-shadow:
     none;
-
-  backdrop-filter:
-    none;
-
-  -webkit-backdrop-filter:
-    none;
 }
 
 
 /* =========================================================
-   INDIVIDUAL NAV BUTTONS
+   NAVIGATION BUTTONS
    ========================================================= */
 
 .page-nav-button {
   min-height:
-    46px;
+    43px;
 
   display:
     flex;
@@ -587,14 +544,13 @@ main {
     8px;
 
   padding:
-    7px
-    11px;
+    6px 11px;
 
   border:
     1px solid var(--border-strong);
 
   border-radius:
-    12px;
+    11px;
 
   background:
     var(--surface);
@@ -657,7 +613,7 @@ main {
     var(--accent);
 
   font-size:
-    18px;
+    17px;
 
   line-height:
     1;
@@ -682,7 +638,7 @@ main {
     var(--text-muted);
 
   font-size:
-    9px;
+    8px;
 
   font-weight:
     700;
@@ -729,8 +685,6 @@ main {
 
 /* =========================================================
    CONTENT WRAPPER
-
-   Keeps navigation and content aligned.
    ========================================================= */
 
 .content-wrapper {
@@ -741,13 +695,10 @@ main {
     );
 
   margin:
-    0
-    auto;
+    0 auto;
 
   padding:
-    4px
-    0
-    70px;
+    4px 0 70px;
 }
 
 
@@ -760,13 +711,10 @@ main {
     100%;
 
   margin:
-    0
-    auto;
+    0 auto;
 
   padding:
-    30px
-    36px
-    44px;
+    30px 36px 44px;
 
   background:
     var(--surface);
@@ -786,7 +734,7 @@ main {
 
 
 /* =========================================================
-   NOTE TYPOGRAPHY
+   TYPOGRAPHY
    ========================================================= */
 
 .content h1,
@@ -889,11 +837,7 @@ main {
 
   border:
     1px solid
-    color-mix(
-      in srgb,
-      var(--accent) 16%,
-      var(--border)
-    );
+    rgba(118, 87, 246, 0.16);
 
   border-left:
     4px solid var(--accent);
@@ -1178,11 +1122,6 @@ main {
     var(--shadow-sm);
 }
 
-
-/*
-   Markdown width support.
-*/
-
 .content img[width="30%"] {
   width:
     30%;
@@ -1212,35 +1151,6 @@ main {
 
   border-top:
     1px solid var(--border);
-}
-
-
-/* =========================================================
-   EMPTY / ERROR
-   ========================================================= */
-
-.empty-state,
-.error {
-  padding:
-    45px 20px;
-
-  text-align:
-    center;
-}
-
-.empty-state h1,
-.error h1 {
-  margin-top:
-    0;
-
-  color:
-    var(--text);
-}
-
-.empty-state p,
-.error p {
-  color:
-    var(--text-muted);
 }
 
 
@@ -1302,6 +1212,35 @@ main {
     background-position:
       -200% 0;
   }
+}
+
+
+/* =========================================================
+   EMPTY / ERROR
+   ========================================================= */
+
+.empty-state,
+.error {
+  padding:
+    45px 20px;
+
+  text-align:
+    center;
+}
+
+.empty-state h1,
+.error h1 {
+  margin-top:
+    0;
+
+  color:
+    var(--text);
+}
+
+.empty-state p,
+.error p {
+  color:
+    var(--text-muted);
 }
 
 
@@ -1383,47 +1322,13 @@ main {
 
 
 /* =========================================================
-   MOBILE MENU
+   MOBILE
    ========================================================= */
-
-.menu-button {
-  display:
-    none;
-
-  width:
-    34px;
-
-  height:
-    34px;
-
-  border:
-    1px solid var(--border);
-
-  border-radius:
-    8px;
-
-  background:
-    var(--surface);
-
-  color:
-    var(--text);
-
-  cursor:
-    pointer;
-
-  font-size:
-    17px;
-}
 
 .sidebar-overlay {
   display:
     none;
 }
-
-
-/* =========================================================
-   RESPONSIVE
-   ========================================================= */
 
 @media (max-width: 900px) {
 
@@ -1434,9 +1339,7 @@ main {
 
   .content {
     padding:
-      26px
-      28px
-      40px;
+      26px 28px 40px;
   }
 
 }
@@ -1463,6 +1366,30 @@ main {
 
     justify-content:
       center;
+
+    width:
+      34px;
+
+    height:
+      34px;
+
+    border:
+      1px solid var(--border);
+
+    border-radius:
+      8px;
+
+    background:
+      var(--surface);
+
+    color:
+      var(--text);
+
+    cursor:
+      pointer;
+
+    font-size:
+      17px;
   }
 
   .sidebar {
@@ -1499,7 +1426,7 @@ main {
   }
 
   main,
-  .sidebar.contents-hidden ~ #main {
+  .sidebar.contents-hidden ~ main {
     margin-left:
       0;
   }
@@ -1530,7 +1457,9 @@ main {
   }
 
 
-  /* Navigation stays very close to top */
+  /* ---------------------------------
+     Top navigation
+     --------------------------------- */
 
   .page-navigation {
     top:
@@ -1540,9 +1469,7 @@ main {
       calc(100% - 20px);
 
     padding:
-      4px
-      0
-      3px;
+      4px 0 3px;
 
     gap:
       6px;
@@ -1553,8 +1480,7 @@ main {
       43px;
 
     padding:
-      6px
-      8px;
+      6px 8px;
 
     border-radius:
       10px;
@@ -1582,23 +1508,21 @@ main {
   }
 
 
-  /* Content exactly follows navigation */
+  /* ---------------------------------
+     Content
+     --------------------------------- */
 
   .content-wrapper {
     width:
       calc(100% - 20px);
 
     padding:
-      3px
-      0
-      60px;
+      3px 0 60px;
   }
 
   .content {
     padding:
-      23px
-      19px
-      34px;
+      23px 19px 34px;
 
     border-radius:
       15px;
@@ -1632,6 +1556,7 @@ main {
     height:
       38px;
   }
+
 }
 
 
@@ -1668,10 +1593,9 @@ main {
 
   .content {
     padding:
-      20px
-      15px
-      30px;
+      20px 15px 30px;
   }
+
 }
 
 
@@ -1684,11 +1608,7 @@ input:focus-visible,
 a:focus-visible {
   outline:
     3px solid
-    color-mix(
-      in srgb,
-      var(--accent) 30%,
-      transparent
-    );
+    rgba(118, 87, 246, 0.30);
 
   outline-offset:
     2px;
@@ -1701,11 +1621,7 @@ a:focus-visible {
 
 ::selection {
   background:
-    color-mix(
-      in srgb,
-      var(--accent) 25%,
-      transparent
-    );
+    rgba(118, 87, 246, 0.25);
 
   color:
     var(--text);
