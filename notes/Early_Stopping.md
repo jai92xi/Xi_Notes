@@ -1,7 +1,20 @@
+<div style="display:flex; align-items:center; gap:30px; margin:25px 0;">
+
+<div style="width:50%;">
+
 > 🧠 **EARLY STOPPING**
+>
 > Early stopping is a **regularization technique** that **prevents overfitting** by stopping training when **validation performance stops improving**.
 
-<img src="../images/early_stopping1.png" alt="Early Stopping" width="40%">
+</div>
+
+<div style="width:50%; text-align:center;">
+
+<img src="../images/early_stopping1.png" alt="Early Stopping" style="width:100%; height:auto;">
+
+</div>
+
+</div>
 
 ---
 
