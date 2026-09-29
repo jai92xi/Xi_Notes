@@ -10,7 +10,7 @@
 
   <meta
     name="description"
-    content="AI & ML Key Concepts — practical notes and learnings about artificial intelligence, machine learning, deep learning, LLMs, and more."
+    content="AI & ML Key Concepts — shared notes on artificial intelligence and machine learning."
   >
 
   <meta
@@ -18,11 +18,10 @@
     content="#ffffff"
   >
 
-  <title>AI &amp; ML Key Concepts</title>
-
+  <title>AI & ML Key Concepts</title>
 
   <!-- =====================================================
-       FONT
+       FONTS
        ===================================================== -->
 
   <link
@@ -37,9 +36,18 @@
   >
 
   <link
-    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+    href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap"
     rel="stylesheet"
   >
+
+
+  <!-- =====================================================
+       MARKDOWN
+       ===================================================== -->
+
+  <script
+    src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"
+  ></script>
 
 
   <!-- =====================================================
@@ -50,61 +58,86 @@
     rel="stylesheet"
     href="style.css"
   >
-
-
-  <!-- =====================================================
-       MARKDOWN RENDERER
-       ===================================================== -->
-
-  <script
-    src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"
-    defer
-  ></script>
-
 </head>
 
 
 <body>
 
+  <!-- =====================================================
+       MOBILE OVERLAY
+       ===================================================== -->
+
+  <div
+    id="sidebar-overlay"
+    class="sidebar-overlay"
+  ></div>
+
+
+  <!-- =====================================================
+       APP
+       ===================================================== -->
+
   <div class="app">
 
-    <div class="layout">
+
+    <!-- ===================================================
+         SIDEBAR
+         =================================================== -->
+
+    <aside
+      id="sidebar"
+      class="sidebar"
+    >
+
+      <div class="sidebar-inner">
 
 
-      <!-- =================================================
-           NOTES SIDEBAR
-           ================================================= -->
-
-      <aside
-        id="sidebar"
-        aria-label="AI and ML notes"
-      >
+        <!-- ===============================================
+             SIDEBAR HEADER
+             =============================================== -->
 
         <div class="sidebar-header">
 
+          <div class="brand">
 
-          <!-- Mobile close -->
+            <div class="brand-mark">
+              ✦
+            </div>
+
+            <div class="brand-copy">
+
+              <div class="brand-title">
+                AI & ML Key Concepts
+              </div>
+
+              <div class="brand-subtitle">
+                Notes worth sharing
+              </div>
+
+            </div>
+
+          </div>
+
 
           <button
             id="close-sidebar"
+            class="close-sidebar"
             type="button"
-            aria-label="Close notes"
-            title="Close notes"
+            aria-label="Close navigation"
           >
             ×
           </button>
 
-
-          <!-- Site title -->
-
-          <h1 class="sidebar-title">
-            AI &amp; ML Key Concepts
-          </h1>
+        </div>
 
 
-          <!-- Search -->
+        <!-- ===============================================
+             SEARCH
+             =============================================== -->
 
-          <div class="search-container">
+        <div class="search-wrapper">
+
+          <div class="search-box">
 
             <span
               class="search-icon"
@@ -113,35 +146,44 @@
               ⌕
             </span>
 
-
             <input
               id="search"
               type="search"
               placeholder="Search concepts..."
               autocomplete="off"
               spellcheck="false"
-              aria-label="Search AI and ML concepts"
+              aria-label="Search concepts"
             >
+
+            <span class="search-shortcut">
+              ⌘ K
+            </span>
 
           </div>
 
         </div>
 
 
-        <!-- =================================================
-             NOTES LIST
+        <!-- ===============================================
+             TABLE OF CONTENTS
+             =============================================== -->
 
-             app.js automatically fills this section
-             from the /notes folder.
+        <div class="contents-header">
 
-             .md is NOT displayed.
-             Underscores are NOT displayed.
-             Names are formatted by app.js.
-             ================================================= -->
+          <span>
+            CONTENTS
+          </span>
+
+          <span class="contents-spark">
+            ✦
+          </span>
+
+        </div>
+
 
         <nav
           class="topic-navigation"
-          aria-label="AI and ML key concepts"
+          aria-label="AI and ML notes"
         >
 
           <div class="no-results">
@@ -150,156 +192,94 @@
 
         </nav>
 
-      </aside>
+
+        <!-- ===============================================
+             SIDEBAR FOOTER
+             =============================================== -->
+
+        <div class="sidebar-footer">
+
+          <span>
+            Made with
+            <span class="heart">♥</span>
+            & curiosity
+          </span>
+
+        </div>
+
+      </div>
+
+    </aside>
+
+
+    <!-- ===================================================
+         MAIN
+         =================================================== -->
+
+    <main class="main">
 
 
       <!-- =================================================
-           MOBILE SIDEBAR OVERLAY
+           FIXED TOP NAVIGATION
            ================================================= -->
 
-      <div
-        id="sidebar-overlay"
-        aria-hidden="true"
-      ></div>
+      <header class="top-bar">
 
 
-      <!-- =================================================
-           MAIN
-           ================================================= -->
+        <!-- ===============================================
+             MOBILE MENU
+             =============================================== -->
 
-      <main>
+        <button
+          id="menu-button"
+          class="menu-button"
+          type="button"
+          aria-label="Open navigation"
+        >
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
 
 
-        <!-- =================================================
-             FROZEN TOP NAVIGATION
+        <!-- ===============================================
+             PREVIOUS / NEXT
+             =============================================== -->
 
-             This is the ONLY Previous / Next navigation.
-             ================================================= -->
-
-        <header
-          class="top-bar"
+        <div
+          class="page-navigation"
           aria-label="Note navigation"
         >
+          <!-- Populated by app.js -->
+        </div>
 
 
-          <!-- Mobile menu -->
+        <!-- ===============================================
+             THEME BUTTON
+             =============================================== -->
 
-          <button
-            id="menu-button"
-            type="button"
-            aria-label="Open notes"
-            title="Open notes"
-          >
-            ☰
-          </button>
+        <button
+          id="theme-button"
+          class="theme-button"
+          type="button"
+          aria-label="Switch to dark theme"
+          title="Switch to dark theme"
+        >
+          ☾
+        </button>
 
-
-          <!-- =================================================
-               PREVIOUS / NEXT
-
-               app.js updates these buttons based on the
-               currently selected note.
-               ================================================= -->
-
-          <nav
-            class="page-navigation"
-            aria-label="Previous and next note"
-          >
-
-            <button
-              id="previous-note"
-              type="button"
-              class="page-nav-button previous-page"
-              disabled
-              aria-label="Previous note"
-            >
-
-              <span
-                class="page-nav-arrow"
-                aria-hidden="true"
-              >
-                ←
-              </span>
+      </header>
 
 
-              <span class="page-nav-copy">
+      <!-- =================================================
+           CONTENT AREA
+           ================================================= -->
 
-                <span class="page-nav-label">
-                  Previous
-                </span>
-
-                <span class="page-nav-title">
-                  —
-                </span>
-
-              </span>
-
-            </button>
-
-
-            <button
-              id="next-note"
-              type="button"
-              class="page-nav-button next-page"
-              disabled
-              aria-label="Next note"
-            >
-
-              <span class="page-nav-copy">
-
-                <span class="page-nav-label">
-                  Next
-                </span>
-
-                <span class="page-nav-title">
-                  —
-                </span>
-
-              </span>
-
-
-              <span
-                class="page-nav-arrow"
-                aria-hidden="true"
-              >
-                →
-              </span>
-
-            </button>
-
-          </nav>
-
-
-          <!-- =================================================
-               THEME TOGGLE
-
-               Light theme is the default.
-               ================================================= -->
-
-          <button
-            id="theme-button"
-            type="button"
-            aria-label="Switch to dark theme"
-            title="Switch to dark theme"
-          >
-            ☾
-          </button>
-
-        </header>
-
-
-        <!-- =================================================
-             NOTE CONTENT
-
-             app.js loads and renders Markdown here.
-
-             There is intentionally NO second
-             Previous / Next navigation here.
-             ================================================= -->
+      <div class="content-wrapper">
 
         <article
           id="content"
-          aria-live="polite"
+          class="content"
         >
 
           <div class="loading">
@@ -314,38 +294,20 @@
 
         </article>
 
-
-      </main>
-
-    </div>
+      </div>
 
 
-    <!-- =====================================================
-         NOTES BUTTON
-
-         Kept as a simple way to access the notes on mobile.
-         The sidebar itself does NOT auto-collapse.
-         ===================================================== -->
-
-    <button
-      id="notes-toggle"
-      type="button"
-      aria-label="Open notes list"
-      title="Open notes list"
-    >
-      ☰ Notes
-    </button>
+    </main>
 
   </div>
 
 
-  <!-- =======================================================
-       APPLICATION
-       ======================================================= -->
+  <!-- =====================================================
+       APP SCRIPT
+       ===================================================== -->
 
   <script
     src="app.js"
-    defer
   ></script>
 
 </body>
