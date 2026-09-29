@@ -5,7 +5,9 @@
 
 const GITHUB_USER = "jai92xi";
 const GITHUB_REPO = "Xi_Notes";
+const GITHUB_BRANCH = "main";
 const NOTES_FOLDER = "notes";
+
 
 let topics = [];
 let currentTopicIndex = -1;
@@ -15,13 +17,24 @@ let currentTopicIndex = -1;
    DOM
    ========================================================= */
 
-const sidebar = document.getElementById("sidebar");
-const content = document.getElementById("content");
-const searchInput = document.getElementById("search");
-const themeButton = document.getElementById("theme-button");
-const menuButton = document.getElementById("menu-button");
+const sidebar =
+  document.getElementById("sidebar");
+
+const content =
+  document.getElementById("content");
+
+const searchInput =
+  document.getElementById("search");
+
+const themeButton =
+  document.getElementById("theme-button");
+
+const menuButton =
+  document.getElementById("menu-button");
+
 const closeSidebarButton =
   document.getElementById("close-sidebar");
+
 const sidebarOverlay =
   document.getElementById("sidebar-overlay");
 
@@ -30,24 +43,42 @@ const sidebarOverlay =
    INITIALIZE
    ========================================================= */
 
-document.addEventListener("DOMContentLoaded", () => {
-  configureMarkdown();
-  setupTheme();
-  setupSearch();
-  setupKeyboardShortcuts();
-  setupMobileMenu();
-  setupContentsToggle();
-  loadTopics();
-});
+document.addEventListener(
+  "DOMContentLoaded",
+  () => {
+
+    configureMarkdown();
+
+    setupTheme();
+
+    setupSearch();
+
+    setupKeyboardShortcuts();
+
+    setupMobileMenu();
+
+    setupContentsToggle();
+
+    loadTopics();
+
+  }
+);
 
 
 /* =========================================================
-   MARKDOWN
+   MARKDOWN CONFIGURATION
    ========================================================= */
 
 function configureMarkdown() {
-  if (typeof marked === "undefined") {
-    console.error("Marked.js was not loaded.");
+
+  if (
+    typeof marked === "undefined"
+  ) {
+
+    console.error(
+      "Marked.js was not loaded."
+    );
+
     return;
   }
 
@@ -55,6 +86,7 @@ function configureMarkdown() {
     gfm: true,
     breaks: true
   });
+
 }
 
 
@@ -63,65 +95,126 @@ function configureMarkdown() {
    ========================================================= */
 
 async function loadTopics() {
+
   try {
+
     showLoadingSidebar();
 
-    const apiURL =
-      `https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}/contents/${NOTES_FOLDER}`;
 
-    const response = await fetch(apiURL);
+    const apiURL =
+      `https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}/contents/${NOTES_FOLDER}?ref=${GITHUB_BRANCH}`;
+
+
+    const response =
+      await fetch(apiURL);
+
 
     if (!response.ok) {
+
       throw new Error(
         `GitHub API error: ${response.status}`
       );
+
     }
 
-    const files = await response.json();
 
-    topics = files
-      .filter(file =>
-        file.type === "file" &&
-        file.name.toLowerCase().endsWith(".md")
-      )
-      .map(file => ({
-        file: file.name,
-        name: formatTopicName(file.name),
-        url: file.download_url
-      }))
-      .sort((a, b) =>
-        a.name.localeCompare(
-          b.name,
-          undefined,
-          {
-            numeric: true,
-            sensitivity: "base"
-          }
+    const files =
+      await response.json();
+
+
+    topics =
+      files
+
+        .filter(
+          file =>
+            file.type === "file" &&
+            file.name
+              .toLowerCase()
+              .endsWith(".md")
         )
-      );
+
+        .map(
+          file => ({
+
+            /*
+             * IMPORTANT:
+             *
+             * Keep the REAL filename exactly
+             * as GitHub returns it.
+             *
+             * Do not generate this filename
+             * from the display name.
+             */
+
+            file: file.name,
+
+            /*
+             * Human-friendly display name.
+             */
+
+            name:
+              formatTopicName(
+                file.name
+              ),
+
+            /*
+             * Keep GitHub's download URL too.
+             */
+
+            url:
+              file.download_url
+
+          })
+        )
+
+        .sort(
+          (a, b) =>
+            a.name.localeCompare(
+              b.name,
+              undefined,
+              {
+                numeric: true,
+                sensitivity: "base"
+              }
+            )
+        );
+
 
     createSidebar(topics);
 
+
     if (topics.length > 0) {
+
       await loadMarkdown(
         topics[0],
         false
       );
+
     } else {
+
       showMessage(
         "No notes yet",
         "Add Markdown files to the notes folder."
       );
+
     }
 
+
   } catch (error) {
-    console.error(error);
+
+    console.error(
+      "Could not load topics:",
+      error
+    );
+
 
     showError(
       "Couldn’t load your notes.",
       "Please check your GitHub repository and notes folder."
     );
+
   }
+
 }
 
 
@@ -131,62 +224,114 @@ async function loadTopics() {
 
 function formatTopicName(filename) {
 
-  let name = filename
-    .replace(/\.md$/i, "")
-    .replace(/[_-]+/g, " ")
-    .replace(/([a-z0-9])([A-Z])/g, "$1 $2")
-    .replace(/([A-Z]+)([A-Z][a-z])/g, "$1 $2")
-    .replace(/\s+/g, " ")
-    .trim();
+  let name =
+    filename
 
-  name = name
-    .toLowerCase()
-    .split(" ")
-    .filter(Boolean)
-    .map(word =>
-      word.charAt(0).toUpperCase() +
-      word.slice(1)
-    )
-    .join(" ");
+      .replace(
+        /\.md$/i,
+        ""
+      )
+
+      .replace(
+        /[_-]+/g,
+        " "
+      )
+
+      .replace(
+        /([a-z0-9])([A-Z])/g,
+        "$1 $2"
+      )
+
+      .replace(
+        /([A-Z]+)([A-Z][a-z])/g,
+        "$1 $2"
+      )
+
+      .replace(
+        /\s+/g,
+        " "
+      )
+
+      .trim();
+
+
+  name =
+    name
+      .toLowerCase()
+      .split(" ")
+      .filter(Boolean)
+      .map(
+        word =>
+          word.charAt(0).toUpperCase() +
+          word.slice(1)
+      )
+      .join(" ");
+
 
   const replacements = {
+
     "Ai": "AI",
     "Ml": "ML",
+
     "Llm": "LLM",
     "Llms": "LLMs",
+
     "Nlp": "NLP",
+
     "Cv": "CV",
+
     "Rag": "RAG",
+
     "Vllm": "vLLM",
+
     "Gpu": "GPU",
     "Gpus": "GPUs",
+
     "Cpu": "CPU",
     "Cpus": "CPUs",
+
     "Api": "API",
     "Apis": "APIs",
+
     "Mlp": "MLP",
+
     "Cnn": "CNN",
     "Cnns": "CNNs",
+
     "Rnn": "RNN",
     "Rnns": "RNNs",
+
     "Lstm": "LSTM",
+
     "Lora": "LoRA",
+
     "Sql": "SQL",
+
     "Json": "JSON",
+
     "Pytorch": "PyTorch",
+
     "Tensorflow": "TensorFlow",
+
     "Keras": "Keras",
+
     "Knn": "KNN",
+
     "Svm": "SVM",
+
     "Xgboost": "XGBoost"
+
   };
+
 
   return name
     .split(" ")
-    .map(word =>
-      replacements[word] || word
+    .map(
+      word =>
+        replacements[word] || word
     )
     .join(" ");
+
 }
 
 
@@ -201,11 +346,14 @@ function createSidebar(items) {
       ".topic-navigation"
     );
 
+
   if (!navigation) {
     return;
   }
 
+
   navigation.innerHTML = "";
+
 
   if (items.length === 0) {
 
@@ -218,21 +366,29 @@ function createSidebar(items) {
     return;
   }
 
-  items.forEach((topic, index) => {
+
+  items.forEach(topic => {
 
     const button =
-      document.createElement("button");
+      document.createElement(
+        "button"
+      );
+
 
     button.type = "button";
+
     button.className =
       "topic-button";
 
+
     button.innerHTML = `
       <span class="topic-dot">✦</span>
+
       <span class="topic-name">
         ${escapeHTML(topic.name)}
       </span>
     `;
+
 
     button.addEventListener(
       "click",
@@ -244,20 +400,55 @@ function createSidebar(items) {
         );
 
         closeMobileSidebar();
+
       }
     );
 
-    navigation.appendChild(button);
+
+    navigation.appendChild(
+      button
+    );
+
   });
+
 
   if (
     currentTopicIndex >= 0 &&
     topics[currentTopicIndex]
   ) {
+
     updateActiveTopic(
       topics[currentTopicIndex]
     );
+
   }
+
+}
+
+
+/* =========================================================
+   GET RAW MARKDOWN URL
+   ========================================================= */
+
+function getMarkdownURL(topic) {
+
+  /*
+   * Use the EXACT filename returned by
+   * GitHub's API.
+   *
+   * This avoids GitHub Pages relative-path
+   * problems.
+   */
+
+  return (
+    `https://raw.githubusercontent.com/` +
+    `${GITHUB_USER}/` +
+    `${GITHUB_REPO}/` +
+    `${GITHUB_BRANCH}/` +
+    `${NOTES_FOLDER}/` +
+    `${encodeURIComponent(topic.file)}`
+  );
+
 }
 
 
@@ -274,53 +465,100 @@ async function loadMarkdown(
 
     showLoading();
 
+
     currentTopicIndex =
       topics.findIndex(
         item =>
           item.file === topic.file
       );
 
+
+    /*
+     * Fetch the exact Markdown file
+     * from GitHub raw content.
+     */
+
     const markdownURL =
-      `./${NOTES_FOLDER}/${encodeURIComponent(topic.file)}`;
+      getMarkdownURL(topic);
+
+
+    console.log(
+      "Loading note:",
+      topic.file
+    );
+
+    console.log(
+      "Markdown URL:",
+      markdownURL
+    );
+
 
     const response =
-      await fetch(markdownURL);
+      await fetch(
+        markdownURL,
+        {
+          cache: "no-cache"
+        }
+      );
+
 
     if (!response.ok) {
+
       throw new Error(
-        `Could not load ${topic.file}`
+        `Could not load ${topic.file} ` +
+        `(HTTP ${response.status})`
       );
+
     }
+
 
     const markdown =
       await response.text();
 
-    if (typeof marked === "undefined") {
+
+    if (
+      typeof marked === "undefined"
+    ) {
+
       throw new Error(
         "Marked.js is unavailable."
       );
+
     }
 
+
     /*
-     * Keep HTML from the Markdown file.
+     * Render Markdown.
      *
-     * This allows simple Markdown such as:
-     *
-     * <img src="../images/example.png" width="30%">
-     *
-     * to render correctly.
+     * HTML written inside the .md
+     * file is preserved.
      */
 
     const html =
-      marked.parse(markdown);
+      marked.parse(
+        markdown
+      );
 
-    content.innerHTML = html;
+
+    content.innerHTML =
+      html;
+
 
     content.classList.add(
       "note-loaded"
     );
 
+
+    /*
+     * Fix relative images.
+     */
+
     fixMarkdownImages();
+
+
+    /*
+     * Other content processing.
+     */
 
     addHeadingIds();
 
@@ -328,16 +566,23 @@ async function loadMarkdown(
 
     setupExternalLinks();
 
-    updateActiveTopic(topic);
+    updateActiveTopic(
+      topic
+    );
+
 
     if (scrollToTop) {
 
       window.scrollTo({
+
         top: 0,
+
         behavior: "smooth"
+
       });
 
     }
+
 
   } catch (error) {
 
@@ -346,16 +591,19 @@ async function loadMarkdown(
       error
     );
 
+
     showError(
       "Couldn’t open this note.",
       topic.file
     );
+
   }
+
 }
 
 
 /* =========================================================
-   IMAGE HANDLING
+   FIX MARKDOWN IMAGES
    ========================================================= */
 
 function fixMarkdownImages() {
@@ -364,60 +612,122 @@ function fixMarkdownImages() {
     return;
   }
 
+
   const images =
-    content.querySelectorAll("img");
+    content.querySelectorAll(
+      "img"
+    );
 
-  images.forEach(image => {
 
-    const source =
-      image.getAttribute("src");
+  images.forEach(
+    image => {
 
-    if (!source) {
-      return;
-    }
-
-    if (
-      source.startsWith("http://") ||
-      source.startsWith("https://") ||
-      source.startsWith("//") ||
-      source.startsWith("data:") ||
-      source.startsWith("blob:")
-    ) {
-
-      image.loading = "lazy";
-      image.decoding = "async";
-
-      return;
-    }
-
-    try {
-
-      const baseURL =
-        new URL(
-          `./${NOTES_FOLDER}/`,
-          window.location.href
+      const source =
+        image.getAttribute(
+          "src"
         );
 
-      const imageURL =
-        new URL(
+
+      if (!source) {
+        return;
+      }
+
+
+      /*
+       * Absolute images don't need
+       * any modification.
+       */
+
+      if (
+
+        source.startsWith(
+          "http://"
+        ) ||
+
+        source.startsWith(
+          "https://"
+        ) ||
+
+        source.startsWith(
+          "//"
+        ) ||
+
+        source.startsWith(
+          "data:"
+        ) ||
+
+        source.startsWith(
+          "blob:"
+        )
+
+      ) {
+
+        image.loading =
+          "lazy";
+
+        image.decoding =
+          "async";
+
+        return;
+      }
+
+
+      /*
+       * Markdown images are relative
+       * to the /notes/ folder.
+       *
+       * Example:
+       *
+       * ../images/early_stopping1.png
+       *
+       * becomes:
+       *
+       * https://raw.githubusercontent.com/
+       * jai92xi/Xi_Notes/main/images/
+       * early_stopping1.png
+       */
+
+      try {
+
+        const notesBaseURL =
+          `https://raw.githubusercontent.com/` +
+          `${GITHUB_USER}/` +
+          `${GITHUB_REPO}/` +
+          `${GITHUB_BRANCH}/` +
+          `${NOTES_FOLDER}/`;
+
+
+        const imageURL =
+          new URL(
+            source,
+            notesBaseURL
+          );
+
+
+        image.src =
+          imageURL.href;
+
+
+      } catch (error) {
+
+        console.warn(
+          "Could not resolve image:",
           source,
-          baseURL
+          error
         );
 
-      image.src =
-        imageURL.href;
+      }
 
-    } catch (error) {
 
-      console.warn(
-        "Could not resolve image:",
-        source
-      );
+      image.loading =
+        "lazy";
+
+      image.decoding =
+        "async";
+
     }
+  );
 
-    image.loading = "lazy";
-    image.decoding = "async";
-  });
 }
 
 
@@ -432,27 +742,44 @@ function updateTopNavigation() {
       ".page-navigation"
     );
 
+
   if (!navigation) {
     return;
   }
 
+
   navigation.innerHTML = "";
+
 
   if (topics.length <= 1) {
     return;
   }
 
+
+  /*
+   * PREVIOUS
+   */
+
   const previous =
     currentTopicIndex > 0
-      ? topics[currentTopicIndex - 1]
+      ? topics[
+          currentTopicIndex - 1
+        ]
       : null;
 
-  const previousButton =
-    document.createElement("button");
 
-  previousButton.type = "button";
+  const previousButton =
+    document.createElement(
+      "button"
+    );
+
+
+  previousButton.type =
+    "button";
+
   previousButton.className =
     "page-nav-button previous-page";
+
 
   if (previous) {
 
@@ -468,25 +795,33 @@ function updateTopNavigation() {
         </span>
 
         <span class="page-nav-title">
-          ${escapeHTML(previous.name)}
+          ${escapeHTML(
+            previous.name
+          )}
         </span>
 
       </span>
     `;
 
+
     previousButton.addEventListener(
       "click",
       () => {
+
         loadMarkdown(
           previous,
           true
         );
+
       }
     );
 
+
   } else {
 
-    previousButton.disabled = true;
+    previousButton.disabled =
+      true;
+
 
     previousButton.innerHTML = `
       <span class="page-nav-arrow">
@@ -505,21 +840,37 @@ function updateTopNavigation() {
 
       </span>
     `;
+
   }
 
+
+  /*
+   * NEXT
+   */
 
   const next =
     currentTopicIndex <
       topics.length - 1
-      ? topics[currentTopicIndex + 1]
+
+      ? topics[
+          currentTopicIndex + 1
+        ]
+
       : null;
 
-  const nextButton =
-    document.createElement("button");
 
-  nextButton.type = "button";
+  const nextButton =
+    document.createElement(
+      "button"
+    );
+
+
+  nextButton.type =
+    "button";
+
   nextButton.className =
     "page-nav-button next-page";
+
 
   if (next) {
 
@@ -531,7 +882,9 @@ function updateTopNavigation() {
         </span>
 
         <span class="page-nav-title">
-          ${escapeHTML(next.name)}
+          ${escapeHTML(
+            next.name
+          )}
         </span>
 
       </span>
@@ -541,19 +894,25 @@ function updateTopNavigation() {
       </span>
     `;
 
+
     nextButton.addEventListener(
       "click",
       () => {
+
         loadMarkdown(
           next,
           true
         );
+
       }
     );
 
+
   } else {
 
-    nextButton.disabled = true;
+    nextButton.disabled =
+      true;
+
 
     nextButton.innerHTML = `
       <span class="page-nav-copy">
@@ -572,7 +931,9 @@ function updateTopNavigation() {
         →
       </span>
     `;
+
   }
+
 
   navigation.appendChild(
     previousButton
@@ -581,6 +942,7 @@ function updateTopNavigation() {
   navigation.appendChild(
     nextButton
   );
+
 }
 
 
@@ -588,35 +950,46 @@ function updateTopNavigation() {
    ACTIVE TOPIC
    ========================================================= */
 
-function updateActiveTopic(topic) {
+function updateActiveTopic(
+  topic
+) {
 
   const buttons =
     document.querySelectorAll(
       ".topic-button"
     );
 
-  buttons.forEach(button => {
 
-    const name =
-      button.querySelector(
-        ".topic-name"
+  buttons.forEach(
+    button => {
+
+      const name =
+        button.querySelector(
+          ".topic-name"
+        );
+
+
+      if (!name) {
+        return;
+      }
+
+
+      const active =
+        name.textContent.trim() ===
+        topic.name;
+
+
+      button.classList.toggle(
+        "active",
+        active
       );
 
-    if (!name) {
-      return;
     }
+  );
 
-    const active =
-      name.textContent.trim() ===
-      topic.name;
-
-    button.classList.toggle(
-      "active",
-      active
-    );
-  });
 
   updateTopNavigation();
+
 }
 
 
@@ -630,6 +1003,7 @@ function setupSearch() {
     return;
   }
 
+
   searchInput.addEventListener(
     "input",
     event => {
@@ -638,6 +1012,7 @@ function setupSearch() {
         event.target.value
           .toLowerCase()
           .trim();
+
 
       if (!query) {
 
@@ -648,22 +1023,30 @@ function setupSearch() {
         return;
       }
 
-      const filtered =
-        topics.filter(topic =>
-          topic.name
-            .toLowerCase()
-            .includes(query) ||
 
-          topic.file
-            .toLowerCase()
-            .includes(query)
+      const filtered =
+        topics.filter(
+          topic =>
+
+            topic.name
+              .toLowerCase()
+              .includes(query)
+
+            ||
+
+            topic.file
+              .toLowerCase()
+              .includes(query)
         );
+
 
       createSidebar(
         filtered
       );
+
     }
   );
+
 }
 
 
@@ -677,72 +1060,134 @@ function setupKeyboardShortcuts() {
     "keydown",
     event => {
 
+      /*
+       * CMD/CTRL + K
+       */
+
       if (
-        (event.ctrlKey || event.metaKey) &&
-        event.key.toLowerCase() === "k"
+
+        (event.ctrlKey ||
+          event.metaKey) &&
+
+        event.key.toLowerCase() ===
+          "k"
+
       ) {
 
         event.preventDefault();
 
+
         if (searchInput) {
+
           searchInput.focus();
+
           searchInput.select();
+
         }
+
       }
 
+
+      /*
+       * ESC
+       */
+
       if (
-        event.key === "Escape"
+        event.key ===
+        "Escape"
       ) {
 
         if (searchInput) {
-          searchInput.value = "";
+
+          searchInput.value =
+            "";
+
           searchInput.blur();
+
         }
 
-        createSidebar(topics);
+
+        createSidebar(
+          topics
+        );
+
 
         closeMobileSidebar();
+
       }
 
+
+      /*
+       * LEFT ARROW
+       */
+
       if (
-        event.key === "ArrowLeft" &&
+
+        event.key ===
+          "ArrowLeft" &&
+
         !isTyping(event)
+
       ) {
 
-        if (currentTopicIndex > 0) {
+        if (
+          currentTopicIndex >
+          0
+        ) {
 
           event.preventDefault();
+
 
           loadMarkdown(
             topics[
               currentTopicIndex - 1
             ]
           );
+
         }
+
       }
 
+
+      /*
+       * RIGHT ARROW
+       */
+
       if (
-        event.key === "ArrowRight" &&
+
+        event.key ===
+          "ArrowRight" &&
+
         !isTyping(event)
+
       ) {
 
         if (
-          currentTopicIndex >= 0 &&
+
+          currentTopicIndex >=
+            0 &&
+
           currentTopicIndex <
             topics.length - 1
+
         ) {
 
           event.preventDefault();
+
 
           loadMarkdown(
             topics[
               currentTopicIndex + 1
             ]
           );
+
         }
+
       }
+
     }
   );
+
 }
 
 
@@ -757,35 +1202,47 @@ function setupContentsToggle() {
       "contents-toggle"
     );
 
+
   const sidebarElement =
     document.getElementById(
       "sidebar"
     );
 
+
   if (
     !toggle ||
     !sidebarElement
   ) {
+
     return;
+
   }
 
+
   /*
-   * DEFAULT:
-   * CONTENTS ARE OPEN
+   * Contents open by default.
    */
 
   sidebarElement.classList.remove(
     "contents-hidden"
   );
 
+
   toggle.setAttribute(
     "aria-label",
     "Hide contents"
   );
 
+
   toggle.setAttribute(
     "title",
     "Hide contents"
+  );
+
+
+  toggle.setAttribute(
+    "aria-expanded",
+    "true"
   );
 
 
@@ -798,6 +1255,7 @@ function setupContentsToggle() {
           "contents-hidden"
         );
 
+
       toggle.setAttribute(
         "aria-label",
         hidden
@@ -805,14 +1263,25 @@ function setupContentsToggle() {
           : "Hide contents"
       );
 
+
       toggle.setAttribute(
         "title",
         hidden
           ? "Show contents"
           : "Hide contents"
       );
+
+
+      toggle.setAttribute(
+        "aria-expanded",
+        hidden
+          ? "false"
+          : "true"
+      );
+
     }
   );
+
 }
 
 
@@ -825,20 +1294,28 @@ function isTyping(event) {
   const element =
     event.target;
 
+
   if (!element) {
     return false;
   }
+
 
   const tag =
     element.tagName
       ? element.tagName.toLowerCase()
       : "";
 
+
   return (
+
     tag === "input" ||
+
     tag === "textarea" ||
+
     element.isContentEditable
+
   );
+
 }
 
 
@@ -853,75 +1330,97 @@ function addCopyButtons() {
       "pre > code"
     );
 
-  codeBlocks.forEach(code => {
 
-    const pre =
-      code.parentElement;
+  codeBlocks.forEach(
+    code => {
 
-    if (
-      pre.querySelector(
-        ".copy-button"
-      )
-    ) {
-      return;
-    }
+      const pre =
+        code.parentElement;
 
-    const button =
-      document.createElement(
-        "button"
+
+      if (
+        pre.querySelector(
+          ".copy-button"
+        )
+      ) {
+
+        return;
+
+      }
+
+
+      const button =
+        document.createElement(
+          "button"
+        );
+
+
+      button.type =
+        "button";
+
+      button.className =
+        "copy-button";
+
+      button.textContent =
+        "Copy";
+
+
+      button.addEventListener(
+        "click",
+        async () => {
+
+          try {
+
+            await navigator.clipboard.writeText(
+              code.innerText
+            );
+
+
+            button.textContent =
+              "Copied ✦";
+
+
+            button.classList.add(
+              "copied"
+            );
+
+
+            setTimeout(
+              () => {
+
+                button.textContent =
+                  "Copy";
+
+
+                button.classList.remove(
+                  "copied"
+                );
+
+              },
+              1400
+            );
+
+
+          } catch (error) {
+
+            fallbackCopy(
+              code.innerText,
+              button
+            );
+
+          }
+
+        }
       );
 
-    button.type = "button";
 
-    button.className =
-      "copy-button";
+      pre.appendChild(
+        button
+      );
 
-    button.textContent =
-      "Copy";
+    }
+  );
 
-    button.addEventListener(
-      "click",
-      async () => {
-
-        try {
-
-          await navigator.clipboard.writeText(
-            code.innerText
-          );
-
-          button.textContent =
-            "Copied ✦";
-
-          button.classList.add(
-            "copied"
-          );
-
-          setTimeout(
-            () => {
-
-              button.textContent =
-                "Copy";
-
-              button.classList.remove(
-                "copied"
-              );
-
-            },
-            1400
-          );
-
-        } catch (error) {
-
-          fallbackCopy(
-            code.innerText,
-            button
-          );
-        }
-      }
-    );
-
-    pre.appendChild(button);
-  });
 }
 
 
@@ -939,20 +1438,26 @@ function fallbackCopy(
       "textarea"
     );
 
+
   textarea.value =
     text;
+
 
   textarea.style.position =
     "fixed";
 
+
   textarea.style.left =
     "-9999px";
+
 
   document.body.appendChild(
     textarea
   );
 
+
   textarea.select();
+
 
   try {
 
@@ -960,18 +1465,22 @@ function fallbackCopy(
       "copy"
     );
 
+
     button.textContent =
       "Copied ✦";
+
 
     button.classList.add(
       "copied"
     );
+
 
     setTimeout(
       () => {
 
         button.textContent =
           "Copy";
+
 
         button.classList.remove(
           "copied"
@@ -981,15 +1490,19 @@ function fallbackCopy(
       1400
     );
 
+
   } catch (error) {
 
     console.error(
       "Copy failed:",
       error
     );
+
   }
 
+
   textarea.remove();
+
 }
 
 
@@ -1004,50 +1517,67 @@ function addHeadingIds() {
       "h1, h2, h3, h4"
     );
 
+
   const used =
     new Set();
 
-  headings.forEach(heading => {
 
-    const text =
-      heading.textContent
-        .toLowerCase()
-        .trim();
+  headings.forEach(
+    heading => {
 
-    let id =
-      text
-        .replace(
-          /[^\w\s-]/g,
-          ""
-        )
-        .replace(
-          /\s+/g,
-          "-"
-        );
+      const text =
+        heading.textContent
+          .toLowerCase()
+          .trim();
 
-    if (!id) {
-      return;
+
+      let id =
+        text
+
+          .replace(
+            /[^\w\s-]/g,
+            ""
+          )
+
+          .replace(
+            /\s+/g,
+            "-"
+          );
+
+
+      if (!id) {
+        return;
+      }
+
+
+      const original =
+        id;
+
+
+      let counter =
+        2;
+
+
+      while (
+        used.has(id)
+      ) {
+
+        id =
+          `${original}-${counter}`;
+
+        counter++;
+
+      }
+
+
+      used.add(id);
+
+      heading.id =
+        id;
+
     }
+  );
 
-    const original =
-      id;
-
-    let counter = 2;
-
-    while (
-      used.has(id)
-    ) {
-
-      id =
-        `${original}-${counter}`;
-
-      counter++;
-    }
-
-    used.add(id);
-
-    heading.id = id;
-  });
 }
 
 
@@ -1062,28 +1592,48 @@ function setupExternalLinks() {
       "a"
     );
 
-  links.forEach(link => {
 
-    const href =
-      link.getAttribute(
-        "href"
-      );
+  links.forEach(
+    link => {
 
-    if (
-      href &&
-      (
-        href.startsWith("http://") ||
-        href.startsWith("https://")
-      )
-    ) {
+      const href =
+        link.getAttribute(
+          "href"
+        );
 
-      link.target =
-        "_blank";
 
-      link.rel =
-        "noopener noreferrer";
+      if (
+
+        href &&
+
+        (
+
+          href.startsWith(
+            "http://"
+          )
+
+          ||
+
+          href.startsWith(
+            "https://"
+          )
+
+        )
+
+      ) {
+
+        link.target =
+          "_blank";
+
+
+        link.rel =
+          "noopener noreferrer";
+
+      }
+
     }
-  });
+  );
+
 }
 
 
@@ -1099,7 +1649,9 @@ function setupMobileMenu() {
       "click",
       openMobileSidebar
     );
+
   }
+
 
   if (closeSidebarButton) {
 
@@ -1107,7 +1659,9 @@ function setupMobileMenu() {
       "click",
       closeMobileSidebar
     );
+
   }
+
 
   if (sidebarOverlay) {
 
@@ -1115,47 +1669,63 @@ function setupMobileMenu() {
       "click",
       closeMobileSidebar
     );
+
   }
+
 }
 
 
 function openMobileSidebar() {
 
   if (sidebar) {
+
     sidebar.classList.add(
       "mobile-open"
     );
+
   }
 
+
   if (sidebarOverlay) {
+
     sidebarOverlay.classList.add(
       "active"
     );
+
   }
+
 
   document.body.classList.add(
     "sidebar-open"
   );
+
 }
 
 
 function closeMobileSidebar() {
 
   if (sidebar) {
+
     sidebar.classList.remove(
       "mobile-open"
     );
+
   }
 
+
   if (sidebarOverlay) {
+
     sidebarOverlay.classList.remove(
       "active"
     );
+
   }
+
 
   document.body.classList.remove(
     "sidebar-open"
   );
+
 }
 
 
@@ -1169,16 +1739,20 @@ function setupTheme() {
     return;
   }
 
+
   const saved =
     localStorage.getItem(
       "shared-ai-notes-theme"
     );
 
+
   /*
-   * DEFAULT = LIGHT
+   * Default = LIGHT
    */
 
-  if (saved === "dark") {
+  if (
+    saved === "dark"
+  ) {
 
     document.body.classList.add(
       "dark-theme"
@@ -1189,9 +1763,12 @@ function setupTheme() {
     document.body.classList.remove(
       "dark-theme"
     );
+
   }
 
+
   updateThemeButton();
+
 
   themeButton.addEventListener(
     "click",
@@ -1201,10 +1778,12 @@ function setupTheme() {
         "dark-theme"
       );
 
+
       const dark =
         document.body.classList.contains(
           "dark-theme"
         );
+
 
       localStorage.setItem(
         "shared-ai-notes-theme",
@@ -1213,9 +1792,12 @@ function setupTheme() {
           : "light"
       );
 
+
       updateThemeButton();
+
     }
   );
+
 }
 
 
@@ -1225,15 +1807,18 @@ function updateThemeButton() {
     return;
   }
 
+
   const dark =
     document.body.classList.contains(
       "dark-theme"
     );
 
+
   themeButton.textContent =
     dark
       ? "☀"
       : "☾";
+
 
   themeButton.setAttribute(
     "aria-label",
@@ -1242,12 +1827,14 @@ function updateThemeButton() {
       : "Switch to dark theme"
   );
 
+
   themeButton.setAttribute(
     "title",
     dark
       ? "Switch to light theme"
       : "Switch to dark theme"
   );
+
 }
 
 
@@ -1269,9 +1856,11 @@ function showLoading() {
     </div>
   `;
 
+
   content.classList.remove(
     "note-loaded"
   );
+
 }
 
 
@@ -1282,15 +1871,18 @@ function showLoadingSidebar() {
       ".topic-navigation"
     );
 
+
   if (!navigation) {
     return;
   }
+
 
   navigation.innerHTML = `
     <div class="no-results">
       Loading concepts...
     </div>
   `;
+
 }
 
 
@@ -1316,6 +1908,7 @@ function showMessage(
 
     </div>
   `;
+
 }
 
 
@@ -1341,6 +1934,7 @@ function showError(
 
     </div>
   `;
+
 }
 
 
@@ -1348,15 +1942,20 @@ function showError(
    ESCAPE HTML
    ========================================================= */
 
-function escapeHTML(value) {
+function escapeHTML(
+  value
+) {
 
   const div =
     document.createElement(
       "div"
     );
 
+
   div.textContent =
     String(value);
 
+
   return div.innerHTML;
+
 }
