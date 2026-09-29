@@ -1,10 +1,8 @@
-<div style="display:flex; align-items:center; gap:30px;">
+<div class="note-intro">
 
-  <div style="flex:1;">
+  <div class="note-intro-definition">
 
-    <p>
-      🧠 <strong>EARLY STOPPING</strong>
-    </p>
+    <strong>🧠 EARLY STOPPING</strong>
 
     <p>
       Early stopping is a
@@ -16,18 +14,16 @@
 
   </div>
 
-  <div style="flex:1; text-align:center;">
+  <div class="note-intro-image">
 
     <img
       src="../images/early_stopping1.png"
       alt="Early Stopping"
-      style="width:100%; height:auto; margin:0;"
     >
 
   </div>
 
 </div>
-
 
 ---
 
