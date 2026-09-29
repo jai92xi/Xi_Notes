@@ -5,5 +5,5 @@
 
 ---
 **Forward Propagation vs Backward Propagation**: 
-
-Fwd propagation <mark> makes predictions </mark> - Bckwd Propagation <mark>learns from prediction error</mark> and updates model weights.
+1. Fwd propagation <mark> makes predictions </mark>
+2. Bckwd Propagation <mark>learns from prediction error</mark> and updates model weights.
