@@ -832,6 +832,49 @@ body {
 
 
 /* =========================================================
+   MARK / KEYWORD HIGHLIGHT
+   ========================================================= */
+
+.content mark {
+  display: inline;
+
+  padding: 0.08em 0.28em;
+
+  border-radius: 0.3em;
+
+  background:
+    linear-gradient(
+      120deg,
+      #fef08a,
+      #fde68a
+    );
+
+  color: #3f3500;
+
+  font-weight: 700;
+
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+}
+
+
+/* =========================================================
+   MARK / KEYWORD HIGHLIGHT — DARK THEME
+   ========================================================= */
+
+.dark-theme .content mark {
+  background:
+    linear-gradient(
+      120deg,
+      #665c1e,
+      #75691f
+    );
+
+  color: #fff7b2;
+}
+
+
+/* =========================================================
    GEN Z CALLOUT / BLOCKQUOTE
    ========================================================= */
 
