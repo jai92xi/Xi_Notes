@@ -7,11 +7,12 @@ const GITHUB_USER = "jai92xi";
 const GITHUB_REPO = "Xi_Notes";
 const NOTES_FOLDER = "notes";
 
-const NOTES_TITLE = "AI & ML Key Concepts";
+let topics = [];
+let currentTopicIndex = -1;
 
 
 /* =========================================================
-   DOM ELEMENTS
+   DOM
    ========================================================= */
 
 const sidebar = document.getElementById("sidebar");
@@ -19,41 +20,51 @@ const content = document.getElementById("content");
 const searchInput = document.getElementById("search");
 const themeButton = document.getElementById("theme-button");
 const menuButton = document.getElementById("menu-button");
-const closeSidebarButton = document.getElementById("close-sidebar");
-const sidebarOverlay = document.getElementById("sidebar-overlay");
-
-
-/* =========================================================
-   STATE
-   ========================================================= */
-
-let topics = [];
-let currentTopicIndex = -1;
+const closeSidebarButton =
+  document.getElementById("close-sidebar");
+const sidebarOverlay =
+  document.getElementById("sidebar-overlay");
 
 
 /* =========================================================
    INITIALIZE
    ========================================================= */
 
-function initialize() {
+document.addEventListener("DOMContentLoaded", () => {
   configureMarkdown();
+  setupTheme();
   setupSearch();
   setupKeyboardShortcuts();
   setupMobileMenu();
-  setupTheme();
   loadTopics();
-}
+});
 
 
 /* =========================================================
-   MARKDOWN CONFIGURATION
+   MARKED CONFIGURATION
    ========================================================= */
 
 function configureMarkdown() {
   if (typeof marked === "undefined") {
-    console.error("Marked.js is not loaded.");
+    console.error("Marked.js was not loaded.");
     return;
   }
+
+  /*
+   * IMPORTANT:
+   *
+   * Do NOT escape HTML here.
+   *
+   * marked.parse() will preserve HTML such as:
+   *
+   * <div>
+   * <p>
+   * <img>
+   * <span>
+   *
+   * This allows HTML layouts to be written directly
+   * inside .md files.
+   */
 
   marked.setOptions({
     gfm: true,
@@ -70,22 +81,18 @@ async function loadTopics() {
   try {
     showLoadingSidebar();
 
-    const apiUrl =
+    const apiURL =
       `https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}/contents/${NOTES_FOLDER}`;
 
-    const response = await fetch(apiUrl);
+    const response = await fetch(apiURL);
 
     if (!response.ok) {
       throw new Error(
-        `GitHub API returned ${response.status}`
+        `GitHub API error: ${response.status}`
       );
     }
 
     const files = await response.json();
-
-    if (!Array.isArray(files)) {
-      throw new Error("Invalid notes response.");
-    }
 
     topics = files
       .filter(file =>
@@ -111,7 +118,10 @@ async function loadTopics() {
     createSidebar(topics);
 
     if (topics.length > 0) {
-      await loadMarkdown(topics[0], false);
+      await loadMarkdown(
+        topics[0],
+        false
+      );
     } else {
       showMessage(
         "No notes yet",
@@ -120,14 +130,11 @@ async function loadTopics() {
     }
 
   } catch (error) {
-    console.error(
-      "Failed to load notes:",
-      error
-    );
+    console.error(error);
 
     showError(
       "Couldn’t load your notes.",
-      "Please check that the notes folder exists in your GitHub repository."
+      "Please check your GitHub repository and notes folder."
     );
   }
 }
@@ -157,7 +164,7 @@ function formatTopicName(filename) {
     )
     .join(" ");
 
-  const abbreviations = {
+  const replacements = {
     "Ai": "AI",
     "Ml": "ML",
     "Llm": "LLM",
@@ -183,31 +190,31 @@ function formatTopicName(filename) {
     "Json": "JSON",
     "Pytorch": "PyTorch",
     "Tensorflow": "TensorFlow",
+    "Keras": "Keras",
     "Knn": "KNN",
     "Svm": "SVM",
-    "Xgboost": "XGBoost",
-    "Keras": "Keras"
+    "Xgboost": "XGBoost"
   };
 
-  name = name
+  return name
     .split(" ")
     .map(word =>
-      abbreviations[word] || word
+      replacements[word] || word
     )
     .join(" ");
-
-  return name;
 }
 
 
 /* =========================================================
-   CREATE SIDEBAR
+   SIDEBAR
    ========================================================= */
 
-function createSidebar(items = topics) {
+function createSidebar(items) {
 
   const navigation =
-    document.querySelector(".topic-navigation");
+    document.querySelector(
+      ".topic-navigation"
+    );
 
   if (!navigation) {
     return;
@@ -216,11 +223,13 @@ function createSidebar(items = topics) {
   navigation.innerHTML = "";
 
   if (items.length === 0) {
+
     navigation.innerHTML = `
       <div class="no-results">
         Nothing found ✦
       </div>
     `;
+
     return;
   }
 
@@ -230,7 +239,8 @@ function createSidebar(items = topics) {
       document.createElement("button");
 
     button.type = "button";
-    button.className = "topic-button";
+    button.className =
+      "topic-button";
 
     button.innerHTML = `
       <span class="topic-dot">✦</span>
@@ -242,7 +252,12 @@ function createSidebar(items = topics) {
     button.addEventListener(
       "click",
       () => {
-        loadMarkdown(topic, true);
+
+        loadMarkdown(
+          topic,
+          true
+        );
+
         closeMobileSidebar();
       }
     );
@@ -276,14 +291,24 @@ async function loadMarkdown(
 
     currentTopicIndex =
       topics.findIndex(
-        item => item.file === topic.file
+        item =>
+          item.file === topic.file
       );
 
+
     /*
-     * Fetch the Markdown from GitHub Pages.
+     * IMPORTANT
      *
-     * Using ./notes/ keeps this compatible
-     * with the GitHub Pages project path.
+     * Fetch directly from GitHub Pages.
+     *
+     * Markdown:
+     * /Xi_Notes/notes/Early_Stopping.md
+     *
+     * Image:
+     * /Xi_Notes/images/early_stopping1.png
+     *
+     * Therefore ../images/... inside Markdown
+     * resolves correctly.
      */
 
     const markdownURL =
@@ -294,92 +319,74 @@ async function loadMarkdown(
 
     if (!response.ok) {
       throw new Error(
-        `Unable to load ${topic.file}`
+        `Could not load ${topic.file}`
       );
     }
 
     const markdown =
       await response.text();
 
-    if (typeof marked === "undefined") {
-      throw new Error(
-        "Marked.js is not available."
-      );
-    }
-
 
     /* =====================================================
        RENDER MARKDOWN
-
-       marked.parse() allows normal HTML contained inside
-       the Markdown document to remain HTML.
-
-       Therefore this works:
-
-       <div style="display:flex; ...">
-
-       <img src="../images/example.png">
-
-       </div>
        ===================================================== */
 
-    const renderedHTML =
+    if (typeof marked === "undefined") {
+      throw new Error(
+        "Marked.js is unavailable."
+      );
+    }
+
+    /*
+     * THIS IS THE IMPORTANT PART.
+     *
+     * marked.parse() returns HTML.
+     *
+     * We assign it directly to innerHTML.
+     *
+     * This means HTML written in the .md file
+     * is actually rendered instead of displayed
+     * as text.
+     */
+
+    const html =
       marked.parse(markdown);
 
-    content.innerHTML =
-      renderedHTML;
+    content.innerHTML = html;
 
     content.classList.add(
       "note-loaded"
     );
 
 
-    /*
-     * Fix relative image paths.
-     */
+    /* =====================================================
+       POST PROCESS
+       ===================================================== */
 
     fixMarkdownImages();
 
-
-    /*
-     * Add IDs to headings.
-     */
-
     addHeadingIds();
-
-
-    /*
-     * Add copy buttons to code blocks.
-     */
 
     addCopyButtons();
 
-
-    /*
-     * Make external links open in a new tab.
-     */
-
     setupExternalLinks();
-
-
-    /*
-     * Update sidebar and top navigation.
-     */
 
     updateActiveTopic(topic);
 
 
     if (scrollToTop) {
+
       window.scrollTo({
         top: 0,
         behavior: "smooth"
       });
+
     }
 
   } catch (error) {
 
     console.error(
-      "Failed to load note:",
+      "Markdown loading error:",
       error
     );
 
@@ -415,7 +422,7 @@ function fixMarkdownImages() {
 
 
     /*
-     * External images are left untouched.
+     * Leave absolute URLs alone.
      */
 
     if (
@@ -425,57 +432,50 @@ function fixMarkdownImages() {
       source.startsWith("data:") ||
       source.startsWith("blob:")
     ) {
-      return;
-    }
 
-
-    /*
-     * Root-relative paths are left untouched.
-     */
-
-    if (source.startsWith("/")) {
       image.loading = "lazy";
       image.decoding = "async";
+
       return;
     }
 
 
     /*
-     * Markdown lives in:
+     * Resolve relative image paths
+     * relative to /notes/.
      *
-     * /Xi_Notes/notes/
+     * Example:
      *
-     * So:
+     * ../images/early_stopping1.png
      *
-     * ../images/file.png
+     * becomes:
      *
-     * correctly becomes:
-     *
-     * /Xi_Notes/images/file.png
+     * /Xi_Notes/images/early_stopping1.png
      */
 
     try {
 
-      const basePath =
-        `${window.location.origin}/${GITHUB_REPO}/${NOTES_FOLDER}/`;
+      const baseURL =
+        new URL(
+          `./${NOTES_FOLDER}/`,
+          window.location.href
+        );
 
-      const absoluteURL =
+      const imageURL =
         new URL(
           source,
-          basePath
+          baseURL
         );
 
       image.src =
-        absoluteURL.href;
+        imageURL.href;
 
     } catch (error) {
 
       console.warn(
         "Could not resolve image:",
-        source,
-        error
+        source
       );
-
     }
 
     image.loading = "lazy";
@@ -486,21 +486,21 @@ function fixMarkdownImages() {
 
 
 /* =========================================================
-   TOP PREVIOUS / NEXT NAVIGATION
+   TOP NAVIGATION
    ========================================================= */
 
 function updateTopNavigation() {
 
-  const topNavigation =
+  const navigation =
     document.querySelector(
-      ".top-bar .page-navigation"
+      ".page-navigation"
     );
 
-  if (!topNavigation) {
+  if (!navigation) {
     return;
   }
 
-  topNavigation.innerHTML = "";
+  navigation.innerHTML = "";
 
   if (topics.length <= 1) {
     return;
@@ -511,7 +511,7 @@ function updateTopNavigation() {
      PREVIOUS
      ===================================================== */
 
-  const previousTopic =
+  const previous =
     currentTopicIndex > 0
       ? topics[currentTopicIndex - 1]
       : null;
@@ -523,7 +523,7 @@ function updateTopNavigation() {
   previousButton.className =
     "page-nav-button previous-page";
 
-  if (previousTopic) {
+  if (previous) {
 
     previousButton.innerHTML = `
       <span class="page-nav-arrow">
@@ -537,21 +537,19 @@ function updateTopNavigation() {
         </span>
 
         <span class="page-nav-title">
-          ${escapeHTML(previousTopic.name)}
+          ${escapeHTML(previous.name)}
         </span>
 
       </span>
     `;
 
-    previousButton.setAttribute(
-      "aria-label",
-      `Previous: ${previousTopic.name}`
-    );
-
     previousButton.addEventListener(
       "click",
       () => {
-        loadMarkdown(previousTopic, true);
+        loadMarkdown(
+          previous,
+          true
+        );
       }
     );
 
@@ -583,7 +581,7 @@ function updateTopNavigation() {
      NEXT
      ===================================================== */
 
-  const nextTopic =
+  const next =
     currentTopicIndex <
       topics.length - 1
       ? topics[currentTopicIndex + 1]
@@ -596,7 +594,7 @@ function updateTopNavigation() {
   nextButton.className =
     "page-nav-button next-page";
 
-  if (nextTopic) {
+  if (next) {
 
     nextButton.innerHTML = `
       <span class="page-nav-copy">
@@ -606,7 +604,7 @@ function updateTopNavigation() {
         </span>
 
         <span class="page-nav-title">
-          ${escapeHTML(nextTopic.name)}
+          ${escapeHTML(next.name)}
         </span>
 
       </span>
@@ -616,15 +614,13 @@ function updateTopNavigation() {
       </span>
     `;
 
-    nextButton.setAttribute(
-      "aria-label",
-      `Next: ${nextTopic.name}`
-    );
-
     nextButton.addEventListener(
       "click",
       () => {
-        loadMarkdown(nextTopic, true);
+        loadMarkdown(
+          next,
+          true
+        );
       }
     );
 
@@ -652,23 +648,21 @@ function updateTopNavigation() {
   }
 
 
-  topNavigation.appendChild(
+  navigation.appendChild(
     previousButton
   );
 
-  topNavigation.appendChild(
+  navigation.appendChild(
     nextButton
   );
 }
 
 
 /* =========================================================
-   UPDATE ACTIVE TOPIC
+   ACTIVE TOPIC
    ========================================================= */
 
-function updateActiveTopic(
-  selectedTopic
-) {
+function updateActiveTopic(topic) {
 
   const buttons =
     document.querySelectorAll(
@@ -677,22 +671,22 @@ function updateActiveTopic(
 
   buttons.forEach(button => {
 
-    const topicName =
+    const name =
       button.querySelector(
         ".topic-name"
       );
 
-    if (!topicName) {
+    if (!name) {
       return;
     }
 
-    const isActive =
-      topicName.textContent.trim() ===
-      selectedTopic.name;
+    const active =
+      name.textContent.trim() ===
+      topic.name;
 
     button.classList.toggle(
       "active",
-      isActive
+      active
     );
   });
 
@@ -720,28 +714,28 @@ function setupSearch() {
           .trim();
 
       if (!query) {
-        createSidebar(topics);
+
+        createSidebar(
+          topics
+        );
+
         return;
       }
 
       const filtered =
-        topics.filter(topic => {
+        topics.filter(topic =>
+          topic.name
+            .toLowerCase()
+            .includes(query) ||
 
-          return (
-            topic.name
-              .toLowerCase()
-              .includes(query)
+          topic.file
+            .toLowerCase()
+            .includes(query)
+        );
 
-            ||
-
-            topic.file
-              .toLowerCase()
-              .includes(query)
-          );
-
-        });
-
-      createSidebar(filtered);
+      createSidebar(
+        filtered
+      );
     }
   );
 }
@@ -758,20 +752,24 @@ function setupKeyboardShortcuts() {
     event => {
 
       if (
-        (event.metaKey || event.ctrlKey) &&
+        (event.ctrlKey || event.metaKey) &&
         event.key.toLowerCase() === "k"
       ) {
 
         event.preventDefault();
 
         if (searchInput) {
+
           searchInput.focus();
+
           searchInput.select();
         }
       }
 
 
-      if (event.key === "Escape") {
+      if (
+        event.key === "Escape"
+      ) {
 
         if (searchInput) {
           searchInput.value = "";
@@ -786,7 +784,7 @@ function setupKeyboardShortcuts() {
 
       if (
         event.key === "ArrowLeft" &&
-        !isTypingInField(event)
+        !isTyping(event)
       ) {
 
         if (currentTopicIndex > 0) {
@@ -794,7 +792,9 @@ function setupKeyboardShortcuts() {
           event.preventDefault();
 
           loadMarkdown(
-            topics[currentTopicIndex - 1]
+            topics[
+              currentTopicIndex - 1
+            ]
           );
         }
       }
@@ -802,7 +802,7 @@ function setupKeyboardShortcuts() {
 
       if (
         event.key === "ArrowRight" &&
-        !isTypingInField(event)
+        !isTyping(event)
       ) {
 
         if (
@@ -814,7 +814,9 @@ function setupKeyboardShortcuts() {
           event.preventDefault();
 
           loadMarkdown(
-            topics[currentTopicIndex + 1]
+            topics[
+              currentTopicIndex + 1
+            ]
           );
         }
       }
@@ -825,10 +827,10 @@ function setupKeyboardShortcuts() {
 
 
 /* =========================================================
-   CHECK IF USER IS TYPING
+   TYPING CHECK
    ========================================================= */
 
-function isTypingInField(event) {
+function isTyping(event) {
 
   const element =
     event.target;
@@ -847,6 +849,262 @@ function isTypingInField(event) {
     tag === "textarea" ||
     element.isContentEditable
   );
+}
+
+
+/* =========================================================
+   COPY BUTTONS
+   ========================================================= */
+
+function addCopyButtons() {
+
+  /*
+   * IMPORTANT:
+   *
+   * Only target actual Markdown code blocks.
+   *
+   * We do NOT target generic HTML.
+   *
+   * This prevents your HTML layout from accidentally
+   * receiving a "Copy" button.
+   */
+
+  const codeBlocks =
+    content.querySelectorAll(
+      "pre > code"
+    );
+
+  codeBlocks.forEach(code => {
+
+    const pre =
+      code.parentElement;
+
+    if (
+      pre.querySelector(
+        ".copy-button"
+      )
+    ) {
+      return;
+    }
+
+    const button =
+      document.createElement(
+        "button"
+      );
+
+    button.type = "button";
+
+    button.className =
+      "copy-button";
+
+    button.textContent =
+      "Copy";
+
+    button.addEventListener(
+      "click",
+      async () => {
+
+        try {
+
+          await navigator.clipboard.writeText(
+            code.innerText
+          );
+
+          button.textContent =
+            "Copied ✦";
+
+          button.classList.add(
+            "copied"
+          );
+
+          setTimeout(
+            () => {
+
+              button.textContent =
+                "Copy";
+
+              button.classList.remove(
+                "copied"
+              );
+
+            },
+            1400
+          );
+
+        } catch (error) {
+
+          fallbackCopy(
+            code.innerText,
+            button
+          );
+        }
+      }
+    );
+
+    pre.appendChild(button);
+  });
+}
+
+
+/* =========================================================
+   FALLBACK COPY
+   ========================================================= */
+
+function fallbackCopy(
+  text,
+  button
+) {
+
+  const textarea =
+    document.createElement(
+      "textarea"
+    );
+
+  textarea.value =
+    text;
+
+  textarea.style.position =
+    "fixed";
+
+  textarea.style.left =
+    "-9999px";
+
+  document.body.appendChild(
+    textarea
+  );
+
+  textarea.select();
+
+  try {
+
+    document.execCommand(
+      "copy"
+    );
+
+    button.textContent =
+      "Copied ✦";
+
+    button.classList.add(
+      "copied"
+    );
+
+    setTimeout(
+      () => {
+
+        button.textContent =
+          "Copy";
+
+        button.classList.remove(
+          "copied"
+        );
+
+      },
+      1400
+    );
+
+  } catch (error) {
+
+    console.error(
+      "Copy failed:",
+      error
+    );
+  }
+
+  textarea.remove();
+}
+
+
+/* =========================================================
+   HEADING IDS
+   ========================================================= */
+
+function addHeadingIds() {
+
+  const headings =
+    content.querySelectorAll(
+      "h1, h2, h3, h4"
+    );
+
+  const used =
+    new Set();
+
+  headings.forEach(heading => {
+
+    const text =
+      heading.textContent
+        .toLowerCase()
+        .trim();
+
+    let id =
+      text
+        .replace(
+          /[^\w\s-]/g,
+          ""
+        )
+        .replace(
+          /\s+/g,
+          "-"
+        );
+
+    if (!id) {
+      return;
+    }
+
+    const original =
+      id;
+
+    let counter = 2;
+
+    while (
+      used.has(id)
+    ) {
+
+      id =
+        `${original}-${counter}`;
+
+      counter++;
+    }
+
+    used.add(id);
+
+    heading.id = id;
+  });
+}
+
+
+/* =========================================================
+   EXTERNAL LINKS
+   ========================================================= */
+
+function setupExternalLinks() {
+
+  const links =
+    content.querySelectorAll(
+      "a"
+    );
+
+  links.forEach(link => {
+
+    const href =
+      link.getAttribute(
+        "href"
+      );
+
+    if (
+      href &&
+      (
+        href.startsWith("http://") ||
+        href.startsWith("https://")
+      )
+    ) {
+
+      link.target =
+        "_blank";
+
+      link.rel =
+        "noopener noreferrer";
+    }
+  });
 }
 
 
@@ -879,13 +1137,8 @@ function setupMobileMenu() {
       closeMobileSidebar
     );
   }
-
 }
 
-
-/* =========================================================
-   OPEN MOBILE SIDEBAR
-   ========================================================= */
 
 function openMobileSidebar() {
 
@@ -906,10 +1159,6 @@ function openMobileSidebar() {
   );
 }
 
-
-/* =========================================================
-   CLOSE MOBILE SIDEBAR
-   ========================================================= */
 
 function closeMobileSidebar() {
 
@@ -932,255 +1181,104 @@ function closeMobileSidebar() {
 
 
 /* =========================================================
-   COPY CODE BUTTONS
+   THEME
    ========================================================= */
 
-function addCopyButtons() {
+function setupTheme() {
 
-  const codeBlocks =
-    content.querySelectorAll("pre");
+  if (!themeButton) {
+    return;
+  }
 
-  codeBlocks.forEach(pre => {
-
-    if (
-      pre.querySelector(
-        ".copy-button"
-      )
-    ) {
-      return;
-    }
-
-    const button =
-      document.createElement("button");
-
-    button.type = "button";
-    button.className =
-      "copy-button";
-
-    button.textContent =
-      "Copy";
-
-    button.setAttribute(
-      "aria-label",
-      "Copy code"
+  const saved =
+    localStorage.getItem(
+      "shared-ai-notes-theme"
     );
 
-    button.addEventListener(
-      "click",
-      async () => {
 
-        const code =
-          pre.querySelector("code");
+  /*
+   * DEFAULT = LIGHT
+   */
 
-        if (!code) {
-          return;
-        }
+  if (saved === "dark") {
 
-        const codeText =
-          code.innerText;
-
-        try {
-
-          await navigator.clipboard.writeText(
-            codeText
-          );
-
-          showCopiedState(button);
-
-        } catch (error) {
-
-          fallbackCopy(
-            codeText,
-            button
-          );
-        }
-      }
+    document.body.classList.add(
+      "dark-theme"
     );
 
-    pre.appendChild(button);
-  });
-}
+  } else {
 
-
-/* =========================================================
-   COPIED STATE
-   ========================================================= */
-
-function showCopiedState(button) {
-
-  button.textContent =
-    "Copied ✦";
-
-  button.classList.add(
-    "copied"
-  );
-
-  setTimeout(
-    () => {
-
-      button.textContent =
-        "Copy";
-
-      button.classList.remove(
-        "copied"
-      );
-
-    },
-    1400
-  );
-}
-
-
-/* =========================================================
-   FALLBACK COPY
-   ========================================================= */
-
-function fallbackCopy(
-  text,
-  button
-) {
-
-  try {
-
-    const textarea =
-      document.createElement(
-        "textarea"
-      );
-
-    textarea.value =
-      text;
-
-    textarea.style.position =
-      "fixed";
-
-    textarea.style.opacity =
-      "0";
-
-    document.body.appendChild(
-      textarea
-    );
-
-    textarea.select();
-
-    document.execCommand(
-      "copy"
-    );
-
-    textarea.remove();
-
-    showCopiedState(button);
-
-  } catch (error) {
-
-    console.error(
-      "Copy failed:",
-      error
+    document.body.classList.remove(
+      "dark-theme"
     );
   }
-}
+
+  updateThemeButton();
 
 
-/* =========================================================
-   HEADING IDS
-   ========================================================= */
+  themeButton.addEventListener(
+    "click",
+    () => {
 
-function addHeadingIds() {
+      document.body.classList.toggle(
+        "dark-theme"
+      );
 
-  const headings =
-    content.querySelectorAll(
-      "h1, h2, h3, h4"
-    );
-
-  const usedIds =
-    new Set();
-
-  headings.forEach(heading => {
-
-    const text =
-      heading.textContent
-        .toLowerCase()
-        .trim();
-
-    let baseId =
-      text
-        .replace(
-          /[^\w\s-]/g,
-          ""
-        )
-        .replace(
-          /\s+/g,
-          "-"
+      const dark =
+        document.body.classList.contains(
+          "dark-theme"
         );
 
-    if (!baseId) {
-      return;
+      localStorage.setItem(
+        "shared-ai-notes-theme",
+        dark
+          ? "dark"
+          : "light"
+      );
+
+      updateThemeButton();
     }
+  );
+}
 
-    let id =
-      baseId;
 
-    let counter =
-      2;
+function updateThemeButton() {
 
-    while (
-      usedIds.has(id)
-    ) {
+  if (!themeButton) {
+    return;
+  }
 
-      id =
-        `${baseId}-${counter}`;
+  const dark =
+    document.body.classList.contains(
+      "dark-theme"
+    );
 
-      counter++;
-    }
+  themeButton.textContent =
+    dark
+      ? "☀"
+      : "☾";
 
-    usedIds.add(id);
+  themeButton.setAttribute(
+    "aria-label",
+    dark
+      ? "Switch to light theme"
+      : "Switch to dark theme"
+  );
 
-    heading.id =
-      id;
-  });
+  themeButton.setAttribute(
+    "title",
+    dark
+      ? "Switch to light theme"
+      : "Switch to dark theme"
+  );
 }
 
 
 /* =========================================================
-   EXTERNAL LINKS
-   ========================================================= */
-
-function setupExternalLinks() {
-
-  const links =
-    content.querySelectorAll("a");
-
-  links.forEach(link => {
-
-    const href =
-      link.getAttribute("href");
-
-    if (
-      href &&
-      (
-        href.startsWith("http://") ||
-        href.startsWith("https://")
-      )
-    ) {
-
-      link.target =
-        "_blank";
-
-      link.rel =
-        "noopener noreferrer";
-    }
-  });
-}
-
-
-/* =========================================================
-   LOADING STATE
+   LOADING
    ========================================================= */
 
 function showLoading() {
-
-  content.classList.remove(
-    "note-loaded"
-  );
 
   content.innerHTML = `
     <div class="loading">
@@ -1193,12 +1291,12 @@ function showLoading() {
 
     </div>
   `;
+
+  content.classList.remove(
+    "note-loaded"
+  );
 }
 
-
-/* =========================================================
-   SIDEBAR LOADING
-   ========================================================= */
 
 function showLoadingSidebar() {
 
@@ -1220,17 +1318,13 @@ function showLoadingSidebar() {
 
 
 /* =========================================================
-   MESSAGE
+   EMPTY STATE
    ========================================================= */
 
 function showMessage(
   title,
   message
 ) {
-
-  content.classList.remove(
-    "note-loaded"
-  );
 
   content.innerHTML = `
     <div class="empty-state">
@@ -1256,10 +1350,6 @@ function showError(
   title,
   message
 ) {
-
-  content.classList.remove(
-    "note-loaded"
-  );
 
   content.innerHTML = `
     <div class="error">
@@ -1292,121 +1382,4 @@ function escapeHTML(value) {
     String(value);
 
   return div.innerHTML;
-}
-
-
-/* =========================================================
-   THEME
-   ========================================================= */
-
-function setupTheme() {
-
-  if (!themeButton) {
-    return;
-  }
-
-  const savedTheme =
-    localStorage.getItem(
-      "shared-ai-notes-theme"
-    );
-
-  /*
-   * Light theme is the default.
-   */
-
-  if (savedTheme === "dark") {
-
-    document.body.classList.add(
-      "dark-theme"
-    );
-
-  } else {
-
-    document.body.classList.remove(
-      "dark-theme"
-    );
-  }
-
-  updateThemeButton();
-
-  themeButton.addEventListener(
-    "click",
-    () => {
-
-      document.body.classList.toggle(
-        "dark-theme"
-      );
-
-      const isDark =
-        document.body.classList.contains(
-          "dark-theme"
-        );
-
-      localStorage.setItem(
-        "shared-ai-notes-theme",
-        isDark
-          ? "dark"
-          : "light"
-      );
-
-      updateThemeButton();
-    }
-  );
-}
-
-
-/* =========================================================
-   THEME BUTTON
-   ========================================================= */
-
-function updateThemeButton() {
-
-  if (!themeButton) {
-    return;
-  }
-
-  const isDark =
-    document.body.classList.contains(
-      "dark-theme"
-    );
-
-  themeButton.textContent =
-    isDark
-      ? "☀"
-      : "☾";
-
-  themeButton.setAttribute(
-    "aria-label",
-    isDark
-      ? "Switch to light theme"
-      : "Switch to dark theme"
-  );
-
-  themeButton.setAttribute(
-    "title",
-    isDark
-      ? "Switch to light theme"
-      : "Switch to dark theme"
-  );
-}
-
-
-/* =========================================================
-   START
-   ========================================================= */
-
-if (
-  document.readyState ===
-  "loading"
-) {
-
-  document.addEventListener(
-    "DOMContentLoaded",
-    initialize
-  );
-
-} else {
-
-  initialize();
-
 }
