@@ -10,269 +10,179 @@
 
   <meta
     name="description"
-    content="AI & ML Key Concepts — shared notes on artificial intelligence and machine learning."
-  >
-
-  <meta
-    name="theme-color"
-    content="#ffffff"
+    content="AI & ML Key Concepts — simple notes worth sharing."
   >
 
   <title>AI & ML Key Concepts</title>
-
-  <!-- =====================================================
-       FONTS
-       ===================================================== -->
-
-  <link
-    rel="preconnect"
-    href="https://fonts.googleapis.com"
-  >
-
-  <link
-    rel="preconnect"
-    href="https://fonts.gstatic.com"
-    crossorigin
-  >
-
-  <link
-    href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap"
-    rel="stylesheet"
-  >
-
-
-  <!-- =====================================================
-       MARKDOWN
-       ===================================================== -->
-
-  <script
-    src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"
-  ></script>
-
-
-  <!-- =====================================================
-       STYLES
-       ===================================================== -->
 
   <link
     rel="stylesheet"
     href="style.css"
   >
-</head>
 
+  <!-- Markdown parser -->
+  <script
+    src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"
+    defer
+  ></script>
+</head>
 
 <body>
 
   <!-- =====================================================
-       MOBILE OVERLAY
+       HEADER
        ===================================================== -->
 
-  <div
-    id="sidebar-overlay"
-    class="sidebar-overlay"
-  ></div>
+  <header>
+
+    <a
+      href="./"
+      class="brand"
+      aria-label="AI & ML Key Concepts home"
+    >
+      <span>✦</span>
+      <span>AI & ML Key Concepts</span>
+    </a>
+
+
+    <div class="header-actions">
+
+      <button
+        id="menu-button"
+        class="menu-button"
+        type="button"
+        aria-label="Open contents"
+        title="Open contents"
+      >
+        ☰
+      </button>
+
+
+      <button
+        id="theme-button"
+        class="theme-button"
+        type="button"
+        aria-label="Switch to dark theme"
+        title="Switch to dark theme"
+      >
+        ☾
+      </button>
+
+    </div>
+
+  </header>
 
 
   <!-- =====================================================
-       APP
+       APPLICATION
        ===================================================== -->
 
   <div class="app">
 
 
     <!-- ===================================================
-         SIDEBAR
+         SIDEBAR / CONTENTS
          =================================================== -->
 
     <aside
       id="sidebar"
       class="sidebar"
+      aria-label="Contents"
     >
 
-      <div class="sidebar-inner">
+      <!-- Three-line contents toggle -->
+
+      <button
+        id="contents-toggle"
+        class="contents-toggle"
+        type="button"
+        aria-label="Hide contents"
+        title="Hide contents"
+      >
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
 
 
-        <!-- ===============================================
-             SIDEBAR HEADER
-             =============================================== -->
+      <!-- Sidebar header -->
 
-        <div class="sidebar-header">
+      <div class="sidebar-header">
 
-          <div class="brand">
-
-            <div class="brand-mark">
-              ✦
-            </div>
-
-            <div class="brand-copy">
-
-              <div class="brand-title">
-                AI & ML Key Concepts
-              </div>
-
-              <div class="brand-subtitle">
-                Notes worth sharing
-              </div>
-
-            </div>
-
-          </div>
-
-
-          <button
-            id="close-sidebar"
-            class="close-sidebar"
-            type="button"
-            aria-label="Close navigation"
-          >
-            ×
-          </button>
-
+        <div class="sidebar-title">
+          CONTENTS ✦
         </div>
 
 
-        <!-- ===============================================
-             SEARCH
-             =============================================== -->
+        <!-- Search -->
 
-        <div class="search-wrapper">
-
-          <div class="search-box">
-
-            <span
-              class="search-icon"
-              aria-hidden="true"
-            >
-              ⌕
-            </span>
-
-            <input
-              id="search"
-              type="search"
-              placeholder="Search concepts..."
-              autocomplete="off"
-              spellcheck="false"
-              aria-label="Search concepts"
-            >
-
-            <span class="search-shortcut">
-              ⌘ K
-            </span>
-
-          </div>
-
-        </div>
-
-
-        <!-- ===============================================
-             TABLE OF CONTENTS
-             =============================================== -->
-
-        <div class="contents-header">
-
-          <span>
-            CONTENTS
-          </span>
-
-          <span class="contents-spark">
-            ✦
-          </span>
-
-        </div>
-
-
-        <nav
-          class="topic-navigation"
-          aria-label="AI and ML notes"
+        <input
+          id="search"
+          class="search-input"
+          type="search"
+          placeholder="Search concepts..."
+          autocomplete="off"
+          aria-label="Search concepts"
         >
 
-          <div class="no-results">
-            Loading concepts...
-          </div>
-
-        </nav>
+      </div>
 
 
-        <!-- ===============================================
-             SIDEBAR FOOTER
-             =============================================== -->
+      <!-- Notes -->
 
-        <div class="sidebar-footer">
+      <nav
+        class="topic-navigation"
+        aria-label="Note navigation"
+      >
 
-          <span>
-            Made with
-            <span class="heart">♥</span>
-            & curiosity
-          </span>
+        <!-- Topics are generated by app.js -->
 
-        </div>
+      </nav>
 
+
+      <!-- Sidebar footer -->
+
+      <div class="sidebar-footer">
+        Made with ♥ &amp; curiosity
       </div>
 
     </aside>
 
 
     <!-- ===================================================
+         MOBILE OVERLAY
+         =================================================== -->
+
+    <div
+      id="sidebar-overlay"
+      class="sidebar-overlay"
+      aria-hidden="true"
+    ></div>
+
+
+    <!-- ===================================================
          MAIN
          =================================================== -->
 
-    <main class="main">
+    <main id="main">
 
 
       <!-- =================================================
-           FIXED TOP NAVIGATION
+           TOP PREVIOUS / NEXT NAVIGATION
            ================================================= -->
 
-      <header class="top-bar">
+      <nav
+        class="page-navigation"
+        aria-label="Previous and next note"
+      >
 
+        <!-- Generated by app.js -->
 
-        <!-- ===============================================
-             MOBILE MENU
-             =============================================== -->
-
-        <button
-          id="menu-button"
-          class="menu-button"
-          type="button"
-          aria-label="Open navigation"
-        >
-          <span></span>
-          <span></span>
-          <span></span>
-        </button>
-
-
-        <!-- ===============================================
-             PREVIOUS / NEXT
-             =============================================== -->
-
-        <div
-          class="page-navigation"
-          aria-label="Note navigation"
-        >
-          <!-- Populated by app.js -->
-        </div>
-
-
-        <!-- ===============================================
-             THEME BUTTON
-             =============================================== -->
-
-        <button
-          id="theme-button"
-          class="theme-button"
-          type="button"
-          aria-label="Switch to dark theme"
-          title="Switch to dark theme"
-        >
-          ☾
-        </button>
-
-      </header>
+      </nav>
 
 
       <!-- =================================================
-           CONTENT AREA
+           CONTENT
            ================================================= -->
 
       <div class="content-wrapper">
@@ -296,18 +206,18 @@
 
       </div>
 
-
     </main>
 
   </div>
 
 
   <!-- =====================================================
-       APP SCRIPT
+       APP
        ===================================================== -->
 
   <script
     src="app.js"
+    defer
   ></script>
 
 </body>
