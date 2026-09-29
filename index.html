@@ -1,181 +1,163 @@
-<!DOCTYPE html> <html lang="en"> <head> <meta charset="UTF-8">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<meta
-name="viewport"
-content="width=device-width, initial-scale=1.0"
-
-<meta
-name="description"
-content="Xi Notes — personal notes and knowledge."
-
-<title>Xi Notes</title> <link rel="stylesheet" href="style.css"> <!-- Markdown parser --> <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script> </head> <body> <div class="app">
-<!-- ================================
-     SIDEBAR
-================================= -->
-
-<aside
-  class="sidebar"
-  id="sidebar"
->
-
-  <div class="sidebar-header">
-
-    <a
-      href="#"
-      class="logo"
-      onclick="window.scrollTo({top: 0, behavior: 'smooth'}); return false;"
-    >
-      Xi Notes
-    </a>
-
-    <button
-      id="close-sidebar"
-      class="close-sidebar"
-      type="button"
-      aria-label="Close menu"
-    >
-      ×
-    </button>
-
-  </div>
-
-
-  <!-- Search -->
-
-  <div class="search-container">
-
-    <div class="search-box">
-
-      <span class="search-icon">/</span>
-
-      <input
-        id="search"
-        type="search"
-        placeholder="Search notes"
-        autocomplete="off"
-        spellcheck="false"
-        aria-label="Search notes"
-      >
-
-      <span class="search-shortcut">
-        ⌘K
-      </span>
-
-    </div>
-
-  </div>
-
-
-  <!-- Notes -->
-
-  <nav
-    class="topic-navigation"
-    aria-label="Notes"
+  <meta
+    name="description"
+    content="AI & ML notes, experiments, ideas and things worth remembering."
   >
-    <!-- app.js loads notes here -->
-  </nav>
 
+  <title>AI Curiosity Lab</title>
 
-  <!-- Sidebar footer -->
+  <link rel="stylesheet" href="style.css">
 
-  <div class="sidebar-footer">
-    <span>Personal notes</span>
-  </div>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+</head>
 
-</aside>
+<body>
 
+  <div class="app">
 
-<!-- ================================
-     MAIN
-================================= -->
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="sidebar">
 
-<main class="main">
+      <div class="sidebar-header">
 
-  <!-- Top bar -->
+        <a
+          href="#"
+          class="logo"
+          onclick="window.scrollTo({top: 0, behavior: 'smooth'}); return false;"
+        >
+          AI Curiosity Lab
+        </a>
 
-  <header class="topbar">
-
-    <button
-      id="menu-button"
-      class="menu-button"
-      type="button"
-      aria-label="Open menu"
-      aria-controls="sidebar"
-      aria-expanded="false"
-    >
-      ☰
-    </button>
-
-
-    <div class="breadcrumb">
-
-      <span class="breadcrumb-home">
-        Xi Notes
-      </span>
-
-      <span class="breadcrumb-separator">
-        /
-      </span>
-
-      <span
-        id="current-topic"
-        class="current-topic"
-      >
-        Notes
-      </span>
-
-    </div>
-
-
-    <!-- Theme -->
-
-    <button
-      id="theme-button"
-      class="theme-button"
-      type="button"
-      aria-label="Toggle theme"
-      title="Toggle theme"
-    >
-      ☾
-    </button>
-
-  </header>
-
-
-  <!-- ================================
-       CONTENT
-  ================================= -->
-
-  <div class="content-wrapper">
-
-    <article
-      id="content"
-      class="content"
-    >
-
-      <!-- Initial screen -->
-
-      <div class="welcome">
-
-        <p class="welcome-label">
-          NOTES
-        </p>
-
-        <h1>
-          Xi Notes
-        </h1>
-
-        <p class="welcome-description">
-          A collection of notes, ideas,
-          concepts and things worth remembering.
-        </p>
+        <button
+          id="close-sidebar"
+          class="close-sidebar"
+          type="button"
+          aria-label="Close menu"
+        >
+          ×
+        </button>
 
       </div>
 
-    </article>
+      <!-- SEARCH -->
+      <div class="search-container">
+
+        <div class="search-box">
+
+          <span class="search-icon">⌕</span>
+
+          <input
+            id="search"
+            type="search"
+            placeholder="Search notes"
+            autocomplete="off"
+            spellcheck="false"
+            aria-label="Search notes"
+          >
+
+          <span class="search-shortcut">⌘K</span>
+
+        </div>
+
+      </div>
+
+      <!-- NOTES -->
+      <nav
+        class="topic-navigation"
+        aria-label="Notes"
+      ></nav>
+
+      <!-- FOOTER -->
+      <div class="sidebar-footer">
+        Made with ❤️ & curiosity
+      </div>
+
+    </aside>
+
+
+    <!-- MAIN -->
+    <main class="main">
+
+      <!-- STICKY TOP BAR -->
+      <header class="topbar">
+
+        <button
+          id="menu-button"
+          class="menu-button"
+          type="button"
+          aria-label="Open menu"
+        >
+          ☰
+        </button>
+
+
+        <div class="topbar-brand">
+          <span class="brand-mark">✦</span>
+          <span>AI Curiosity Lab</span>
+        </div>
+
+
+        <!-- THEME -->
+        <button
+          id="theme-button"
+          class="theme-button"
+          type="button"
+          aria-label="Switch to dark mode"
+          title="Switch to dark mode"
+        >
+          ☾
+        </button>
+
+      </header>
+
+
+      <!-- CONTENT -->
+      <div class="content-wrapper">
+
+        <article
+          id="content"
+          class="content"
+        >
+
+          <div class="welcome">
+
+            <p class="welcome-label">
+              CURRENTLY EXPLORING
+            </p>
+
+            <h1>
+              Always learning.
+            </h1>
+
+            <p class="welcome-description">
+              AI, machine learning, systems, experiments,
+              ideas and the occasional rabbit hole.
+            </p>
+
+          </div>
+
+        </article>
+
+      </div>
+
+    </main>
 
   </div>
 
-</main>
 
-</div> <!-- ================================ MOBILE OVERLAY ================================= --> <div id="sidebar-overlay" class="sidebar-overlay" ></div> <!-- ================================ APP JAVASCRIPT ================================= --> <script src="app.js"></script> <!-- ================================ THEME HANDLING ================================= --> <script> const themeButton = document.getElementById("theme-button"); function updateThemeIcon() { const isLight = document.body.classList.contains( "light-theme" ); themeButton.textContent = isLight ? "☾" : "☀"; themeButton.setAttribute( "aria-label", isLight ? "Switch to dark mode" : "Switch to light mode" ); } /* Restore saved theme */ const savedTheme = localStorage.getItem( "xi-notes-theme" ); if (savedTheme === "light") { document.body.classList.add( "light-theme" ); } updateThemeIcon(); /* Toggle theme */ themeButton.addEventListener( "click", () => { document.body.classList.toggle( "light-theme" ); const isLight = document.body.classList.contains( "light-theme" ); localStorage.setItem( "xi-notes-theme", isLight ? "light" : "dark" ); updateThemeIcon(); } ); </script> </body> </html>
+  <!-- MOBILE OVERLAY -->
+  <div
+    id="sidebar-overlay"
+    class="sidebar-overlay"
+  ></div>
+
+
+  <script src="app.js"></script>
+
+</body>
+</html>
