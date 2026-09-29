@@ -2,6 +2,7 @@
    AI & ML KEY CONCEPTS
    app.js
    ========================================================= */
+
 const GITHUB_USER = "jai92xi";
 const GITHUB_REPO = "Xi_Notes";
 const GITHUB_BRANCH = "main";
@@ -46,23 +47,41 @@ document.addEventListener("DOMContentLoaded", () => {
   closeSidebarButton = document.getElementById("close-sidebar");
   sidebarOverlay = document.getElementById("sidebar-overlay");
 
-  contentsToggle = document.getElementById("contents-toggle");
-  topicNavigation = document.getElementById("topic-navigation");
+  contentsToggle =
+    document.getElementById("contents-toggle");
 
-  previousButton = document.getElementById("previous-button");
-  nextButton = document.getElementById("next-button");
-  previousTitle = document.getElementById("previous-title");
-  nextTitle = document.getElementById("next-title");
+  topicNavigation =
+    document.getElementById("topic-navigation");
+
+  previousButton =
+    document.getElementById("previous-button");
+
+  nextButton =
+    document.getElementById("next-button");
+
+  previousTitle =
+    document.getElementById("previous-title");
+
+  nextTitle =
+    document.getElementById("next-title");
+
 
   configureMarkdown();
+
   setupTheme();
+
   setupSearch();
+
   setupKeyboardShortcuts();
+
   setupContentsToggle();
+
   setupMobileMenu();
+
   setupTopNavigation();
 
   loadTopics();
+
 });
 
 
@@ -73,7 +92,11 @@ document.addEventListener("DOMContentLoaded", () => {
 function configureMarkdown() {
 
   if (typeof marked === "undefined") {
-    console.error("Marked.js was not loaded.");
+
+    console.error(
+      "Marked.js was not loaded."
+    );
+
     return;
   }
 
@@ -81,6 +104,7 @@ function configureMarkdown() {
     gfm: true,
     breaks: true
   });
+
 }
 
 
@@ -100,50 +124,81 @@ async function loadTopics() {
       `${GITHUB_REPO}/contents/` +
       `${NOTES_FOLDER}?ref=${GITHUB_BRANCH}`;
 
-    const response = await fetch(apiURL, {
-      cache: "no-cache"
-    });
+
+    const response =
+      await fetch(
+        apiURL,
+        {
+          cache: "no-cache"
+        }
+      );
+
 
     if (!response.ok) {
+
       throw new Error(
         `GitHub API error: ${response.status}`
       );
+
     }
 
-    const files = await response.json();
+
+    const files =
+      await response.json();
+
 
     if (!Array.isArray(files)) {
-      throw new Error("Invalid GitHub API response.");
+
+      throw new Error(
+        "Invalid GitHub API response."
+      );
+
     }
 
-    topics = files
-      .filter(file =>
-        file &&
-        file.type === "file" &&
-        typeof file.name === "string" &&
-        file.name.toLowerCase().endsWith(".md")
-      )
-      .map(file => ({
-        file: file.name,
-        name: formatTopicName(file.name),
-        url: file.download_url
-      }))
-      .sort((a, b) =>
-        a.name.localeCompare(
-          b.name,
-          undefined,
-          {
-            numeric: true,
-            sensitivity: "base"
-          }
+
+    topics =
+      files
+        .filter(
+          file =>
+            file &&
+            file.type === "file" &&
+            typeof file.name === "string" &&
+            file.name
+              .toLowerCase()
+              .endsWith(".md")
         )
-      );
+        .map(
+          file => ({
+            file: file.name,
+
+            name:
+              formatTopicName(
+                file.name
+              ),
+
+            url:
+              file.download_url
+          })
+        )
+        .sort(
+          (a, b) =>
+            a.name.localeCompare(
+              b.name,
+              undefined,
+              {
+                numeric: true,
+                sensitivity: "base"
+              }
+            )
+        );
+
 
     currentTopicIndex = -1;
 
     createSidebar(topics);
 
     updateTopNavigation();
+
 
     if (topics.length > 0) {
 
@@ -172,7 +227,9 @@ async function loadTopics() {
       "Couldn’t load your notes.",
       "Please check your GitHub repository and notes folder."
     );
+
   }
+
 }
 
 
@@ -184,60 +241,106 @@ function formatTopicName(filename) {
 
   let name =
     filename
-      .replace(/\.md$/i, "")
-      .replace(/[_-]+/g, " ")
-      .replace(/([a-z0-9])([A-Z])/g, "$1 $2")
-      .replace(/([A-Z]+)([A-Z][a-z])/g, "$1 $2")
-      .replace(/\s+/g, " ")
+      .replace(
+        /\.md$/i,
+        ""
+      )
+      .replace(
+        /[_-]+/g,
+        " "
+      )
+      .replace(
+        /([a-z0-9])([A-Z])/g,
+        "$1 $2"
+      )
+      .replace(
+        /([A-Z]+)([A-Z][a-z])/g,
+        "$1 $2"
+      )
+      .replace(
+        /\s+/g,
+        " "
+      )
       .trim();
+
 
   name =
     name
       .toLowerCase()
       .split(" ")
       .filter(Boolean)
-      .map(word =>
-        word.charAt(0).toUpperCase() +
-        word.slice(1)
+      .map(
+        word =>
+          word.charAt(0).toUpperCase() +
+          word.slice(1)
       )
       .join(" ");
 
+
   const replacements = {
+
     "Ai": "AI",
     "Ml": "ML",
+
     "Llm": "LLM",
     "Llms": "LLMs",
+
     "Nlp": "NLP",
+
     "Cv": "CV",
+
     "Rag": "RAG",
+
     "Vllm": "vLLM",
+
     "Gpu": "GPU",
     "Gpus": "GPUs",
+
     "Cpu": "CPU",
     "Cpus": "CPUs",
+
     "Api": "API",
     "Apis": "APIs",
+
     "Mlp": "MLP",
+
     "Cnn": "CNN",
     "Cnns": "CNNs",
+
     "Rnn": "RNN",
     "Rnns": "RNNs",
+
     "Lstm": "LSTM",
+
     "Lora": "LoRA",
+
     "Sql": "SQL",
+
     "Json": "JSON",
+
     "Pytorch": "PyTorch",
+
     "Tensorflow": "TensorFlow",
+
     "Keras": "Keras",
+
     "Knn": "KNN",
+
     "Svm": "SVM",
+
     "Xgboost": "XGBoost"
+
   };
+
 
   return name
     .split(" ")
-    .map(word => replacements[word] || word)
+    .map(
+      word =>
+        replacements[word] || word
+    )
     .join(" ");
+
 }
 
 
@@ -251,9 +354,14 @@ function createSidebar(items) {
     return;
   }
 
+
   topicNavigation.innerHTML = "";
 
-  if (!Array.isArray(items) || items.length === 0) {
+
+  if (
+    !Array.isArray(items) ||
+    items.length === 0
+  ) {
 
     topicNavigation.innerHTML = `
       <div class="no-results">
@@ -264,12 +372,21 @@ function createSidebar(items) {
     return;
   }
 
+
   items.forEach(topic => {
 
-    const button = document.createElement("button");
+    const button =
+      document.createElement(
+        "button"
+      );
 
-    button.type = "button";
-    button.className = "topic-button";
+
+    button.type =
+      "button";
+
+    button.className =
+      "topic-button";
+
 
     button.innerHTML = `
       <span class="topic-dot">✦</span>
@@ -278,18 +395,31 @@ function createSidebar(items) {
       </span>
     `;
 
-    button.addEventListener("click", event => {
 
-      event.preventDefault();
-      event.stopPropagation();
+    button.addEventListener(
+      "click",
+      event => {
 
-      loadMarkdown(topic, true);
+        event.preventDefault();
+        event.stopPropagation();
 
-      closeMobileSidebar();
-    });
+        loadMarkdown(
+          topic,
+          true
+        );
 
-    topicNavigation.appendChild(button);
+        closeMobileSidebar();
+
+      }
+    );
+
+
+    topicNavigation.appendChild(
+      button
+    );
+
   });
+
 
   if (
     currentTopicIndex >= 0 &&
@@ -299,7 +429,9 @@ function createSidebar(items) {
     updateActiveTopic(
       topics[currentTopicIndex]
     );
+
   }
+
 }
 
 
@@ -312,36 +444,52 @@ async function loadMarkdown(
   scrollToTop = true
 ) {
 
-  if (!topic || !content) {
+  if (
+    !topic ||
+    !content
+  ) {
+
     return;
   }
 
+
   const index =
     topics.findIndex(
-      item => item.file === topic.file
+      item =>
+        item.file === topic.file
     );
+
 
   if (index === -1) {
     return;
   }
 
+
   /*
-   * Update navigation state immediately.
-   * This makes Previous / Next respond
-   * correctly even before Markdown finishes loading.
+   * Update the current index BEFORE
+   * fetching the Markdown file.
+   *
+   * This keeps Previous / Next
+   * navigation synchronized.
    */
-  currentTopicIndex = index;
+
+  currentTopicIndex =
+    index;
+
 
   updateTopNavigation();
 
   updateActiveTopic(topic);
 
+
   try {
 
     showLoading();
 
+
     const markdownURL =
       getMarkdownURL(topic);
+
 
     const response =
       await fetch(
@@ -351,32 +499,46 @@ async function loadMarkdown(
         }
       );
 
+
     if (!response.ok) {
 
       throw new Error(
         `Could not load ${topic.file} ` +
         `(HTTP ${response.status})`
       );
+
     }
+
 
     const markdown =
       await response.text();
 
-    if (typeof marked === "undefined") {
+
+    if (
+      typeof marked === "undefined"
+    ) {
 
       throw new Error(
         "Marked.js is unavailable."
       );
+
     }
 
-    const html =
-      marked.parse(markdown);
 
-    content.innerHTML = html;
+    const html =
+      marked.parse(
+        markdown
+      );
+
+
+    content.innerHTML =
+      html;
+
 
     content.classList.add(
       "note-loaded"
     );
+
 
     fixMarkdownImages();
 
@@ -390,12 +552,14 @@ async function loadMarkdown(
 
     updateTopNavigation();
 
+
     if (scrollToTop) {
 
       window.scrollTo({
         top: 0,
         behavior: "smooth"
       });
+
     }
 
   } catch (error) {
@@ -405,19 +569,25 @@ async function loadMarkdown(
       error
     );
 
-    /*
-     * Keep the navigation index correct
-     * even if the note itself fails to load.
-     */
-    currentTopicIndex = index;
-
-    updateTopNavigation();
 
     showError(
       "Couldn’t open this note.",
       topic.file
     );
+
+
+    /*
+     * Keep navigation state even
+     * when note loading fails.
+     */
+
+    currentTopicIndex =
+      index;
+
+    updateTopNavigation();
+
   }
+
 }
 
 
@@ -435,6 +605,7 @@ function getMarkdownURL(topic) {
     `${NOTES_FOLDER}/` +
     `${encodeURIComponent(topic.file)}`
   );
+
 }
 
 
@@ -448,31 +619,53 @@ function fixMarkdownImages() {
     return;
   }
 
+
   const images =
-    content.querySelectorAll("img");
+    content.querySelectorAll(
+      "img"
+    );
+
 
   images.forEach(image => {
 
     const source =
-      image.getAttribute("src");
+      image.getAttribute(
+        "src"
+      );
+
 
     if (!source) {
       return;
     }
 
+
     if (
-      source.startsWith("http://") ||
-      source.startsWith("https://") ||
-      source.startsWith("//") ||
-      source.startsWith("data:") ||
-      source.startsWith("blob:")
+      source.startsWith(
+        "http://"
+      ) ||
+      source.startsWith(
+        "https://"
+      ) ||
+      source.startsWith(
+        "//"
+      ) ||
+      source.startsWith(
+        "data:"
+      ) ||
+      source.startsWith(
+        "blob:"
+      )
     ) {
 
-      image.loading = "lazy";
-      image.decoding = "async";
+      image.loading =
+        "lazy";
+
+      image.decoding =
+        "async";
 
       return;
     }
+
 
     try {
 
@@ -483,11 +676,13 @@ function fixMarkdownImages() {
         `${GITHUB_BRANCH}/` +
         `${NOTES_FOLDER}/`;
 
+
       const imageURL =
         new URL(
           source,
           notesBaseURL
         );
+
 
       image.src =
         imageURL.href;
@@ -499,11 +694,18 @@ function fixMarkdownImages() {
         source,
         error
       );
+
     }
 
-    image.loading = "lazy";
-    image.decoding = "async";
+
+    image.loading =
+      "lazy";
+
+    image.decoding =
+      "async";
+
   });
+
 }
 
 
@@ -513,26 +715,25 @@ function fixMarkdownImages() {
 
 function setupTopNavigation() {
 
-  if (!previousButton || !nextButton) {
+  if (
+    !previousButton ||
+    !nextButton
+  ) {
+
     console.warn(
-      "Previous/Next navigation buttons were not found."
+      "Navigation buttons not found."
     );
 
     return;
   }
 
-  /*
-   * Remove accidental disabled state from HTML
-   * before JavaScript controls it.
-   */
-  previousButton.disabled = false;
-  nextButton.disabled = false;
 
-  /*
-   * Make buttons explicitly clickable.
-   */
-  previousButton.type = "button";
-  nextButton.type = "button";
+  previousButton.type =
+    "button";
+
+  nextButton.type =
+    "button";
+
 
   previousButton.addEventListener(
     "click",
@@ -542,8 +743,10 @@ function setupTopNavigation() {
       event.stopPropagation();
 
       goToPrevious();
+
     }
   );
+
 
   nextButton.addEventListener(
     "click",
@@ -553,15 +756,18 @@ function setupTopNavigation() {
       event.stopPropagation();
 
       goToNext();
+
     }
   );
 
+
   updateTopNavigation();
+
 }
 
 
 /* =========================================================
-   GO PREVIOUS
+   PREVIOUS
    ========================================================= */
 
 function goToPrevious() {
@@ -570,32 +776,42 @@ function goToPrevious() {
     !Array.isArray(topics) ||
     topics.length === 0
   ) {
+
     return;
   }
 
-  if (currentTopicIndex <= 0) {
+
+  if (
+    currentTopicIndex <= 0
+  ) {
+
     return;
   }
+
 
   const previousIndex =
     currentTopicIndex - 1;
 
+
   const previous =
     topics[previousIndex];
+
 
   if (!previous) {
     return;
   }
 
+
   loadMarkdown(
     previous,
     true
   );
+
 }
 
 
 /* =========================================================
-   GO NEXT
+   NEXT
    ========================================================= */
 
 function goToNext() {
@@ -604,63 +820,84 @@ function goToNext() {
     !Array.isArray(topics) ||
     topics.length === 0
   ) {
+
     return;
   }
 
+
   if (
     currentTopicIndex < 0 ||
-    currentTopicIndex >= topics.length - 1
+    currentTopicIndex >=
+      topics.length - 1
   ) {
+
     return;
   }
+
 
   const nextIndex =
     currentTopicIndex + 1;
 
+
   const next =
     topics[nextIndex];
+
 
   if (!next) {
     return;
   }
 
+
   loadMarkdown(
     next,
     true
   );
+
 }
 
 
 /* =========================================================
-   UPDATE NAVIGATION
+   UPDATE TOP NAVIGATION
    ========================================================= */
 
 function updateTopNavigation() {
 
-  if (!previousButton || !nextButton) {
+  if (
+    !previousButton ||
+    !nextButton
+  ) {
+
     return;
   }
 
+
   const validIndex =
-    Number.isInteger(currentTopicIndex) &&
+    Number.isInteger(
+      currentTopicIndex
+    ) &&
     currentTopicIndex >= 0 &&
-    currentTopicIndex < topics.length;
+    currentTopicIndex <
+      topics.length;
+
 
   const hasPrevious =
     validIndex &&
     currentTopicIndex > 0;
 
+
   const hasNext =
     validIndex &&
-    currentTopicIndex < topics.length - 1;
+    currentTopicIndex <
+      topics.length - 1;
 
 
   /*
-   * PREVIOUS
+   * Previous
    */
 
   previousButton.disabled =
     !hasPrevious;
+
 
   previousButton.setAttribute(
     "aria-disabled",
@@ -668,6 +905,7 @@ function updateTopNavigation() {
       ? "false"
       : "true"
   );
+
 
   if (previousTitle) {
 
@@ -677,15 +915,17 @@ function updateTopNavigation() {
             currentTopicIndex - 1
           ].name
         : "Start";
+
   }
 
 
   /*
-   * NEXT
+   * Next
    */
 
   nextButton.disabled =
     !hasNext;
+
 
   nextButton.setAttribute(
     "aria-disabled",
@@ -693,6 +933,7 @@ function updateTopNavigation() {
       ? "false"
       : "true"
   );
+
 
   if (nextTitle) {
 
@@ -702,7 +943,9 @@ function updateTopNavigation() {
             currentTopicIndex + 1
           ].name
         : "You're caught up ✦";
+
   }
+
 }
 
 
@@ -710,16 +953,24 @@ function updateTopNavigation() {
    ACTIVE TOPIC
    ========================================================= */
 
-function updateActiveTopic(topic) {
+function updateActiveTopic(
+  topic
+) {
 
-  if (!topicNavigation || !topic) {
+  if (
+    !topicNavigation ||
+    !topic
+  ) {
+
     return;
   }
+
 
   const buttons =
     topicNavigation.querySelectorAll(
       ".topic-button"
     );
+
 
   buttons.forEach(button => {
 
@@ -728,19 +979,24 @@ function updateActiveTopic(topic) {
         ".topic-name"
       );
 
+
     if (!name) {
       return;
     }
+
 
     const active =
       name.textContent.trim() ===
       topic.name;
 
+
     button.classList.toggle(
       "active",
       active
     );
+
   });
+
 }
 
 
@@ -754,6 +1010,7 @@ function setupSearch() {
     return;
   }
 
+
   searchInput.addEventListener(
     "input",
     event => {
@@ -763,41 +1020,46 @@ function setupSearch() {
           .toLowerCase()
           .trim();
 
+
       if (!query) {
 
-        createSidebar(topics);
-
-        if (
-          currentTopicIndex >= 0 &&
-          topics[currentTopicIndex]
-        ) {
-
-          updateActiveTopic(
-            topics[currentTopicIndex]
-          );
-        }
+        createSidebar(
+          topics
+        );
 
         return;
       }
 
+
       const filtered =
-        topics.filter(topic => {
+        topics.filter(
+          topic => {
 
-          const name =
-            topic.name.toLowerCase();
+            const name =
+              topic.name
+                .toLowerCase();
 
-          const filename =
-            topic.file.toLowerCase();
+            const filename =
+              topic.file
+                .toLowerCase();
 
-          return (
-            name.includes(query) ||
-            filename.includes(query)
-          );
-        });
 
-      createSidebar(filtered);
+            return (
+              name.includes(query) ||
+              filename.includes(query)
+            );
+
+          }
+        );
+
+
+      createSidebar(
+        filtered
+      );
+
     }
   );
+
 }
 
 
@@ -818,16 +1080,21 @@ function setupKeyboardShortcuts() {
       if (
         (event.ctrlKey ||
           event.metaKey) &&
-        event.key.toLowerCase() === "k"
+        event.key.toLowerCase() ===
+          "k"
       ) {
 
         event.preventDefault();
 
+
         if (searchInput) {
 
           searchInput.focus();
+
           searchInput.select();
+
         }
+
       }
 
 
@@ -835,44 +1102,59 @@ function setupKeyboardShortcuts() {
        * ESC
        */
 
-      if (event.key === "Escape") {
+      if (
+        event.key ===
+        "Escape"
+      ) {
 
         if (searchInput) {
 
           searchInput.value = "";
+
           searchInput.blur();
 
-          createSidebar(topics);
+          createSidebar(
+            topics
+          );
+
         }
 
+
         closeMobileSidebar();
+
       }
 
 
       /*
-       * LEFT ARROW
+       * LEFT
        */
 
       if (
-        event.key === "ArrowLeft" &&
+        event.key ===
+          "ArrowLeft" &&
         !isTyping(event)
       ) {
 
-        if (currentTopicIndex > 0) {
+        if (
+          currentTopicIndex > 0
+        ) {
 
           event.preventDefault();
 
           goToPrevious();
+
         }
+
       }
 
 
       /*
-       * RIGHT ARROW
+       * RIGHT
        */
 
       if (
-        event.key === "ArrowRight" &&
+        event.key ===
+          "ArrowRight" &&
         !isTyping(event)
       ) {
 
@@ -885,10 +1167,14 @@ function setupKeyboardShortcuts() {
           event.preventDefault();
 
           goToNext();
+
         }
+
       }
+
     }
   );
+
 }
 
 
@@ -898,49 +1184,39 @@ function setupKeyboardShortcuts() {
 
 function setupContentsToggle() {
 
-  if (!contentsToggle || !sidebar) {
+  if (
+    !contentsToggle ||
+    !sidebar
+  ) {
 
     console.warn(
-      "Contents toggle or sidebar was not found."
+      "Contents toggle or sidebar not found."
     );
 
     return;
   }
 
 
-  /*
-   * Make sure the button itself is a button.
-   */
-
-  contentsToggle.type = "button";
+  contentsToggle.type =
+    "button";
 
 
   /*
-   * Start with contents visible.
+   * Initial state.
    */
 
   sidebar.classList.remove(
     "contents-hidden"
   );
 
-  contentsToggle.setAttribute(
-    "aria-expanded",
-    "true"
-  );
 
-  contentsToggle.setAttribute(
-    "aria-label",
-    "Hide contents"
-  );
-
-  contentsToggle.setAttribute(
-    "title",
-    "Hide contents"
+  setContentsToggleState(
+    false
   );
 
 
   /*
-   * Toggle handler.
+   * Click.
    */
 
   contentsToggle.addEventListener(
@@ -951,53 +1227,68 @@ function setupContentsToggle() {
       event.stopPropagation();
 
 
-      const isHidden =
+      const hidden =
         sidebar.classList.contains(
           "contents-hidden"
         );
 
 
-      const newHiddenState =
-        !isHidden;
-
-
-      sidebar.classList.toggle(
-        "contents-hidden",
-        newHiddenState
+      setContentsToggleState(
+        !hidden
       );
 
-
-      contentsToggle.setAttribute(
-        "aria-expanded",
-        newHiddenState
-          ? "false"
-          : "true"
-      );
-
-
-      contentsToggle.setAttribute(
-        "aria-label",
-        newHiddenState
-          ? "Show contents"
-          : "Hide contents"
-      );
-
-
-      contentsToggle.setAttribute(
-        "title",
-        newHiddenState
-          ? "Show contents"
-          : "Hide contents"
-      );
-
-
-      /*
-       * Keep focus on the button.
-       */
-
-      contentsToggle.focus();
     }
   );
+
+}
+
+
+/* =========================================================
+   SET CONTENTS STATE
+   ========================================================= */
+
+function setContentsToggleState(
+  hidden
+) {
+
+  if (
+    !sidebar ||
+    !contentsToggle
+  ) {
+
+    return;
+  }
+
+
+  sidebar.classList.toggle(
+    "contents-hidden",
+    hidden
+  );
+
+
+  contentsToggle.setAttribute(
+    "aria-expanded",
+    hidden
+      ? "false"
+      : "true"
+  );
+
+
+  contentsToggle.setAttribute(
+    "aria-label",
+    hidden
+      ? "Show contents"
+      : "Hide contents"
+  );
+
+
+  contentsToggle.setAttribute(
+    "title",
+    hidden
+      ? "Show contents"
+      : "Hide contents"
+  );
+
 }
 
 
@@ -1009,7 +1300,9 @@ function setupMobileMenu() {
 
   if (menuButton) {
 
-    menuButton.type = "button";
+    menuButton.type =
+      "button";
+
 
     menuButton.addEventListener(
       "click",
@@ -1019,14 +1312,18 @@ function setupMobileMenu() {
         event.stopPropagation();
 
         openMobileSidebar();
+
       }
     );
+
   }
 
 
   if (closeSidebarButton) {
 
-    closeSidebarButton.type = "button";
+    closeSidebarButton.type =
+      "button";
+
 
     closeSidebarButton.addEventListener(
       "click",
@@ -1036,8 +1333,10 @@ function setupMobileMenu() {
         event.stopPropagation();
 
         closeMobileSidebar();
+
       }
     );
+
   }
 
 
@@ -1050,9 +1349,12 @@ function setupMobileMenu() {
         event.preventDefault();
 
         closeMobileSidebar();
+
       }
     );
+
   }
+
 }
 
 
@@ -1067,18 +1369,33 @@ function openMobileSidebar() {
     sidebar.classList.add(
       "mobile-open"
     );
+
   }
+
 
   if (sidebarOverlay) {
 
     sidebarOverlay.classList.add(
       "active"
     );
+
   }
+
+
+  if (menuButton) {
+
+    menuButton.setAttribute(
+      "aria-expanded",
+      "true"
+    );
+
+  }
+
 
   document.body.classList.add(
     "sidebar-open"
   );
+
 }
 
 
@@ -1093,18 +1410,33 @@ function closeMobileSidebar() {
     sidebar.classList.remove(
       "mobile-open"
     );
+
   }
+
 
   if (sidebarOverlay) {
 
     sidebarOverlay.classList.remove(
       "active"
     );
+
   }
+
+
+  if (menuButton) {
+
+    menuButton.setAttribute(
+      "aria-expanded",
+      "false"
+    );
+
+  }
+
 
   document.body.classList.remove(
     "sidebar-open"
   );
+
 }
 
 
@@ -1118,12 +1450,20 @@ function setupTheme() {
     return;
   }
 
+
+  themeButton.type =
+    "button";
+
+
   const saved =
     localStorage.getItem(
       "shared-ai-notes-theme"
     );
 
-  if (saved === "dark") {
+
+  if (
+    saved === "dark"
+  ) {
 
     document.body.classList.add(
       "dark-theme"
@@ -1134,11 +1474,12 @@ function setupTheme() {
     document.body.classList.remove(
       "dark-theme"
     );
+
   }
+
 
   updateThemeButton();
 
-  themeButton.type = "button";
 
   themeButton.addEventListener(
     "click",
@@ -1147,14 +1488,17 @@ function setupTheme() {
       event.preventDefault();
       event.stopPropagation();
 
+
       document.body.classList.toggle(
         "dark-theme"
       );
+
 
       const dark =
         document.body.classList.contains(
           "dark-theme"
         );
+
 
       localStorage.setItem(
         "shared-ai-notes-theme",
@@ -1163,9 +1507,12 @@ function setupTheme() {
           : "light"
       );
 
+
       updateThemeButton();
+
     }
   );
+
 }
 
 
@@ -1179,15 +1526,18 @@ function updateThemeButton() {
     return;
   }
 
+
   const dark =
     document.body.classList.contains(
       "dark-theme"
     );
 
+
   themeButton.textContent =
     dark
       ? "☀"
       : "☾";
+
 
   themeButton.setAttribute(
     "aria-label",
@@ -1196,12 +1546,14 @@ function updateThemeButton() {
       : "Switch to dark theme"
   );
 
+
   themeButton.setAttribute(
     "title",
     dark
       ? "Switch to light theme"
       : "Switch to dark theme"
   );
+
 }
 
 
@@ -1215,32 +1567,44 @@ function addCopyButtons() {
     return;
   }
 
+
   const codeBlocks =
     content.querySelectorAll(
       "pre > code"
     );
+
 
   codeBlocks.forEach(code => {
 
     const pre =
       code.parentElement;
 
+
     if (
       pre.querySelector(
         ".copy-button"
       )
     ) {
+
       return;
     }
+
 
     const button =
       document.createElement(
         "button"
       );
 
-    button.type = "button";
-    button.className = "copy-button";
-    button.textContent = "Copy";
+
+    button.type =
+      "button";
+
+    button.className =
+      "copy-button";
+
+    button.textContent =
+      "Copy";
+
 
     button.addEventListener(
       "click",
@@ -1249,31 +1613,29 @@ function addCopyButtons() {
         event.preventDefault();
         event.stopPropagation();
 
+
         try {
 
-          await navigator.clipboard.writeText(
-            code.innerText
-          );
+          if (
+            navigator.clipboard &&
+            window.isSecureContext
+          ) {
 
-          button.textContent =
-            "Copied ✦";
+            await navigator.clipboard.writeText(
+              code.innerText
+            );
 
-          button.classList.add(
-            "copied"
-          );
+          } else {
 
-          setTimeout(
-            () => {
+            throw new Error(
+              "Clipboard API unavailable."
+            );
 
-              button.textContent =
-                "Copy";
+          }
 
-              button.classList.remove(
-                "copied"
-              );
 
-            },
-            1400
+          showCopied(
+            button
           );
 
         } catch (error) {
@@ -1282,12 +1644,53 @@ function addCopyButtons() {
             code.innerText,
             button
           );
+
         }
+
       }
     );
 
-    pre.appendChild(button);
+
+    pre.appendChild(
+      button
+    );
+
   });
+
+}
+
+
+/* =========================================================
+   COPIED STATE
+   ========================================================= */
+
+function showCopied(
+  button
+) {
+
+  button.textContent =
+    "Copied ✦";
+
+
+  button.classList.add(
+    "copied"
+  );
+
+
+  setTimeout(
+    () => {
+
+      button.textContent =
+        "Copy";
+
+      button.classList.remove(
+        "copied"
+      );
+
+    },
+    1400
+  );
+
 }
 
 
@@ -1305,43 +1708,55 @@ function fallbackCopy(
       "textarea"
     );
 
-  textarea.value = text;
 
-  textarea.style.position = "fixed";
-  textarea.style.left = "-9999px";
+  textarea.value =
+    text;
+
+
+  textarea.style.position =
+    "fixed";
+
+  textarea.style.left =
+    "-9999px";
+
+  textarea.style.top =
+    "0";
+
+  textarea.style.opacity =
+    "0";
+
 
   document.body.appendChild(
     textarea
   );
 
+
+  textarea.focus();
+
   textarea.select();
+
 
   try {
 
-    document.execCommand(
-      "copy"
-    );
+    const successful =
+      document.execCommand(
+        "copy"
+      );
 
-    button.textContent =
-      "Copied ✦";
 
-    button.classList.add(
-      "copied"
-    );
+    if (successful) {
 
-    setTimeout(
-      () => {
+      showCopied(
+        button
+      );
 
-        button.textContent =
-          "Copy";
+    } else {
 
-        button.classList.remove(
-          "copied"
-        );
+      console.error(
+        "Copy command failed."
+      );
 
-      },
-      1400
-    );
+    }
 
   } catch (error) {
 
@@ -1349,9 +1764,12 @@ function fallbackCopy(
       "Copy failed:",
       error
     );
+
   }
 
+
   textarea.remove();
+
 }
 
 
@@ -1365,51 +1783,71 @@ function addHeadingIds() {
     return;
   }
 
+
   const headings =
     content.querySelectorAll(
       "h1, h2, h3, h4"
     );
 
-  const used = new Set();
 
-  headings.forEach(heading => {
+  const used =
+    new Set();
 
-    const text =
-      heading.textContent
-        .toLowerCase()
-        .trim();
 
-    let id =
-      text
-        .replace(
-          /[^\w\s-]/g,
-          ""
-        )
-        .replace(
-          /\s+/g,
-          "-"
-        );
+  headings.forEach(
+    heading => {
 
-    if (!id) {
-      return;
+      const text =
+        heading.textContent
+          .toLowerCase()
+          .trim();
+
+
+      let id =
+        text
+          .replace(
+            /[^\w\s-]/g,
+            ""
+          )
+          .replace(
+            /\s+/g,
+            "-"
+          );
+
+
+      if (!id) {
+        return;
+      }
+
+
+      const original =
+        id;
+
+
+      let counter =
+        2;
+
+
+      while (
+        used.has(id)
+      ) {
+
+        id =
+          `${original}-${counter}`;
+
+        counter++;
+
+      }
+
+
+      used.add(id);
+
+      heading.id =
+        id;
+
     }
+  );
 
-    const original = id;
-
-    let counter = 2;
-
-    while (used.has(id)) {
-
-      id =
-        `${original}-${counter}`;
-
-      counter++;
-    }
-
-    used.add(id);
-
-    heading.id = id;
-  });
 }
 
 
@@ -1423,28 +1861,46 @@ function setupExternalLinks() {
     return;
   }
 
+
   const links =
-    content.querySelectorAll("a");
+    content.querySelectorAll(
+      "a"
+    );
 
-  links.forEach(link => {
 
-    const href =
-      link.getAttribute("href");
+  links.forEach(
+    link => {
 
-    if (
-      href &&
-      (
-        href.startsWith("http://") ||
-        href.startsWith("https://")
-      )
-    ) {
+      const href =
+        link.getAttribute(
+          "href"
+        );
 
-      link.target = "_blank";
 
-      link.rel =
-        "noopener noreferrer";
+      if (
+        href &&
+        (
+          href.startsWith(
+            "http://"
+          ) ||
+          href.startsWith(
+            "https://"
+          )
+        )
+      ) {
+
+        link.target =
+          "_blank";
+
+
+        link.rel =
+          "noopener noreferrer";
+
+      }
+
     }
-  });
+  );
+
 }
 
 
@@ -1457,20 +1913,24 @@ function isTyping(event) {
   const element =
     event.target;
 
+
   if (!element) {
     return false;
   }
+
 
   const tag =
     element.tagName
       ? element.tagName.toLowerCase()
       : "";
 
+
   return (
     tag === "input" ||
     tag === "textarea" ||
     element.isContentEditable
   );
+
 }
 
 
@@ -1484,6 +1944,13 @@ function showLoading() {
     return;
   }
 
+
+  content.setAttribute(
+    "aria-busy",
+    "true"
+  );
+
+
   content.innerHTML = `
     <div class="loading">
 
@@ -1496,11 +1963,17 @@ function showLoading() {
     </div>
   `;
 
+
   content.classList.remove(
     "note-loaded"
   );
+
 }
 
+
+/* =========================================================
+   LOADING SIDEBAR
+   ========================================================= */
 
 function showLoadingSidebar() {
 
@@ -1508,11 +1981,13 @@ function showLoadingSidebar() {
     return;
   }
 
+
   topicNavigation.innerHTML = `
     <div class="no-results">
       Loading concepts...
     </div>
   `;
+
 }
 
 
@@ -1529,6 +2004,13 @@ function showMessage(
     return;
   }
 
+
+  content.setAttribute(
+    "aria-busy",
+    "false"
+  );
+
+
   content.innerHTML = `
     <div class="empty-state">
 
@@ -1542,6 +2024,7 @@ function showMessage(
 
     </div>
   `;
+
 }
 
 
@@ -1558,6 +2041,13 @@ function showError(
     return;
   }
 
+
+  content.setAttribute(
+    "aria-busy",
+    "false"
+  );
+
+
   content.innerHTML = `
     <div class="error">
 
@@ -1571,6 +2061,7 @@ function showError(
 
     </div>
   `;
+
 }
 
 
@@ -1578,15 +2069,20 @@ function showError(
    ESCAPE HTML
    ========================================================= */
 
-function escapeHTML(value) {
+function escapeHTML(
+  value
+) {
 
   const div =
     document.createElement(
       "div"
     );
 
+
   div.textContent =
     String(value);
 
+
   return div.innerHTML;
+
 }
