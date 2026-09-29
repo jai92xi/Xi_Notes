@@ -1,5 +1,6 @@
 /* =========================================================
    AI & ML KEY CONCEPTS
+   app.js
    ========================================================= */
 
 const GITHUB_USER = "jai92xi";
@@ -49,12 +50,19 @@ let currentTopicIndex = -1;
    ========================================================= */
 
 function initialize() {
+
   configureMarkdown();
+
   setupSearch();
+
   setupKeyboardShortcuts();
+
   setupMobileMenu();
+
   setupTheme();
+
   loadTopics();
+
 }
 
 
@@ -75,18 +83,22 @@ async function loadTopics() {
       await fetch(apiUrl);
 
     if (!response.ok) {
+
       throw new Error(
         `GitHub API returned ${response.status}`
       );
+
     }
 
     const files =
       await response.json();
 
     if (!Array.isArray(files)) {
+
       throw new Error(
         "Invalid notes response."
       );
+
     }
 
     topics =
@@ -101,13 +113,6 @@ async function loadTopics() {
 
           file: file.name,
 
-          /*
-           * Display name:
-           * - removes .md
-           * - replaces _ and - with spaces
-           * - converts camelCase to separate words
-           * - uses consistent Title Case
-           */
           name:
             formatTopicName(file.name),
 
@@ -165,24 +170,6 @@ async function loadTopics() {
 
 /* =========================================================
    FORMAT TOPIC NAME
-   =========================================================
-
-   Examples:
-
-   Early_Stopping.md
-   → Early Stopping
-
-   batch-normalization.md
-   → Batch Normalization
-
-   imbalanced data handling.md
-   → Imbalanced Data Handling
-
-   VLLM.md
-   → Vllm
-
-   someAIConcept.md
-   → Some AI Concept
    ========================================================= */
 
 function formatTopicName(filename) {
@@ -197,56 +184,63 @@ function formatTopicName(filename) {
       .trim();
 
 
-  /*
-   * Convert everything to consistent Title Case.
-   */
   name =
     name
       .toLowerCase()
       .split(" ")
       .filter(Boolean)
-      .map(word => {
-
-        return word.charAt(0).toUpperCase() +
-          word.slice(1);
-
-      })
+      .map(word =>
+        word.charAt(0).toUpperCase() +
+        word.slice(1)
+      )
       .join(" ");
 
 
-  /*
-   * Common AI / ML abbreviations.
-   * Keeps naming consistent and readable.
-   */
   const abbreviations = {
+
     "Ai": "AI",
     "Ml": "ML",
     "Llm": "LLM",
     "Llms": "LLMs",
+
     "Nlp": "NLP",
     "Cv": "CV",
+
     "Rag": "RAG",
     "Vllm": "vLLM",
+
     "Gpu": "GPU",
     "Gpus": "GPUs",
+
     "Cpu": "CPU",
     "Cpus": "CPUs",
+
     "Api": "API",
     "Apis": "APIs",
+
     "Mlp": "MLP",
+
     "Cnn": "CNN",
     "Cnns": "CNNs",
+
     "Rnn": "RNN",
     "Rnns": "RNNs",
+
     "Lstm": "LSTM",
+
     "Lora": "LoRA",
+
     "Sql": "SQL",
     "Json": "JSON",
+
     "Pytorch": "PyTorch",
     "Tensorflow": "TensorFlow",
+
     "Knn": "KNN",
     "Svm": "SVM",
+
     "Xgboost": "XGBoost"
+
   };
 
 
@@ -260,6 +254,7 @@ function formatTopicName(filename) {
 
 
   return name;
+
 }
 
 
@@ -274,9 +269,11 @@ function createSidebar(items = topics) {
       ".topic-navigation"
     );
 
+
   if (!navigation) {
     return;
   }
+
 
   navigation.innerHTML = "";
 
@@ -290,6 +287,7 @@ function createSidebar(items = topics) {
     `;
 
     return;
+
   }
 
 
@@ -298,6 +296,7 @@ function createSidebar(items = topics) {
     const button =
       document.createElement("button");
 
+
     button.type =
       "button";
 
@@ -305,9 +304,6 @@ function createSidebar(items = topics) {
       "topic-button";
 
 
-    /*
-     * Cute replacement for ├──
-     */
     button.innerHTML = `
       <span class="topic-dot">✦</span>
 
@@ -417,12 +413,19 @@ async function loadMarkdown(
 
 
     /*
-     * Add Previous / Next navigation
-     * directly at the top of the content.
+     * IMPORTANT:
      *
-     * This has intentionally been REMOVED.
-     * Navigation exists ONLY in the frozen top bar.
+     * Markdown images such as:
+     *
+     *   ![Early Stopping](../images/early_stopping1.png)
+     *
+     * need to resolve correctly on GitHub Pages.
+     *
+     * This function converts relative image URLs
+     * into absolute GitHub Pages URLs.
      */
+
+    fixMarkdownImages();
 
 
     addHeadingIds();
@@ -435,14 +438,8 @@ async function loadMarkdown(
 
 
     /*
-     * Keep notes list open.
-     *
-     * No auto-collapse.
+     * Sidebar intentionally stays open.
      */
-
-
-    closeMobileSidebar();
-
 
     if (scrollToTop) {
 
@@ -472,10 +469,125 @@ async function loadMarkdown(
 
 
 /* =========================================================
-   UPDATE TOP NAVIGATION
+   FIX MARKDOWN IMAGES
    =========================================================
 
-   Navigation is ONLY in the frozen top bar.
+   Examples:
+
+   ../images/example.png
+   → /Xi_Notes/images/example.png
+
+   ./images/example.png
+   → /Xi_Notes/notes/images/example.png
+
+   images/example.png
+   → /Xi_Notes/notes/images/example.png
+
+   Absolute URLs are left untouched.
+   ========================================================= */
+
+function fixMarkdownImages() {
+
+  if (!content) {
+    return;
+  }
+
+
+  const images =
+    content.querySelectorAll("img");
+
+
+  images.forEach(image => {
+
+    const source =
+      image.getAttribute("src");
+
+
+    if (!source) {
+      return;
+    }
+
+
+    /*
+     * Leave external images alone.
+     */
+
+    if (
+      source.startsWith("http://") ||
+      source.startsWith("https://") ||
+      source.startsWith("//") ||
+      source.startsWith("data:") ||
+      source.startsWith("blob:")
+    ) {
+
+      return;
+
+    }
+
+
+    /*
+     * Leave root-relative URLs alone.
+     */
+
+    if (source.startsWith("/")) {
+
+      image.loading =
+        "lazy";
+
+      image.decoding =
+        "async";
+
+      return;
+
+    }
+
+
+    /*
+     * Build URL relative to:
+     *
+     * /Xi_Notes/notes/
+     */
+
+    const basePath =
+      `${window.location.origin}/${GITHUB_REPO}/${NOTES_FOLDER}/`;
+
+
+    try {
+
+      const absoluteURL =
+        new URL(
+          source,
+          basePath
+        );
+
+
+      image.src =
+        absoluteURL.href;
+
+
+    } catch (error) {
+
+      console.warn(
+        "Could not resolve image:",
+        source
+      );
+
+    }
+
+
+    image.loading =
+      "lazy";
+
+    image.decoding =
+      "async";
+
+  });
+
+}
+
+
+/* =========================================================
+   TOP PREVIOUS / NEXT NAVIGATION
    ========================================================= */
 
 function updateTopNavigation() {
@@ -802,8 +914,6 @@ function setupKeyboardShortcuts() {
     event => {
 
 
-      /* CTRL/CMD + K */
-
       if (
         (event.metaKey ||
           event.ctrlKey) &&
@@ -825,8 +935,6 @@ function setupKeyboardShortcuts() {
       }
 
 
-      /* ESC */
-
       if (
         event.key === "Escape"
       ) {
@@ -846,8 +954,6 @@ function setupKeyboardShortcuts() {
 
       }
 
-
-      /* LEFT ARROW */
 
       if (
         event.key === "ArrowLeft" &&
@@ -870,8 +976,6 @@ function setupKeyboardShortcuts() {
 
       }
 
-
-      /* RIGHT ARROW */
 
       if (
         event.key === "ArrowRight" &&
@@ -966,6 +1070,11 @@ function setupMobileMenu() {
     );
 
   }
+
+
+  /*
+   * The notes list is NOT automatically collapsed.
+   */
 
 }
 
@@ -1386,7 +1495,7 @@ function showLoadingSidebar() {
 
   navigation.innerHTML = `
     <div class="no-results">
-      Loading notes...
+      Loading concepts...
     </div>
   `;
 
