@@ -36,8 +36,6 @@
         class="menu-button"
         type="button"
         aria-label="Open contents"
-        aria-controls="sidebar"
-        aria-expanded="false"
         title="Open contents"
       >
         ☰
@@ -69,44 +67,48 @@
     aria-label="Contents"
   >
 
-    <!-- Contents toggle -->
-
-    <button
-      id="contents-toggle"
-      class="contents-toggle"
-      type="button"
-      aria-expanded="true"
-      aria-controls="topic-navigation"
-      aria-label="Hide contents"
-      title="Hide contents"
-    >
-      <span aria-hidden="true"></span>
-      <span aria-hidden="true"></span>
-      <span aria-hidden="true"></span>
-    </button>
-
-
-    <!-- Search -->
+    <!-- ===================================================
+         CONTENTS HEADER
+         Search + Hide/Show in one box
+         =================================================== -->
 
     <div
       id="sidebar-header"
       class="sidebar-header"
     >
 
-      <input
-        id="search"
-        class="search-input"
-        type="search"
-        placeholder="⌕  Search concepts..."
-        autocomplete="off"
-        spellcheck="false"
-        aria-label="Search concepts"
-      >
+      <div class="contents-search-box">
+
+        <input
+          id="search"
+          class="search-input"
+          type="search"
+          placeholder="⌕  Search concepts..."
+          autocomplete="off"
+          aria-label="Search concepts"
+        >
+
+        <button
+          id="contents-toggle"
+          class="contents-toggle"
+          type="button"
+          aria-expanded="true"
+          aria-label="Hide contents"
+          title="Hide contents"
+        >
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+
+      </div>
 
     </div>
 
 
-    <!-- Topics -->
+    <!-- ===================================================
+         TOPICS
+         =================================================== -->
 
     <nav
       id="topic-navigation"
@@ -121,21 +123,14 @@
     </nav>
 
 
-    <!-- Footer -->
+    <!-- ===================================================
+         SIDEBAR FOOTER
+         =================================================== -->
 
     <div class="sidebar-footer">
-
       <span>Made with</span>
-
-      <span
-        class="footer-love"
-        aria-hidden="true"
-      >
-        ♥
-      </span>
-
+      <span class="footer-love">♥</span>
       <span>&amp; curiosity</span>
-
     </div>
 
   </aside>
@@ -145,13 +140,11 @@
        MAIN
        ===================================================== -->
 
-  <main
-    id="main"
-    tabindex="-1"
-  >
+  <main id="main">
+
 
     <!-- ===================================================
-         TOP PREVIOUS / NEXT NAVIGATION
+         PREVIOUS / NEXT NAVIGATION
          =================================================== -->
 
     <nav
@@ -167,8 +160,8 @@
         class="page-nav-button previous-page"
         type="button"
         disabled
-        aria-disabled="true"
         aria-label="Previous note"
+        title="Previous note"
       >
 
         <span
@@ -178,19 +171,11 @@
           ←
         </span>
 
-        <span class="page-nav-copy">
-
-          <span class="page-nav-label">
-            Previous
-          </span>
-
-          <span
-            id="previous-title"
-            class="page-nav-title"
-          >
-            Start
-          </span>
-
+        <span
+          id="previous-title"
+          class="page-nav-title"
+        >
+          Start
         </span>
 
       </button>
@@ -203,23 +188,15 @@
         class="page-nav-button next-page"
         type="button"
         disabled
-        aria-disabled="true"
         aria-label="Next note"
+        title="Next note"
       >
 
-        <span class="page-nav-copy">
-
-          <span class="page-nav-label">
-            Next
-          </span>
-
-          <span
-            id="next-title"
-            class="page-nav-title"
-          >
-            You're caught up ✦
-          </span>
-
+        <span
+          id="next-title"
+          class="page-nav-title"
+        >
+          You're caught up ✦
         </span>
 
         <span
@@ -243,8 +220,6 @@
       <article
         id="content"
         class="content"
-        aria-live="polite"
-        aria-busy="false"
       >
 
         <div class="loading">
