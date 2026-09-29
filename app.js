@@ -36,12 +36,13 @@ document.addEventListener("DOMContentLoaded", () => {
   setupSearch();
   setupKeyboardShortcuts();
   setupMobileMenu();
+  setupContentsToggle();
   loadTopics();
 });
 
 
 /* =========================================================
-   MARKED CONFIGURATION
+   MARKDOWN
    ========================================================= */
 
 function configureMarkdown() {
@@ -49,22 +50,6 @@ function configureMarkdown() {
     console.error("Marked.js was not loaded.");
     return;
   }
-
-  /*
-   * IMPORTANT:
-   *
-   * Do NOT escape HTML here.
-   *
-   * marked.parse() will preserve HTML such as:
-   *
-   * <div>
-   * <p>
-   * <img>
-   * <span>
-   *
-   * This allows HTML layouts to be written directly
-   * inside .md files.
-   */
 
   marked.setOptions({
     gfm: true,
@@ -233,7 +218,7 @@ function createSidebar(items) {
     return;
   }
 
-  items.forEach(topic => {
+  items.forEach((topic, index) => {
 
     const button =
       document.createElement("button");
@@ -295,22 +280,6 @@ async function loadMarkdown(
           item.file === topic.file
       );
 
-
-    /*
-     * IMPORTANT
-     *
-     * Fetch directly from GitHub Pages.
-     *
-     * Markdown:
-     * /Xi_Notes/notes/Early_Stopping.md
-     *
-     * Image:
-     * /Xi_Notes/images/early_stopping1.png
-     *
-     * Therefore ../images/... inside Markdown
-     * resolves correctly.
-     */
-
     const markdownURL =
       `./${NOTES_FOLDER}/${encodeURIComponent(topic.file)}`;
 
@@ -326,11 +295,6 @@ async function loadMarkdown(
     const markdown =
       await response.text();
 
-
-    /* =====================================================
-       RENDER MARKDOWN
-       ===================================================== */
-
     if (typeof marked === "undefined") {
       throw new Error(
         "Marked.js is unavailable."
@@ -338,15 +302,13 @@ async function loadMarkdown(
     }
 
     /*
-     * THIS IS THE IMPORTANT PART.
+     * Keep HTML from the Markdown file.
      *
-     * marked.parse() returns HTML.
+     * This allows simple Markdown such as:
      *
-     * We assign it directly to innerHTML.
+     * <img src="../images/example.png" width="30%">
      *
-     * This means HTML written in the .md file
-     * is actually rendered instead of displayed
-     * as text.
+     * to render correctly.
      */
 
     const html =
@@ -358,11 +320,6 @@ async function loadMarkdown(
       "note-loaded"
     );
 
-
-    /* =====================================================
-       POST PROCESS
-       ===================================================== */
-
     fixMarkdownImages();
 
     addHeadingIds();
@@ -372,7 +329,6 @@ async function loadMarkdown(
     setupExternalLinks();
 
     updateActiveTopic(topic);
-
 
     if (scrollToTop) {
 
@@ -399,7 +355,7 @@ async function loadMarkdown(
 
 
 /* =========================================================
-   FIX MARKDOWN IMAGES
+   IMAGE HANDLING
    ========================================================= */
 
 function fixMarkdownImages() {
@@ -420,11 +376,6 @@ function fixMarkdownImages() {
       return;
     }
 
-
-    /*
-     * Leave absolute URLs alone.
-     */
-
     if (
       source.startsWith("http://") ||
       source.startsWith("https://") ||
@@ -438,20 +389,6 @@ function fixMarkdownImages() {
 
       return;
     }
-
-
-    /*
-     * Resolve relative image paths
-     * relative to /notes/.
-     *
-     * Example:
-     *
-     * ../images/early_stopping1.png
-     *
-     * becomes:
-     *
-     * /Xi_Notes/images/early_stopping1.png
-     */
 
     try {
 
@@ -480,7 +417,6 @@ function fixMarkdownImages() {
 
     image.loading = "lazy";
     image.decoding = "async";
-
   });
 }
 
@@ -505,11 +441,6 @@ function updateTopNavigation() {
   if (topics.length <= 1) {
     return;
   }
-
-
-  /* =====================================================
-     PREVIOUS
-     ===================================================== */
 
   const previous =
     currentTopicIndex > 0
@@ -577,10 +508,6 @@ function updateTopNavigation() {
   }
 
 
-  /* =====================================================
-     NEXT
-     ===================================================== */
-
   const next =
     currentTopicIndex <
       topics.length - 1
@@ -636,7 +563,7 @@ function updateTopNavigation() {
         </span>
 
         <span class="page-nav-title">
-          You’re caught up ✦
+          You're caught up ✦
         </span>
 
       </span>
@@ -646,7 +573,6 @@ function updateTopNavigation() {
       </span>
     `;
   }
-
 
   navigation.appendChild(
     previousButton
@@ -759,13 +685,10 @@ function setupKeyboardShortcuts() {
         event.preventDefault();
 
         if (searchInput) {
-
           searchInput.focus();
-
           searchInput.select();
         }
       }
-
 
       if (
         event.key === "Escape"
@@ -780,7 +703,6 @@ function setupKeyboardShortcuts() {
 
         closeMobileSidebar();
       }
-
 
       if (
         event.key === "ArrowLeft" &&
@@ -798,7 +720,6 @@ function setupKeyboardShortcuts() {
           );
         }
       }
-
 
       if (
         event.key === "ArrowRight" &&
@@ -820,7 +741,76 @@ function setupKeyboardShortcuts() {
           );
         }
       }
+    }
+  );
+}
 
+
+/* =========================================================
+   CONTENTS TOGGLE
+   ========================================================= */
+
+function setupContentsToggle() {
+
+  const toggle =
+    document.getElementById(
+      "contents-toggle"
+    );
+
+  const sidebarElement =
+    document.getElementById(
+      "sidebar"
+    );
+
+  if (
+    !toggle ||
+    !sidebarElement
+  ) {
+    return;
+  }
+
+  /*
+   * DEFAULT:
+   * CONTENTS ARE OPEN
+   */
+
+  sidebarElement.classList.remove(
+    "contents-hidden"
+  );
+
+  toggle.setAttribute(
+    "aria-label",
+    "Hide contents"
+  );
+
+  toggle.setAttribute(
+    "title",
+    "Hide contents"
+  );
+
+
+  toggle.addEventListener(
+    "click",
+    () => {
+
+      const hidden =
+        sidebarElement.classList.toggle(
+          "contents-hidden"
+        );
+
+      toggle.setAttribute(
+        "aria-label",
+        hidden
+          ? "Show contents"
+          : "Hide contents"
+      );
+
+      toggle.setAttribute(
+        "title",
+        hidden
+          ? "Show contents"
+          : "Hide contents"
+      );
     }
   );
 }
@@ -857,17 +847,6 @@ function isTyping(event) {
    ========================================================= */
 
 function addCopyButtons() {
-
-  /*
-   * IMPORTANT:
-   *
-   * Only target actual Markdown code blocks.
-   *
-   * We do NOT target generic HTML.
-   *
-   * This prevents your HTML layout from accidentally
-   * receiving a "Copy" button.
-   */
 
   const codeBlocks =
     content.querySelectorAll(
@@ -1195,7 +1174,6 @@ function setupTheme() {
       "shared-ai-notes-theme"
     );
 
-
   /*
    * DEFAULT = LIGHT
    */
@@ -1214,7 +1192,6 @@ function setupTheme() {
   }
 
   updateThemeButton();
-
 
   themeButton.addEventListener(
     "click",
