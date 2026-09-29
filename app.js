@@ -1,14 +1,72 @@
+/* =========================================================
+   SHARED AI NOTES
+   =========================================================
+
+   Public AI / ML notes.
+
+   Features:
+   - Light theme by default
+   - Dark theme toggle
+   - Sticky Previous / Next navigation
+   - Auto-collapsing notes list
+   - Search
+   - Keyboard navigation
+   - Markdown rendering
+   - Code copy buttons
+   - Responsive sidebar
+   ========================================================= */
+
+
+/* =========================================================
+   CONFIGURATION
+   ========================================================= */
+
 const GITHUB_USER = "jai92xi";
 const GITHUB_REPO = "Xi_Notes";
 const NOTES_FOLDER = "notes";
 
-const sidebar = document.getElementById("sidebar");
-const content = document.getElementById("content");
-const searchInput = document.getElementById("search");
-const themeButton = document.getElementById("theme-button");
+const NOTES_TITLE = "Shared AI Notes";
+
+const NOTES_AUTO_COLLAPSE_DELAY = 2500;
+
+
+/* =========================================================
+   DOM ELEMENTS
+   ========================================================= */
+
+const sidebar =
+  document.getElementById("sidebar");
+
+const content =
+  document.getElementById("content");
+
+const searchInput =
+  document.getElementById("search");
+
+const themeButton =
+  document.getElementById("theme-button");
+
+const menuButton =
+  document.getElementById("menu-button");
+
+const closeSidebarButton =
+  document.getElementById("close-sidebar");
+
+const sidebarOverlay =
+  document.getElementById("sidebar-overlay");
+
+
+/* =========================================================
+   STATE
+   ========================================================= */
 
 let topics = [];
+
 let currentTopicIndex = -1;
+
+let notesAutoCollapseTimer = null;
+
+let sidebarHasAutoCollapsed = false;
 
 
 /* =========================================================
@@ -16,93 +74,169 @@ let currentTopicIndex = -1;
    ========================================================= */
 
 function initialize() {
+
   configureMarkdown();
+
   setupSearch();
+
   setupKeyboardShortcuts();
+
   setupMobileMenu();
+
   setupTheme();
 
+  setupNotesToggle();
+
   loadTopics();
+
 }
 
 
 /* =========================================================
-   LOAD NOTES FROM GITHUB
+   LOAD TOPICS
    ========================================================= */
 
 async function loadTopics() {
+
   try {
+
+    showLoadingSidebar();
+
     const apiUrl =
       `https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}/contents/${NOTES_FOLDER}`;
 
-    const response = await fetch(apiUrl);
+
+    const response =
+      await fetch(apiUrl);
+
 
     if (!response.ok) {
+
       throw new Error(
         `GitHub API returned ${response.status}`
       );
+
     }
 
-    const files = await response.json();
+
+    const files =
+      await response.json();
+
 
     if (!Array.isArray(files)) {
-      throw new Error("Invalid notes response.");
+
+      throw new Error(
+        "Invalid notes response."
+      );
+
     }
 
-    topics = files
-      .filter(file =>
-        file.type === "file" &&
-        file.name.toLowerCase().endsWith(".md")
-      )
-      .map(file => ({
-        file: file.name,
-        name: formatTopicName(file.name),
-        url: file.download_url
-      }))
-      .sort((a, b) =>
-        a.name.localeCompare(b.name)
-      );
+
+    topics =
+      files
+        .filter(file =>
+          file.type === "file" &&
+          file.name
+            .toLowerCase()
+            .endsWith(".md")
+        )
+        .map(file => ({
+
+          file:
+            file.name,
+
+          name:
+            formatTopicName(file.name),
+
+          url:
+            file.download_url
+
+        }))
+        .sort((a, b) =>
+          a.name.localeCompare(
+            b.name,
+            undefined,
+            {
+              numeric: true,
+              sensitivity: "base"
+            }
+          )
+        );
+
 
     createSidebar(topics);
 
-    if (topics.length === 0) {
+
+    /*
+      Open first note.
+    */
+    if (topics.length > 0) {
+
+      await loadMarkdown(
+        topics[0],
+        false
+      );
+
+    } else {
+
       showMessage(
-        "No notes yet ✦",
+        "No notes yet",
         "Add Markdown files to the notes folder."
       );
 
-      return;
     }
 
+
     /*
-      Open the first note automatically.
+      Show the notes list initially,
+      then collapse it automatically.
     */
-    loadMarkdown(topics[0]);
+    scheduleSidebarAutoCollapse();
+
 
   } catch (error) {
+
     console.error(
       "Failed to load notes:",
       error
     );
 
+
     showError(
       "Couldn’t load your notes.",
       "Please check that the notes folder exists in your GitHub repository."
     );
+
   }
+
 }
 
 
 /* =========================================================
-   FORMAT NOTE NAME
+   FORMAT TOPIC NAME
    ========================================================= */
 
 function formatTopicName(filename) {
+
   return filename
-    .replace(/\.md$/i, "")
-    .replace(/_/g, " ")
-    .replace(/\s+/g, " ")
+
+    .replace(
+      /\.md$/i,
+      ""
+    )
+
+    .replace(
+      /_/g,
+      " "
+    )
+
+    .replace(
+      /\s+/g,
+      " "
+    )
+
     .trim();
+
 }
 
 
@@ -111,16 +245,23 @@ function formatTopicName(filename) {
    ========================================================= */
 
 function createSidebar(items = topics) {
+
   const navigation =
-    document.querySelector(".topic-navigation");
+    document.querySelector(
+      ".topic-navigation"
+    );
+
 
   if (!navigation) {
     return;
   }
 
+
   navigation.innerHTML = "";
 
+
   if (items.length === 0) {
+
     navigation.innerHTML = `
       <div class="no-results">
         Nothing found ✦
@@ -130,17 +271,26 @@ function createSidebar(items = topics) {
     return;
   }
 
-  items.forEach(topic => {
-    const button =
-      document.createElement("button");
 
-    button.type = "button";
+  items.forEach(topic => {
+
+    const button =
+      document.createElement(
+        "button"
+      );
+
+
+    button.type =
+      "button";
+
 
     button.className =
       "topic-button";
 
+
     /*
-      Cute replacement for ├──
+      Cute replacement for
+      ├──
     */
     button.innerHTML = `
       <span class="topic-dot">✦</span>
@@ -150,123 +300,158 @@ function createSidebar(items = topics) {
       </span>
     `;
 
+
     button.addEventListener(
       "click",
-      () => loadMarkdown(topic)
+      () => {
+
+        loadMarkdown(
+          topic,
+          true
+        );
+
+      }
     );
 
-    navigation.appendChild(button);
+
+    navigation.appendChild(
+      button
+    );
+
   });
 
-  /*
-    Restore active note after search/sidebar rebuild.
-  */
+
   if (
     currentTopicIndex >= 0 &&
     topics[currentTopicIndex]
   ) {
+
     updateActiveTopic(
       topics[currentTopicIndex]
     );
+
   }
+
 }
 
 
 /* =========================================================
-   LOAD MARKDOWN NOTE
+   LOAD MARKDOWN
    ========================================================= */
 
-async function loadMarkdown(topic) {
+async function loadMarkdown(
+  topic,
+  scrollToTop = true
+) {
+
   try {
 
     showLoading();
 
-    /*
-      Find current note in the complete notes list.
-    */
+
     currentTopicIndex =
       topics.findIndex(
-        item => item.file === topic.file
+        item =>
+          item.file === topic.file
       );
 
-    /*
-      Fetch the Markdown file from the local
-      GitHub Pages notes directory.
 
-      This is preferable to GitHub API content because
-      the site itself is hosted from GitHub Pages.
+    /*
+      Fetch directly from GitHub Pages.
+
+      Example:
+      notes/Early_Stopping.md
     */
     const response =
       await fetch(
         `notes/${encodeURIComponent(topic.file)}`
       );
 
+
     if (!response.ok) {
+
       throw new Error(
         `Unable to load ${topic.file}`
       );
+
     }
+
 
     const markdown =
       await response.text();
 
+
     if (
-      typeof marked === "undefined"
+      typeof marked ===
+      "undefined"
     ) {
+
       throw new Error(
         "Marked.js is not available."
       );
+
     }
 
-    /*
-      Convert Markdown to HTML.
-    */
-    const renderedHTML =
-      marked.parse(markdown);
 
-    /*
-      Render the note.
-    */
+    const renderedHTML =
+      marked.parse(
+        markdown
+      );
+
+
     content.innerHTML =
       renderedHTML;
 
-    /*
-      Tell CSS that this is a real note,
-      not the homepage.
-    */
+
     content.classList.add(
       "note-loaded"
     );
 
+
     /*
-      Add Previous / Next at the TOP.
+      Add sticky navigation at TOP.
     */
     addPageNavigation();
 
-    /*
-      Additional enhancements.
-    */
-    addHeadingIds();
-    addCopyButtons();
-    setupExternalLinks();
 
     /*
-      Highlight the active note.
+      Improve markdown.
     */
-    updateActiveTopic(topic);
+    addHeadingIds();
+
+    addCopyButtons();
+
+    setupExternalLinks();
+
+
+    /*
+      Highlight current note.
+    */
+    updateActiveTopic(
+      topic
+    );
+
 
     /*
       Close mobile sidebar.
     */
     closeMobileSidebar();
 
+
     /*
-      Start at the top of the note.
+      Keep desktop sidebar state.
     */
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth"
-    });
+
+
+    if (scrollToTop) {
+
+      window.scrollTo({
+        top: 0,
+        behavior: "smooth"
+      });
+
+    }
+
 
   } catch (error) {
 
@@ -275,11 +460,14 @@ async function loadMarkdown(topic) {
       error
     );
 
+
     showError(
       "Couldn’t open this note.",
       topic.file
     );
+
   }
+
 }
 
 
@@ -287,37 +475,42 @@ async function loadMarkdown(topic) {
    PREVIOUS / NEXT NAVIGATION
    =========================================================
 
-   Navigation appears ONLY at the top.
+   IMPORTANT:
 
-   There is intentionally no bottom navigation.
+   This is the ONLY article navigation.
+
+   No bottom navigation.
    ========================================================= */
 
 function addPageNavigation() {
 
-  /*
-    Remove an existing navigation if one exists.
-  */
   const existingNavigation =
     content.querySelector(
       ".page-navigation"
     );
 
+
   if (existingNavigation) {
+
     existingNavigation.remove();
+
   }
 
-  /*
-    No navigation if there is only one note.
-  */
+
   if (topics.length <= 1) {
     return;
   }
 
+
   const navigation =
-    document.createElement("nav");
+    document.createElement(
+      "nav"
+    );
+
 
   navigation.className =
     "page-navigation";
+
 
   navigation.setAttribute(
     "aria-label",
@@ -331,14 +524,21 @@ function addPageNavigation() {
 
   const previousTopic =
     currentTopicIndex > 0
-      ? topics[currentTopicIndex - 1]
+      ? topics[
+          currentTopicIndex - 1
+        ]
       : null;
 
 
   const previousButton =
-    document.createElement("button");
+    document.createElement(
+      "button"
+    );
 
-  previousButton.type = "button";
+
+  previousButton.type =
+    "button";
+
 
   previousButton.className =
     "page-nav-button previous-page";
@@ -364,21 +564,31 @@ function addPageNavigation() {
       </span>
     `;
 
+
     previousButton.setAttribute(
       "aria-label",
       `Previous: ${previousTopic.name}`
     );
 
+
     previousButton.addEventListener(
       "click",
       () => {
-        loadMarkdown(previousTopic);
+
+        loadMarkdown(
+          previousTopic,
+          true
+        );
+
       }
     );
 
+
   } else {
 
-    previousButton.disabled = true;
+    previousButton.disabled =
+      true;
+
 
     previousButton.innerHTML = `
       <span class="page-nav-arrow">
@@ -397,6 +607,7 @@ function addPageNavigation() {
 
       </span>
     `;
+
   }
 
 
@@ -407,14 +618,23 @@ function addPageNavigation() {
   const nextTopic =
     currentTopicIndex <
       topics.length - 1
-      ? topics[currentTopicIndex + 1]
+
+      ? topics[
+          currentTopicIndex + 1
+        ]
+
       : null;
 
 
   const nextButton =
-    document.createElement("button");
+    document.createElement(
+      "button"
+    );
 
-  nextButton.type = "button";
+
+  nextButton.type =
+    "button";
+
 
   nextButton.className =
     "page-nav-button next-page";
@@ -440,21 +660,31 @@ function addPageNavigation() {
       </span>
     `;
 
+
     nextButton.setAttribute(
       "aria-label",
       `Next: ${nextTopic.name}`
     );
 
+
     nextButton.addEventListener(
       "click",
       () => {
-        loadMarkdown(nextTopic);
+
+        loadMarkdown(
+          nextTopic,
+          true
+        );
+
       }
     );
 
+
   } else {
 
-    nextButton.disabled = true;
+    nextButton.disabled =
+      true;
+
 
     nextButton.innerHTML = `
       <span class="page-nav-copy">
@@ -473,15 +703,14 @@ function addPageNavigation() {
         →
       </span>
     `;
+
   }
 
 
-  /*
-    Add buttons.
-  */
   navigation.appendChild(
     previousButton
   );
+
 
   navigation.appendChild(
     nextButton
@@ -489,26 +718,29 @@ function addPageNavigation() {
 
 
   /*
-    IMPORTANT:
-    Navigation is inserted BEFORE the note content.
+    Put navigation at the very top.
   */
   content.insertBefore(
     navigation,
     content.firstChild
   );
+
 }
 
 
 /* =========================================================
-   ACTIVE SIDEBAR NOTE
+   UPDATE ACTIVE TOPIC
    ========================================================= */
 
-function updateActiveTopic(selectedTopic) {
+function updateActiveTopic(
+  selectedTopic
+) {
 
   const buttons =
     document.querySelectorAll(
       ".topic-button"
     );
+
 
   buttons.forEach(button => {
 
@@ -517,19 +749,24 @@ function updateActiveTopic(selectedTopic) {
         ".topic-name"
       );
 
+
     if (!topicName) {
       return;
     }
+
 
     const isActive =
       topicName.textContent.trim() ===
       selectedTopic.file;
 
+
     button.classList.toggle(
       "active",
       isActive
     );
+
   });
+
 }
 
 
@@ -543,6 +780,7 @@ function setupSearch() {
     return;
   }
 
+
   searchInput.addEventListener(
     "input",
     event => {
@@ -553,40 +791,242 @@ function setupSearch() {
           .trim();
 
 
-      /*
-        Empty search:
-        restore everything.
-      */
       if (!query) {
 
-        createSidebar(topics);
+        createSidebar(
+          topics
+        );
 
         return;
+
       }
 
 
-      /*
-        Search filename and formatted name.
-      */
       const filtered =
-        topics.filter(topic => {
+        topics.filter(
+          topic => {
 
-          return (
-            topic.file
-              .toLowerCase()
-              .includes(query) ||
+            return (
 
-            topic.name
-              .toLowerCase()
-              .includes(query)
-          );
+              topic.file
+                .toLowerCase()
+                .includes(query)
 
-        });
+              ||
+
+              topic.name
+                .toLowerCase()
+                .includes(query)
+
+            );
+
+          }
+        );
 
 
-      createSidebar(filtered);
+      createSidebar(
+        filtered
+      );
+
     }
   );
+
+}
+
+
+/* =========================================================
+   NOTES TOGGLE
+   ========================================================= */
+
+function setupNotesToggle() {
+
+  /*
+    Some versions of index.html may have
+    a notes toggle button.
+  */
+
+  const notesToggle =
+    document.getElementById(
+      "notes-toggle"
+    );
+
+
+  if (!notesToggle) {
+    return;
+  }
+
+
+  notesToggle.addEventListener(
+    "click",
+    () => {
+
+      toggleNotesPanel();
+
+    }
+  );
+
+}
+
+
+/* =========================================================
+   TOGGLE NOTES PANEL
+   ========================================================= */
+
+function toggleNotesPanel() {
+
+  if (!sidebar) {
+    return;
+  }
+
+
+  const isCollapsed =
+    sidebar.classList.contains(
+      "notes-collapsed"
+    );
+
+
+  if (isCollapsed) {
+
+    openNotesPanel();
+
+  } else {
+
+    collapseNotesPanel();
+
+  }
+
+}
+
+
+/* =========================================================
+   OPEN NOTES PANEL
+   ========================================================= */
+
+function openNotesPanel() {
+
+  if (!sidebar) {
+    return;
+  }
+
+
+  sidebar.classList.remove(
+    "notes-collapsed"
+  );
+
+
+  sidebar.classList.add(
+    "notes-visible"
+  );
+
+
+  updateNotesToggle(
+    true
+  );
+
+}
+
+
+/* =========================================================
+   COLLAPSE NOTES PANEL
+   ========================================================= */
+
+function collapseNotesPanel() {
+
+  if (!sidebar) {
+    return;
+  }
+
+
+  sidebar.classList.add(
+    "notes-collapsed"
+  );
+
+
+  sidebar.classList.remove(
+    "notes-visible"
+  );
+
+
+  sidebarHasAutoCollapsed =
+    true;
+
+
+  updateNotesToggle(
+    false
+  );
+
+}
+
+
+/* =========================================================
+   AUTO COLLAPSE
+   ========================================================= */
+
+function scheduleSidebarAutoCollapse() {
+
+  clearTimeout(
+    notesAutoCollapseTimer
+  );
+
+
+  /*
+    Give the visitor enough time to see
+    the available notes.
+  */
+  notesAutoCollapseTimer =
+    setTimeout(
+      () => {
+
+        collapseNotesPanel();
+
+      },
+      NOTES_AUTO_COLLAPSE_DELAY
+    );
+
+}
+
+
+/* =========================================================
+   UPDATE NOTES TOGGLE
+   ========================================================= */
+
+function updateNotesToggle(
+  isOpen
+) {
+
+  const notesToggle =
+    document.getElementById(
+      "notes-toggle"
+    );
+
+
+  if (!notesToggle) {
+    return;
+  }
+
+
+  if (isOpen) {
+
+    notesToggle.innerHTML =
+      "× Notes";
+
+    notesToggle.setAttribute(
+      "aria-label",
+      "Close notes list"
+    );
+
+  } else {
+
+    notesToggle.innerHTML =
+      "☰ Notes";
+
+    notesToggle.setAttribute(
+      "aria-label",
+      "Open notes list"
+    );
+
+  }
+
 }
 
 
@@ -600,31 +1040,40 @@ function setupKeyboardShortcuts() {
     "keydown",
     event => {
 
-      /*
-        CMD + K / CTRL + K
-        Focus search.
-      */
+
+      /* ---------------------------------------------------
+         CMD + K / CTRL + K
+         --------------------------------------------------- */
+
       if (
-        (event.metaKey || event.ctrlKey) &&
-        event.key.toLowerCase() === "k"
+        (event.metaKey ||
+          event.ctrlKey) &&
+
+        event.key.toLowerCase() ===
+          "k"
       ) {
 
         event.preventDefault();
+
 
         if (searchInput) {
 
           searchInput.focus();
 
           searchInput.select();
+
         }
+
       }
 
 
-      /*
-        ESCAPE
-      */
+      /* ---------------------------------------------------
+         ESC
+         --------------------------------------------------- */
+
       if (
-        event.key === "Escape"
+        event.key ===
+        "Escape"
       ) {
 
         if (searchInput) {
@@ -632,65 +1081,106 @@ function setupKeyboardShortcuts() {
           searchInput.value = "";
 
           searchInput.blur();
+
         }
 
-        createSidebar(topics);
+
+        createSidebar(
+          topics
+        );
+
 
         closeMobileSidebar();
+
       }
 
 
-      /*
-        LEFT ARROW
-        Previous note.
-      */
+      /* ---------------------------------------------------
+         LEFT ARROW
+         --------------------------------------------------- */
+
       if (
-        event.key === "ArrowLeft" &&
-        !isTypingInField(event)
+        event.key ===
+          "ArrowLeft" &&
+
+        !isTypingInField(
+          event
+        )
       ) {
 
         if (
-          currentTopicIndex > 0
+          currentTopicIndex >
+          0
         ) {
 
           event.preventDefault();
+
 
           loadMarkdown(
             topics[
               currentTopicIndex - 1
             ]
           );
+
         }
+
       }
 
 
-      /*
-        RIGHT ARROW
-        Next note.
-      */
+      /* ---------------------------------------------------
+         RIGHT ARROW
+         --------------------------------------------------- */
+
       if (
-        event.key === "ArrowRight" &&
-        !isTypingInField(event)
+        event.key ===
+          "ArrowRight" &&
+
+        !isTypingInField(
+          event
+        )
       ) {
 
         if (
           currentTopicIndex >= 0 &&
+
           currentTopicIndex <
             topics.length - 1
         ) {
 
           event.preventDefault();
 
+
           loadMarkdown(
             topics[
               currentTopicIndex + 1
             ]
           );
+
         }
+
+      }
+
+
+      /* ---------------------------------------------------
+         N = TOGGLE NOTES
+         --------------------------------------------------- */
+
+      if (
+        event.key.toLowerCase() ===
+          "n" &&
+
+        !isTypingInField(
+          event
+        )
+      ) {
+
+        toggleNotesPanel();
+
       }
 
     }
   );
+
 }
 
 
@@ -698,30 +1188,144 @@ function setupKeyboardShortcuts() {
    CHECK IF USER IS TYPING
    ========================================================= */
 
-function isTypingInField(event) {
+function isTypingInField(
+  event
+) {
 
   const element =
     event.target;
 
+
   if (!element) {
     return false;
   }
+
 
   const tag =
     element.tagName
       ? element.tagName.toLowerCase()
       : "";
 
+
   return (
+
     tag === "input" ||
+
     tag === "textarea" ||
+
     element.isContentEditable
+
   );
+
 }
 
 
 /* =========================================================
-   COPY CODE BLOCKS
+   MOBILE MENU
+   ========================================================= */
+
+function setupMobileMenu() {
+
+  if (menuButton) {
+
+    menuButton.addEventListener(
+      "click",
+      () => {
+
+        openMobileSidebar();
+
+      }
+    );
+
+  }
+
+
+  if (closeSidebarButton) {
+
+    closeSidebarButton.addEventListener(
+      "click",
+      closeMobileSidebar
+    );
+
+  }
+
+
+  if (sidebarOverlay) {
+
+    sidebarOverlay.addEventListener(
+      "click",
+      closeMobileSidebar
+    );
+
+  }
+
+}
+
+
+/* =========================================================
+   OPEN MOBILE SIDEBAR
+   ========================================================= */
+
+function openMobileSidebar() {
+
+  if (sidebar) {
+
+    sidebar.classList.add(
+      "mobile-open"
+    );
+
+  }
+
+
+  if (sidebarOverlay) {
+
+    sidebarOverlay.classList.add(
+      "active"
+    );
+
+  }
+
+
+  document.body.classList.add(
+    "sidebar-open"
+  );
+
+}
+
+
+/* =========================================================
+   CLOSE MOBILE SIDEBAR
+   ========================================================= */
+
+function closeMobileSidebar() {
+
+  if (sidebar) {
+
+    sidebar.classList.remove(
+      "mobile-open"
+    );
+
+  }
+
+
+  if (sidebarOverlay) {
+
+    sidebarOverlay.classList.remove(
+      "active"
+    );
+
+  }
+
+
+  document.body.classList.remove(
+    "sidebar-open"
+  );
+
+}
+
+
+/* =========================================================
+   COPY CODE BUTTONS
    ========================================================= */
 
 function addCopyButtons() {
@@ -732,164 +1336,213 @@ function addCopyButtons() {
     );
 
 
-  codeBlocks.forEach(pre => {
-
-    /*
-      Don't add twice.
-    */
-    if (
-      pre.querySelector(
-        ".copy-button"
-      )
-    ) {
-      return;
-    }
+  codeBlocks.forEach(
+    pre => {
 
 
-    const button =
-      document.createElement(
-        "button"
+      if (
+        pre.querySelector(
+          ".copy-button"
+        )
+      ) {
+
+        return;
+
+      }
+
+
+      const button =
+        document.createElement(
+          "button"
+        );
+
+
+      button.type =
+        "button";
+
+
+      button.className =
+        "copy-button";
+
+
+      button.textContent =
+        "Copy";
+
+
+      button.setAttribute(
+        "aria-label",
+        "Copy code"
       );
 
-    button.type = "button";
 
-    button.className =
-      "copy-button";
+      button.addEventListener(
+        "click",
+        async () => {
 
-    button.textContent =
-      "Copy";
-
-
-    button.setAttribute(
-      "aria-label",
-      "Copy code"
-    );
+          const code =
+            pre.querySelector(
+              "code"
+            );
 
 
-    button.addEventListener(
-      "click",
-      async () => {
-
-        const code =
-          pre.querySelector(
-            "code"
-          );
-
-        if (!code) {
-          return;
-        }
+          if (!code) {
+            return;
+          }
 
 
-        try {
-
-          await navigator.clipboard.writeText(
-            code.innerText
-          );
+          const codeText =
+            code.innerText;
 
 
-          button.textContent =
-            "Copied ✦";
-
-
-          button.classList.add(
-            "copied"
-          );
-
-
-          setTimeout(
-            () => {
-
-              button.textContent =
-                "Copy";
-
-              button.classList.remove(
-                "copied"
-              );
-
-            },
-            1400
-          );
-
-
-        } catch (error) {
-
-          console.error(
-            "Copy failed:",
-            error
-          );
-
-
-          /*
-            Fallback for browsers where
-            clipboard API isn't available.
-          */
           try {
 
-            const range =
-              document.createRange();
-
-            range.selectNodeContents(
-              code
+            await navigator.clipboard.writeText(
+              codeText
             );
 
 
-            const selection =
-              window.getSelection();
-
-            selection.removeAllRanges();
-
-            selection.addRange(
-              range
+            showCopiedState(
+              button
             );
 
 
-            document.execCommand(
-              "copy"
-            );
-
-            selection.removeAllRanges();
-
-
-            button.textContent =
-              "Copied ✦";
-
-
-            setTimeout(
-              () => {
-                button.textContent =
-                  "Copy";
-              },
-              1400
-            );
-
-          } catch (fallbackError) {
+          } catch (error) {
 
             console.error(
-              "Clipboard fallback failed:",
-              fallbackError
+              "Clipboard API failed:",
+              error
             );
 
-            button.textContent =
-              "Failed";
 
-            setTimeout(
-              () => {
-                button.textContent =
-                  "Copy";
-              },
-              1400
+            fallbackCopy(
+              codeText,
+              button
             );
+
           }
+
         }
-      }
+      );
+
+
+      pre.appendChild(
+        button
+      );
+
+    }
+  );
+
+}
+
+
+/* =========================================================
+   COPIED STATE
+   ========================================================= */
+
+function showCopiedState(
+  button
+) {
+
+  button.textContent =
+    "Copied ✦";
+
+
+  button.classList.add(
+    "copied"
+  );
+
+
+  setTimeout(
+    () => {
+
+      button.textContent =
+        "Copy";
+
+
+      button.classList.remove(
+        "copied"
+      );
+
+    },
+    1400
+  );
+
+}
+
+
+/* =========================================================
+   FALLBACK COPY
+   ========================================================= */
+
+function fallbackCopy(
+  text,
+  button
+) {
+
+  try {
+
+    const textarea =
+      document.createElement(
+        "textarea"
+      );
+
+
+    textarea.value =
+      text;
+
+
+    textarea.style.position =
+      "fixed";
+
+    textarea.style.opacity =
+      "0";
+
+
+    document.body.appendChild(
+      textarea
     );
 
 
-    pre.appendChild(
+    textarea.select();
+
+
+    document.execCommand(
+      "copy"
+    );
+
+
+    textarea.remove();
+
+
+    showCopiedState(
       button
     );
 
-  });
+
+  } catch (error) {
+
+    console.error(
+      "Fallback copy failed:",
+      error
+    );
+
+
+    button.textContent =
+      "Failed";
+
+
+    setTimeout(
+      () => {
+
+        button.textContent =
+          "Copy";
+
+      },
+      1400
+    );
+
+  }
+
 }
 
 
@@ -903,6 +1556,7 @@ function addHeadingIds() {
     content.querySelectorAll(
       "h1, h2, h3, h4"
     );
+
 
   const usedIds =
     new Set();
@@ -919,10 +1573,12 @@ function addHeadingIds() {
 
       let baseId =
         text
+
           .replace(
             /[^\w\s-]/g,
             ""
           )
+
           .replace(
             /\s+/g,
             "-"
@@ -937,13 +1593,11 @@ function addHeadingIds() {
       let id =
         baseId;
 
+
       let counter =
         2;
 
 
-      /*
-        Make IDs unique.
-      */
       while (
         usedIds.has(id)
       ) {
@@ -952,16 +1606,21 @@ function addHeadingIds() {
           `${baseId}-${counter}`;
 
         counter++;
+
       }
 
 
-      usedIds.add(id);
+      usedIds.add(
+        id
+      );
+
 
       heading.id =
         id;
 
     }
   );
+
 }
 
 
@@ -992,6 +1651,7 @@ function setupExternalLinks() {
           href.startsWith(
             "http://"
           ) ||
+
           href.startsWith(
             "https://"
           )
@@ -1001,6 +1661,7 @@ function setupExternalLinks() {
         link.target =
           "_blank";
 
+
         link.rel =
           "noopener noreferrer";
 
@@ -1008,6 +1669,40 @@ function setupExternalLinks() {
 
     }
   );
+
+}
+
+
+/* =========================================================
+   MARKDOWN CONFIGURATION
+   ========================================================= */
+
+function configureMarkdown() {
+
+  if (
+    typeof marked ===
+    "undefined"
+  ) {
+
+    console.error(
+      "Marked.js was not loaded."
+    );
+
+
+    return;
+  }
+
+
+  marked.setOptions({
+
+    gfm:
+      true,
+
+    breaks:
+      true
+
+  });
+
 }
 
 
@@ -1017,9 +1712,6 @@ function setupExternalLinks() {
 
 function showLoading() {
 
-  /*
-    Remove note styling while loading.
-  */
   content.classList.remove(
     "note-loaded"
   );
@@ -1036,6 +1728,33 @@ function showLoading() {
 
     </div>
   `;
+
+}
+
+
+/* =========================================================
+   SIDEBAR LOADING
+   ========================================================= */
+
+function showLoadingSidebar() {
+
+  const navigation =
+    document.querySelector(
+      ".topic-navigation"
+    );
+
+
+  if (!navigation) {
+    return;
+  }
+
+
+  navigation.innerHTML = `
+    <div class="no-results">
+      Loading notes...
+    </div>
+  `;
+
 }
 
 
@@ -1066,6 +1785,7 @@ function showMessage(
 
     </div>
   `;
+
 }
 
 
@@ -1096,121 +1816,7 @@ function showError(
 
     </div>
   `;
-}
 
-
-/* =========================================================
-   MOBILE SIDEBAR
-   ========================================================= */
-
-function setupMobileMenu() {
-
-  const menuButton =
-    document.getElementById(
-      "menu-button"
-    );
-
-  const closeButton =
-    document.getElementById(
-      "close-sidebar"
-    );
-
-  const overlay =
-    document.getElementById(
-      "sidebar-overlay"
-    );
-
-
-  /*
-    OPEN
-  */
-  if (menuButton) {
-
-    menuButton.addEventListener(
-      "click",
-      () => {
-
-        if (sidebar) {
-
-          sidebar.classList.add(
-            "mobile-open"
-          );
-        }
-
-
-        if (overlay) {
-
-          overlay.classList.add(
-            "active"
-          );
-        }
-
-
-        document.body.classList.add(
-          "sidebar-open"
-        );
-
-      }
-    );
-  }
-
-
-  /*
-    CLOSE BUTTON
-  */
-  if (closeButton) {
-
-    closeButton.addEventListener(
-      "click",
-      closeMobileSidebar
-    );
-  }
-
-
-  /*
-    CLICK OUTSIDE
-  */
-  if (overlay) {
-
-    overlay.addEventListener(
-      "click",
-      closeMobileSidebar
-    );
-  }
-}
-
-
-/* =========================================================
-   CLOSE MOBILE SIDEBAR
-   ========================================================= */
-
-function closeMobileSidebar() {
-
-  if (sidebar) {
-
-    sidebar.classList.remove(
-      "mobile-open"
-    );
-  }
-
-
-  const overlay =
-    document.getElementById(
-      "sidebar-overlay"
-    );
-
-
-  if (overlay) {
-
-    overlay.classList.remove(
-      "active"
-    );
-  }
-
-
-  document.body.classList.remove(
-    "sidebar-open"
-  );
 }
 
 
@@ -1218,45 +1824,22 @@ function closeMobileSidebar() {
    ESCAPE HTML
    ========================================================= */
 
-function escapeHTML(value) {
+function escapeHTML(
+  value
+) {
 
   const div =
     document.createElement(
       "div"
     );
 
+
   div.textContent =
     String(value);
 
+
   return div.innerHTML;
-}
 
-
-/* =========================================================
-   MARKDOWN CONFIGURATION
-   ========================================================= */
-
-function configureMarkdown() {
-
-  if (
-    typeof marked === "undefined"
-  ) {
-
-    console.error(
-      "Marked.js was not loaded."
-    );
-
-    return;
-  }
-
-
-  marked.setOptions({
-
-    gfm: true,
-
-    breaks: true
-
-  });
 }
 
 
@@ -1266,11 +1849,13 @@ function configureMarkdown() {
 
    LIGHT = DEFAULT
 
-   Clicking the button:
-   LIGHT → DARK
-   DARK  → LIGHT
+   DARK = OPTIONAL
 
-   The selection is remembered using localStorage.
+   Important:
+   We intentionally default to light.
+
+   If there is no saved preference,
+   light mode is used.
    ========================================================= */
 
 function setupTheme() {
@@ -1282,15 +1867,18 @@ function setupTheme() {
 
   const savedTheme =
     localStorage.getItem(
-      "ai-curiosity-theme"
+      "shared-ai-notes-theme"
     );
 
 
   /*
-    Default is LIGHT.
+    Default:
+    LIGHT
   */
+
   if (
-    savedTheme === "dark"
+    savedTheme ===
+    "dark"
   ) {
 
     document.body.classList.add(
@@ -1302,15 +1890,13 @@ function setupTheme() {
     document.body.classList.remove(
       "dark-theme"
     );
+
   }
 
 
   updateThemeButton();
 
 
-  /*
-    Toggle theme.
-  */
   themeButton.addEventListener(
     "click",
     () => {
@@ -1327,7 +1913,7 @@ function setupTheme() {
 
 
       localStorage.setItem(
-        "ai-curiosity-theme",
+        "shared-ai-notes-theme",
         isDark
           ? "dark"
           : "light"
@@ -1338,6 +1924,7 @@ function setupTheme() {
 
     }
   );
+
 }
 
 
@@ -1359,12 +1946,13 @@ function updateThemeButton() {
 
 
   /*
-    Light mode:
-      show moon
+    Moon = currently light,
+    clicking switches to dark.
 
-    Dark mode:
-      show sun
+    Sun = currently dark,
+    clicking switches to light.
   */
+
   themeButton.textContent =
     isDark
       ? "☀"
@@ -1374,22 +1962,23 @@ function updateThemeButton() {
   themeButton.setAttribute(
     "aria-label",
     isDark
-      ? "Switch to light mode"
-      : "Switch to dark mode"
+      ? "Switch to light theme"
+      : "Switch to dark theme"
   );
 
 
   themeButton.setAttribute(
     "title",
     isDark
-      ? "Switch to light mode"
-      : "Switch to dark mode"
+      ? "Switch to light theme"
+      : "Switch to dark theme"
   );
+
 }
 
 
 /* =========================================================
-   START APP
+   START APPLICATION
    ========================================================= */
 
 if (
