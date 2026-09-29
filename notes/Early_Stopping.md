@@ -14,3 +14,5 @@ early_stop = callbacks.EarlyStopping(
     restore_best_weights = True        # restore weights from the best epoch
 )
 ```
+
+https://jai92xi.github.io/AIBrainBox/?id=Xi-00015
