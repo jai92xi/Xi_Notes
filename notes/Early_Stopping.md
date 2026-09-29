@@ -1,20 +1,7 @@
 > 🧠 **EARLY STOPPING**
-> A regularization technique that **stops training when validation performance stops improving**, helping reduce overfitting and save computation.
+> Early stopping is a **regularization technique** that **prevents overfitting** by stopping training when **validation performance stops improving**.
 
----
-
-### 📊 Simple Example
-
-| Epoch | Train Loss | Val Loss | Status |
-|:---:|---:|---:|:---|
-| 1 | 0.80 | 0.75 | 📈 Improving |
-| 2 | 0.60 | 0.55 | 📈 Improving |
-| 3 | 0.45 | **0.40 ⭐** | 🏆 Best |
-| 4 | 0.35 | 0.43 | ⚠️ Worse |
-| 5 | 0.28 | 0.47 | ⚠️ Worse |
-| 6 | 0.22 | 0.52 | 🛑 Stop |
-
-**Pattern:** Training loss ↓ but Validation loss ↑ → ⚠️ **Possible overfitting**
+![Uploading image.png…]()
 
 ---
 
