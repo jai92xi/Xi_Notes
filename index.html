@@ -2,162 +2,329 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
 
   <meta
     name="description"
-    content="AI & ML notes, experiments, ideas and things worth remembering."
+    content="Shared AI Notes — practical notes and learnings about AI, machine learning, deep learning, LLMs, and more."
   >
 
-  <title>AI Curiosity Lab</title>
+  <meta
+    name="theme-color"
+    content="#ffffff"
+  >
 
-  <link rel="stylesheet" href="style.css">
+  <title>Shared AI Notes</title>
 
-  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <!-- =====================================================
+       FONTS
+       ===================================================== -->
+
+  <link
+    rel="preconnect"
+    href="https://fonts.googleapis.com"
+  >
+
+  <link
+    rel="preconnect"
+    href="https://fonts.gstatic.com"
+    crossorigin
+  >
+
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;650;700;750&display=swap"
+    rel="stylesheet"
+  >
+
+
+  <!-- =====================================================
+       STYLES
+       ===================================================== -->
+
+  <link
+    rel="stylesheet"
+    href="style.css"
+  >
+
+
+  <!-- =====================================================
+       MARKED.JS
+       ===================================================== -->
+
+  <script
+    src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"
+    defer
+  ></script>
+
 </head>
+
 
 <body>
 
   <div class="app">
 
-    <!-- SIDEBAR -->
-    <aside class="sidebar" id="sidebar">
+    <div class="layout">
 
-      <div class="sidebar-header">
 
-        <a
-          href="#"
-          class="logo"
-          onclick="window.scrollTo({top: 0, behavior: 'smooth'}); return false;"
+      <!-- =================================================
+           SIDEBAR
+           ================================================= -->
+
+      <aside
+        id="sidebar"
+        aria-label="Notes navigation"
+      >
+
+        <div class="sidebar-header">
+
+          <button
+            id="close-sidebar"
+            type="button"
+            aria-label="Close notes"
+          >
+            ×
+          </button>
+
+
+          <h2 class="sidebar-title">
+            Shared AI Notes
+          </h2>
+
+
+          <p class="sidebar-subtitle">
+            Notes worth sharing ✦
+          </p>
+
+
+          <!-- Search -->
+
+          <div class="search-container">
+
+            <span
+              class="search-icon"
+              aria-hidden="true"
+            >
+              ⌕
+            </span>
+
+
+            <input
+              id="search"
+              type="search"
+              placeholder="Search notes..."
+              autocomplete="off"
+              spellcheck="false"
+              aria-label="Search notes"
+            >
+
+          </div>
+
+        </div>
+
+
+        <!-- =================================================
+             TOPIC LIST
+             ================================================= -->
+
+        <nav
+          class="topic-navigation"
+          aria-label="Available notes"
         >
-          AI Curiosity Lab
-        </a>
 
-        <button
-          id="close-sidebar"
-          class="close-sidebar"
-          type="button"
-          aria-label="Close menu"
+          <div class="no-results">
+            Loading notes...
+          </div>
+
+        </nav>
+
+      </aside>
+
+
+      <!-- =================================================
+           SIDEBAR OVERLAY
+           ================================================= -->
+
+      <div
+        id="sidebar-overlay"
+        aria-hidden="true"
+      ></div>
+
+
+      <!-- =================================================
+           MAIN CONTENT
+           ================================================= -->
+
+      <main>
+
+
+        <!-- =================================================
+             FROZEN TOP BAR
+             ================================================= -->
+
+        <header
+          class="top-bar"
+          aria-label="Note navigation"
         >
-          ×
-        </button>
 
-      </div>
 
-      <!-- SEARCH -->
-      <div class="search-container">
+          <!-- Mobile menu -->
 
-        <div class="search-box">
+          <button
+            id="menu-button"
+            type="button"
+            aria-label="Open notes"
+            title="Open notes"
+          >
+            ☰
+          </button>
 
-          <span class="search-icon">⌕</span>
 
-          <input
-            id="search"
-            type="search"
-            placeholder="Search notes"
-            autocomplete="off"
-            spellcheck="false"
-            aria-label="Search notes"
+          <!-- =================================================
+               TOP PREVIOUS / NEXT NAVIGATION
+
+               app.js replaces this content with the
+               current Previous / Next buttons.
+               ================================================= -->
+
+          <nav
+            class="page-navigation"
+            aria-label="Note navigation"
           >
 
-          <span class="search-shortcut">⌘K</span>
+            <button
+              type="button"
+              class="page-nav-button previous-page"
+              disabled
+            >
 
-        </div>
-
-      </div>
-
-      <!-- NOTES -->
-      <nav
-        class="topic-navigation"
-        aria-label="Notes"
-      ></nav>
-
-      <!-- FOOTER -->
-      <div class="sidebar-footer">
-        Made with ❤️ & curiosity
-      </div>
-
-    </aside>
+              <span class="page-nav-arrow">
+                ←
+              </span>
 
 
-    <!-- MAIN -->
-    <main class="main">
+              <span class="page-nav-copy">
 
-      <!-- STICKY TOP BAR -->
-      <header class="topbar">
+                <span class="page-nav-label">
+                  Previous
+                </span>
 
-        <button
-          id="menu-button"
-          class="menu-button"
-          type="button"
-          aria-label="Open menu"
-        >
-          ☰
-        </button>
+                <span class="page-nav-title">
+                  —
+                </span>
 
+              </span>
 
-        <div class="topbar-brand">
-          <span class="brand-mark">✦</span>
-          <span>AI Curiosity Lab</span>
-        </div>
+            </button>
 
 
-        <!-- THEME -->
-        <button
-          id="theme-button"
-          class="theme-button"
-          type="button"
-          aria-label="Switch to dark mode"
-          title="Switch to dark mode"
-        >
-          ☾
-        </button>
+            <button
+              type="button"
+              class="page-nav-button next-page"
+              disabled
+            >
 
-      </header>
+              <span class="page-nav-copy">
+
+                <span class="page-nav-label">
+                  Next
+                </span>
+
+                <span class="page-nav-title">
+                  —
+                </span>
+
+              </span>
 
 
-      <!-- CONTENT -->
-      <div class="content-wrapper">
+              <span class="page-nav-arrow">
+                →
+              </span>
+
+            </button>
+
+          </nav>
+
+
+          <!-- =================================================
+               THEME BUTTON
+               ================================================= -->
+
+          <button
+            id="theme-button"
+            type="button"
+            aria-label="Switch to dark theme"
+            title="Switch to dark theme"
+          >
+            ☾
+          </button>
+
+        </header>
+
+
+        <!-- =================================================
+             NOTE CONTENT
+
+             app.js dynamically loads Markdown here.
+             ================================================= -->
 
         <article
           id="content"
-          class="content"
+          aria-live="polite"
         >
 
-          <div class="welcome">
+          <div class="loading">
 
-            <p class="welcome-label">
-              CURRENTLY EXPLORING
-            </p>
+            <div class="loading-line"></div>
 
-            <h1>
-              Always learning.
-            </h1>
+            <div class="loading-line short"></div>
 
-            <p class="welcome-description">
-              AI, machine learning, systems, experiments,
-              ideas and the occasional rabbit hole.
-            </p>
+            <div class="loading-line"></div>
 
           </div>
 
         </article>
 
-      </div>
 
-    </main>
+      </main>
+
+
+    </div>
+
+
+    <!-- =====================================================
+         NOTES TOGGLE
+
+         The sidebar is visible initially and automatically
+         collapses after 2.5 seconds.
+
+         This button allows the user to open it again.
+         ===================================================== -->
+
+    <button
+      id="notes-toggle"
+      type="button"
+      aria-label="Open notes list"
+      title="Open notes list"
+    >
+      ☰ Notes
+    </button>
+
 
   </div>
 
 
-  <!-- MOBILE OVERLAY -->
-  <div
-    id="sidebar-overlay"
-    class="sidebar-overlay"
-  ></div>
+  <!-- =======================================================
+       APPLICATION SCRIPT
+       ======================================================= -->
 
-
-  <script src="app.js"></script>
+  <script
+    src="app.js"
+    defer
+  ></script>
 
 </body>
 </html>
