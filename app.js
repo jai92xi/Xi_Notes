@@ -2,7 +2,6 @@
    AI & ML KEY CONCEPTS
    app.js
    ========================================================= */
-
 const GITHUB_USER = "jai92xi";
 const GITHUB_REPO = "Xi_Notes";
 const GITHUB_BRANCH = "main";
