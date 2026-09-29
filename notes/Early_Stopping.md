@@ -1,7 +1,7 @@
 > 🧠 **EARLY STOPPING**
 > Early stopping is a **regularization technique** that **prevents overfitting** by stopping training when **validation performance stops improving**.
 
-![Uploading image.png…]()
+![Early Stopping](../images/early_stopping1.png)
 
 ---
 
