@@ -1,33 +1,12 @@
 /* =========================================================
-   SHARED AI NOTES
-   =========================================================
-
-   Public AI / ML notes.
-
-   Features:
-   - Light theme by default
-   - Dark theme toggle
-   - Sticky Previous / Next navigation
-   - Auto-collapsing notes list
-   - Search
-   - Keyboard navigation
-   - Markdown rendering
-   - Code copy buttons
-   - Responsive sidebar
-   ========================================================= */
-
-
-/* =========================================================
-   CONFIGURATION
+   AI & ML KEY CONCEPTS
    ========================================================= */
 
 const GITHUB_USER = "jai92xi";
 const GITHUB_REPO = "Xi_Notes";
 const NOTES_FOLDER = "notes";
 
-const NOTES_TITLE = "Shared AI Notes";
-
-const NOTES_AUTO_COLLAPSE_DELAY = 2500;
+const NOTES_TITLE = "AI & ML Key Concepts";
 
 
 /* =========================================================
@@ -64,31 +43,18 @@ let topics = [];
 
 let currentTopicIndex = -1;
 
-let notesAutoCollapseTimer = null;
-
-let sidebarHasAutoCollapsed = false;
-
 
 /* =========================================================
    INITIALIZE
    ========================================================= */
 
 function initialize() {
-
   configureMarkdown();
-
   setupSearch();
-
   setupKeyboardShortcuts();
-
   setupMobileMenu();
-
   setupTheme();
-
-  setupNotesToggle();
-
   loadTopics();
-
 }
 
 
@@ -105,32 +71,23 @@ async function loadTopics() {
     const apiUrl =
       `https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}/contents/${NOTES_FOLDER}`;
 
-
     const response =
       await fetch(apiUrl);
 
-
     if (!response.ok) {
-
       throw new Error(
         `GitHub API returned ${response.status}`
       );
-
     }
-
 
     const files =
       await response.json();
 
-
     if (!Array.isArray(files)) {
-
       throw new Error(
         "Invalid notes response."
       );
-
     }
-
 
     topics =
       files
@@ -142,9 +99,15 @@ async function loadTopics() {
         )
         .map(file => ({
 
-          file:
-            file.name,
+          file: file.name,
 
+          /*
+           * Display name:
+           * - removes .md
+           * - replaces _ and - with spaces
+           * - converts camelCase to separate words
+           * - uses consistent Title Case
+           */
           name:
             formatTopicName(file.name),
 
@@ -167,9 +130,6 @@ async function loadTopics() {
     createSidebar(topics);
 
 
-    /*
-      Open first note.
-    */
     if (topics.length > 0) {
 
       await loadMarkdown(
@@ -186,21 +146,12 @@ async function loadTopics() {
 
     }
 
-
-    /*
-      Show the notes list initially,
-      then collapse it automatically.
-    */
-    scheduleSidebarAutoCollapse();
-
-
   } catch (error) {
 
     console.error(
       "Failed to load notes:",
       error
     );
-
 
     showError(
       "Couldn’t load your notes.",
@@ -214,29 +165,101 @@ async function loadTopics() {
 
 /* =========================================================
    FORMAT TOPIC NAME
+   =========================================================
+
+   Examples:
+
+   Early_Stopping.md
+   → Early Stopping
+
+   batch-normalization.md
+   → Batch Normalization
+
+   imbalanced data handling.md
+   → Imbalanced Data Handling
+
+   VLLM.md
+   → Vllm
+
+   someAIConcept.md
+   → Some AI Concept
    ========================================================= */
 
 function formatTopicName(filename) {
 
-  return filename
+  let name =
+    filename
+      .replace(/\.md$/i, "")
+      .replace(/[_-]+/g, " ")
+      .replace(/([a-z0-9])([A-Z])/g, "$1 $2")
+      .replace(/([A-Z]+)([A-Z][a-z])/g, "$1 $2")
+      .replace(/\s+/g, " ")
+      .trim();
 
-    .replace(
-      /\.md$/i,
-      ""
-    )
 
-    .replace(
-      /_/g,
-      " "
-    )
+  /*
+   * Convert everything to consistent Title Case.
+   */
+  name =
+    name
+      .toLowerCase()
+      .split(" ")
+      .filter(Boolean)
+      .map(word => {
 
-    .replace(
-      /\s+/g,
-      " "
-    )
+        return word.charAt(0).toUpperCase() +
+          word.slice(1);
 
-    .trim();
+      })
+      .join(" ");
 
+
+  /*
+   * Common AI / ML abbreviations.
+   * Keeps naming consistent and readable.
+   */
+  const abbreviations = {
+    "Ai": "AI",
+    "Ml": "ML",
+    "Llm": "LLM",
+    "Llms": "LLMs",
+    "Nlp": "NLP",
+    "Cv": "CV",
+    "Rag": "RAG",
+    "Vllm": "vLLM",
+    "Gpu": "GPU",
+    "Gpus": "GPUs",
+    "Cpu": "CPU",
+    "Cpus": "CPUs",
+    "Api": "API",
+    "Apis": "APIs",
+    "Mlp": "MLP",
+    "Cnn": "CNN",
+    "Cnns": "CNNs",
+    "Rnn": "RNN",
+    "Rnns": "RNNs",
+    "Lstm": "LSTM",
+    "Lora": "LoRA",
+    "Sql": "SQL",
+    "Json": "JSON",
+    "Pytorch": "PyTorch",
+    "Tensorflow": "TensorFlow",
+    "Knn": "KNN",
+    "Svm": "SVM",
+    "Xgboost": "XGBoost"
+  };
+
+
+  name =
+    name
+      .split(" ")
+      .map(word =>
+        abbreviations[word] || word
+      )
+      .join(" ");
+
+
+  return name;
 }
 
 
@@ -251,11 +274,9 @@ function createSidebar(items = topics) {
       ".topic-navigation"
     );
 
-
   if (!navigation) {
     return;
   }
-
 
   navigation.innerHTML = "";
 
@@ -275,28 +296,23 @@ function createSidebar(items = topics) {
   items.forEach(topic => {
 
     const button =
-      document.createElement(
-        "button"
-      );
-
+      document.createElement("button");
 
     button.type =
       "button";
-
 
     button.className =
       "topic-button";
 
 
     /*
-      Cute replacement for
-      ├──
-    */
+     * Cute replacement for ├──
+     */
     button.innerHTML = `
       <span class="topic-dot">✦</span>
 
       <span class="topic-name">
-        ${escapeHTML(topic.file)}
+        ${escapeHTML(topic.name)}
       </span>
     `;
 
@@ -356,12 +372,6 @@ async function loadMarkdown(
       );
 
 
-    /*
-      Fetch directly from GitHub Pages.
-
-      Example:
-      notes/Early_Stopping.md
-    */
     const response =
       await fetch(
         `notes/${encodeURIComponent(topic.file)}`
@@ -394,9 +404,7 @@ async function loadMarkdown(
 
 
     const renderedHTML =
-      marked.parse(
-        markdown
-      );
+      marked.parse(markdown);
 
 
     content.innerHTML =
@@ -409,38 +417,31 @@ async function loadMarkdown(
 
 
     /*
-      Add sticky navigation at TOP.
-    */
-    addPageNavigation();
+     * Add Previous / Next navigation
+     * directly at the top of the content.
+     *
+     * This has intentionally been REMOVED.
+     * Navigation exists ONLY in the frozen top bar.
+     */
 
 
-    /*
-      Improve markdown.
-    */
     addHeadingIds();
 
     addCopyButtons();
 
     setupExternalLinks();
 
-
-    /*
-      Highlight current note.
-    */
-    updateActiveTopic(
-      topic
-    );
+    updateActiveTopic(topic);
 
 
     /*
-      Close mobile sidebar.
-    */
+     * Keep notes list open.
+     *
+     * No auto-collapse.
+     */
+
+
     closeMobileSidebar();
-
-
-    /*
-      Keep desktop sidebar state.
-    */
 
 
     if (scrollToTop) {
@@ -451,7 +452,6 @@ async function loadMarkdown(
       });
 
     }
-
 
   } catch (error) {
 
@@ -472,50 +472,31 @@ async function loadMarkdown(
 
 
 /* =========================================================
-   PREVIOUS / NEXT NAVIGATION
+   UPDATE TOP NAVIGATION
    =========================================================
 
-   IMPORTANT:
-
-   This is the ONLY article navigation.
-
-   No bottom navigation.
+   Navigation is ONLY in the frozen top bar.
    ========================================================= */
 
-function addPageNavigation() {
+function updateTopNavigation() {
 
-  const existingNavigation =
-    content.querySelector(
-      ".page-navigation"
+  const topNavigation =
+    document.querySelector(
+      ".top-bar .page-navigation"
     );
 
 
-  if (existingNavigation) {
-
-    existingNavigation.remove();
-
+  if (!topNavigation) {
+    return;
   }
+
+
+  topNavigation.innerHTML = "";
 
 
   if (topics.length <= 1) {
     return;
   }
-
-
-  const navigation =
-    document.createElement(
-      "nav"
-    );
-
-
-  navigation.className =
-    "page-navigation";
-
-
-  navigation.setAttribute(
-    "aria-label",
-    "Note navigation"
-  );
 
 
   /* =======================================================
@@ -524,21 +505,16 @@ function addPageNavigation() {
 
   const previousTopic =
     currentTopicIndex > 0
-      ? topics[
-          currentTopicIndex - 1
-        ]
+      ? topics[currentTopicIndex - 1]
       : null;
 
 
   const previousButton =
-    document.createElement(
-      "button"
-    );
+    document.createElement("button");
 
 
   previousButton.type =
     "button";
-
 
   previousButton.className =
     "page-nav-button previous-page";
@@ -583,12 +559,10 @@ function addPageNavigation() {
       }
     );
 
-
   } else {
 
     previousButton.disabled =
       true;
-
 
     previousButton.innerHTML = `
       <span class="page-nav-arrow">
@@ -619,22 +593,17 @@ function addPageNavigation() {
     currentTopicIndex <
       topics.length - 1
 
-      ? topics[
-          currentTopicIndex + 1
-        ]
+      ? topics[currentTopicIndex + 1]
 
       : null;
 
 
   const nextButton =
-    document.createElement(
-      "button"
-    );
+    document.createElement("button");
 
 
   nextButton.type =
     "button";
-
 
   nextButton.className =
     "page-nav-button next-page";
@@ -679,12 +648,10 @@ function addPageNavigation() {
       }
     );
 
-
   } else {
 
     nextButton.disabled =
       true;
-
 
     nextButton.innerHTML = `
       <span class="page-nav-copy">
@@ -707,22 +674,13 @@ function addPageNavigation() {
   }
 
 
-  navigation.appendChild(
+  topNavigation.appendChild(
     previousButton
   );
 
 
-  navigation.appendChild(
+  topNavigation.appendChild(
     nextButton
-  );
-
-
-  /*
-    Put navigation at the very top.
-  */
-  content.insertBefore(
-    navigation,
-    content.firstChild
   );
 
 }
@@ -757,7 +715,7 @@ function updateActiveTopic(
 
     const isActive =
       topicName.textContent.trim() ===
-      selectedTopic.file;
+      selectedTopic.name;
 
 
     button.classList.toggle(
@@ -766,6 +724,9 @@ function updateActiveTopic(
     );
 
   });
+
+
+  updateTopNavigation();
 
 }
 
@@ -793,9 +754,7 @@ function setupSearch() {
 
       if (!query) {
 
-        createSidebar(
-          topics
-        );
+        createSidebar(topics);
 
         return;
 
@@ -803,25 +762,23 @@ function setupSearch() {
 
 
       const filtered =
-        topics.filter(
-          topic => {
+        topics.filter(topic => {
 
-            return (
+          return (
 
-              topic.file
-                .toLowerCase()
-                .includes(query)
+            topic.name
+              .toLowerCase()
+              .includes(query)
 
-              ||
+            ||
 
-              topic.name
-                .toLowerCase()
-                .includes(query)
+            topic.file
+              .toLowerCase()
+              .includes(query)
 
-            );
+          );
 
-          }
-        );
+        });
 
 
       createSidebar(
@@ -830,202 +787,6 @@ function setupSearch() {
 
     }
   );
-
-}
-
-
-/* =========================================================
-   NOTES TOGGLE
-   ========================================================= */
-
-function setupNotesToggle() {
-
-  /*
-    Some versions of index.html may have
-    a notes toggle button.
-  */
-
-  const notesToggle =
-    document.getElementById(
-      "notes-toggle"
-    );
-
-
-  if (!notesToggle) {
-    return;
-  }
-
-
-  notesToggle.addEventListener(
-    "click",
-    () => {
-
-      toggleNotesPanel();
-
-    }
-  );
-
-}
-
-
-/* =========================================================
-   TOGGLE NOTES PANEL
-   ========================================================= */
-
-function toggleNotesPanel() {
-
-  if (!sidebar) {
-    return;
-  }
-
-
-  const isCollapsed =
-    sidebar.classList.contains(
-      "notes-collapsed"
-    );
-
-
-  if (isCollapsed) {
-
-    openNotesPanel();
-
-  } else {
-
-    collapseNotesPanel();
-
-  }
-
-}
-
-
-/* =========================================================
-   OPEN NOTES PANEL
-   ========================================================= */
-
-function openNotesPanel() {
-
-  if (!sidebar) {
-    return;
-  }
-
-
-  sidebar.classList.remove(
-    "notes-collapsed"
-  );
-
-
-  sidebar.classList.add(
-    "notes-visible"
-  );
-
-
-  updateNotesToggle(
-    true
-  );
-
-}
-
-
-/* =========================================================
-   COLLAPSE NOTES PANEL
-   ========================================================= */
-
-function collapseNotesPanel() {
-
-  if (!sidebar) {
-    return;
-  }
-
-
-  sidebar.classList.add(
-    "notes-collapsed"
-  );
-
-
-  sidebar.classList.remove(
-    "notes-visible"
-  );
-
-
-  sidebarHasAutoCollapsed =
-    true;
-
-
-  updateNotesToggle(
-    false
-  );
-
-}
-
-
-/* =========================================================
-   AUTO COLLAPSE
-   ========================================================= */
-
-function scheduleSidebarAutoCollapse() {
-
-  clearTimeout(
-    notesAutoCollapseTimer
-  );
-
-
-  /*
-    Give the visitor enough time to see
-    the available notes.
-  */
-  notesAutoCollapseTimer =
-    setTimeout(
-      () => {
-
-        collapseNotesPanel();
-
-      },
-      NOTES_AUTO_COLLAPSE_DELAY
-    );
-
-}
-
-
-/* =========================================================
-   UPDATE NOTES TOGGLE
-   ========================================================= */
-
-function updateNotesToggle(
-  isOpen
-) {
-
-  const notesToggle =
-    document.getElementById(
-      "notes-toggle"
-    );
-
-
-  if (!notesToggle) {
-    return;
-  }
-
-
-  if (isOpen) {
-
-    notesToggle.innerHTML =
-      "× Notes";
-
-    notesToggle.setAttribute(
-      "aria-label",
-      "Close notes list"
-    );
-
-  } else {
-
-    notesToggle.innerHTML =
-      "☰ Notes";
-
-    notesToggle.setAttribute(
-      "aria-label",
-      "Open notes list"
-    );
-
-  }
 
 }
 
@@ -1041,16 +802,13 @@ function setupKeyboardShortcuts() {
     event => {
 
 
-      /* ---------------------------------------------------
-         CMD + K / CTRL + K
-         --------------------------------------------------- */
+      /* CTRL/CMD + K */
 
       if (
         (event.metaKey ||
           event.ctrlKey) &&
 
-        event.key.toLowerCase() ===
-          "k"
+        event.key.toLowerCase() === "k"
       ) {
 
         event.preventDefault();
@@ -1067,13 +825,10 @@ function setupKeyboardShortcuts() {
       }
 
 
-      /* ---------------------------------------------------
-         ESC
-         --------------------------------------------------- */
+      /* ESC */
 
       if (
-        event.key ===
-        "Escape"
+        event.key === "Escape"
       ) {
 
         if (searchInput) {
@@ -1085,36 +840,25 @@ function setupKeyboardShortcuts() {
         }
 
 
-        createSidebar(
-          topics
-        );
-
+        createSidebar(topics);
 
         closeMobileSidebar();
 
       }
 
 
-      /* ---------------------------------------------------
-         LEFT ARROW
-         --------------------------------------------------- */
+      /* LEFT ARROW */
 
       if (
-        event.key ===
-          "ArrowLeft" &&
-
-        !isTypingInField(
-          event
-        )
+        event.key === "ArrowLeft" &&
+        !isTypingInField(event)
       ) {
 
         if (
-          currentTopicIndex >
-          0
+          currentTopicIndex > 0
         ) {
 
           event.preventDefault();
-
 
           loadMarkdown(
             topics[
@@ -1127,28 +871,20 @@ function setupKeyboardShortcuts() {
       }
 
 
-      /* ---------------------------------------------------
-         RIGHT ARROW
-         --------------------------------------------------- */
+      /* RIGHT ARROW */
 
       if (
-        event.key ===
-          "ArrowRight" &&
-
-        !isTypingInField(
-          event
-        )
+        event.key === "ArrowRight" &&
+        !isTypingInField(event)
       ) {
 
         if (
           currentTopicIndex >= 0 &&
-
           currentTopicIndex <
             topics.length - 1
         ) {
 
           event.preventDefault();
-
 
           loadMarkdown(
             topics[
@@ -1160,24 +896,6 @@ function setupKeyboardShortcuts() {
 
       }
 
-
-      /* ---------------------------------------------------
-         N = TOGGLE NOTES
-         --------------------------------------------------- */
-
-      if (
-        event.key.toLowerCase() ===
-          "n" &&
-
-        !isTypingInField(
-          event
-        )
-      ) {
-
-        toggleNotesPanel();
-
-      }
-
     }
   );
 
@@ -1185,12 +903,10 @@ function setupKeyboardShortcuts() {
 
 
 /* =========================================================
-   CHECK IF USER IS TYPING
+   CHECK INPUT
    ========================================================= */
 
-function isTypingInField(
-  event
-) {
+function isTypingInField(event) {
 
   const element =
     event.target;
@@ -1208,13 +924,9 @@ function isTypingInField(
 
 
   return (
-
     tag === "input" ||
-
     tag === "textarea" ||
-
     element.isContentEditable
-
   );
 
 }
@@ -1230,11 +942,7 @@ function setupMobileMenu() {
 
     menuButton.addEventListener(
       "click",
-      () => {
-
-        openMobileSidebar();
-
-      }
+      openMobileSidebar
     );
 
   }
@@ -1331,106 +1039,84 @@ function closeMobileSidebar() {
 function addCopyButtons() {
 
   const codeBlocks =
-    content.querySelectorAll(
-      "pre"
+    content.querySelectorAll("pre");
+
+
+  codeBlocks.forEach(pre => {
+
+    if (
+      pre.querySelector(
+        ".copy-button"
+      )
+    ) {
+
+      return;
+
+    }
+
+
+    const button =
+      document.createElement("button");
+
+
+    button.type =
+      "button";
+
+    button.className =
+      "copy-button";
+
+    button.textContent =
+      "Copy";
+
+
+    button.setAttribute(
+      "aria-label",
+      "Copy code"
     );
 
 
-  codeBlocks.forEach(
-    pre => {
+    button.addEventListener(
+      "click",
+      async () => {
+
+        const code =
+          pre.querySelector("code");
 
 
-      if (
-        pre.querySelector(
-          ".copy-button"
-        )
-      ) {
-
-        return;
-
-      }
+        if (!code) {
+          return;
+        }
 
 
-      const button =
-        document.createElement(
-          "button"
-        );
+        const codeText =
+          code.innerText;
 
 
-      button.type =
-        "button";
+        try {
+
+          await navigator.clipboard.writeText(
+            codeText
+          );
 
 
-      button.className =
-        "copy-button";
+          showCopiedState(button);
 
+        } catch (error) {
 
-      button.textContent =
-        "Copy";
-
-
-      button.setAttribute(
-        "aria-label",
-        "Copy code"
-      );
-
-
-      button.addEventListener(
-        "click",
-        async () => {
-
-          const code =
-            pre.querySelector(
-              "code"
-            );
-
-
-          if (!code) {
-            return;
-          }
-
-
-          const codeText =
-            code.innerText;
-
-
-          try {
-
-            await navigator.clipboard.writeText(
-              codeText
-            );
-
-
-            showCopiedState(
-              button
-            );
-
-
-          } catch (error) {
-
-            console.error(
-              "Clipboard API failed:",
-              error
-            );
-
-
-            fallbackCopy(
-              codeText,
-              button
-            );
-
-          }
+          fallbackCopy(
+            codeText,
+            button
+          );
 
         }
-      );
+
+      }
+    );
 
 
-      pre.appendChild(
-        button
-      );
+    pre.appendChild(button);
 
-    }
-  );
+  });
 
 }
 
@@ -1439,13 +1125,10 @@ function addCopyButtons() {
    COPIED STATE
    ========================================================= */
 
-function showCopiedState(
-  button
-) {
+function showCopiedState(button) {
 
   button.textContent =
     "Copied ✦";
-
 
   button.classList.add(
     "copied"
@@ -1457,7 +1140,6 @@ function showCopiedState(
 
       button.textContent =
         "Copy";
-
 
       button.classList.remove(
         "copied"
@@ -1490,7 +1172,6 @@ function fallbackCopy(
     textarea.value =
       text;
 
-
     textarea.style.position =
       "fixed";
 
@@ -1514,31 +1195,13 @@ function fallbackCopy(
     textarea.remove();
 
 
-    showCopiedState(
-      button
-    );
-
+    showCopiedState(button);
 
   } catch (error) {
 
     console.error(
-      "Fallback copy failed:",
+      "Copy failed:",
       error
-    );
-
-
-    button.textContent =
-      "Failed";
-
-
-    setTimeout(
-      () => {
-
-        button.textContent =
-          "Copy";
-
-      },
-      1400
     );
 
   }
@@ -1562,64 +1225,56 @@ function addHeadingIds() {
     new Set();
 
 
-  headings.forEach(
-    heading => {
+  headings.forEach(heading => {
 
-      const text =
-        heading.textContent
-          .toLowerCase()
-          .trim();
-
-
-      let baseId =
-        text
-
-          .replace(
-            /[^\w\s-]/g,
-            ""
-          )
-
-          .replace(
-            /\s+/g,
-            "-"
-          );
+    const text =
+      heading.textContent
+        .toLowerCase()
+        .trim();
 
 
-      if (!baseId) {
-        return;
-      }
+    let baseId =
+      text
+        .replace(
+          /[^\w\s-]/g,
+          ""
+        )
+        .replace(
+          /\s+/g,
+          "-"
+        );
 
 
-      let id =
-        baseId;
+    if (!baseId) {
+      return;
+    }
 
 
-      let counter =
-        2;
+    let id =
+      baseId;
+
+    let counter =
+      2;
 
 
-      while (
-        usedIds.has(id)
-      ) {
+    while (
+      usedIds.has(id)
+    ) {
 
-        id =
-          `${baseId}-${counter}`;
+      id =
+        `${baseId}-${counter}`;
 
-        counter++;
-
-      }
-
-
-      usedIds.add(
-        id
-      );
-
-
-      heading.id =
-        id;
+      counter++;
 
     }
-  );
+
+
+    usedIds.add(id);
+
+    heading.id =
+      id;
+
+  });
 
 }
 
@@ -1631,44 +1286,32 @@ function addHeadingIds() {
 function setupExternalLinks() {
 
   const links =
-    content.querySelectorAll(
-      "a"
-    );
+    content.querySelectorAll("a");
 
 
-  links.forEach(
-    link => {
+  links.forEach(link => {
 
-      const href =
-        link.getAttribute(
-          "href"
-        );
+    const href =
+      link.getAttribute("href");
 
 
-      if (
-        href &&
-        (
-          href.startsWith(
-            "http://"
-          ) ||
+    if (
+      href &&
+      (
+        href.startsWith("http://") ||
+        href.startsWith("https://")
+      )
+    ) {
 
-          href.startsWith(
-            "https://"
-          )
-        )
-      ) {
+      link.target =
+        "_blank";
 
-        link.target =
-          "_blank";
-
-
-        link.rel =
-          "noopener noreferrer";
-
-      }
+      link.rel =
+        "noopener noreferrer";
 
     }
-  );
+
+  });
 
 }
 
@@ -1683,23 +1326,15 @@ function configureMarkdown() {
     typeof marked ===
     "undefined"
   ) {
-
-    console.error(
-      "Marked.js was not loaded."
-    );
-
-
     return;
   }
 
 
   marked.setOptions({
 
-    gfm:
-      true,
+    gfm: true,
 
-    breaks:
-      true
+    breaks: true
 
   });
 
@@ -1759,7 +1394,7 @@ function showLoadingSidebar() {
 
 
 /* =========================================================
-   EMPTY MESSAGE
+   MESSAGE
    ========================================================= */
 
 function showMessage(
@@ -1790,7 +1425,7 @@ function showMessage(
 
 
 /* =========================================================
-   ERROR MESSAGE
+   ERROR
    ========================================================= */
 
 function showError(
@@ -1824,14 +1459,10 @@ function showError(
    ESCAPE HTML
    ========================================================= */
 
-function escapeHTML(
-  value
-) {
+function escapeHTML(value) {
 
   const div =
-    document.createElement(
-      "div"
-    );
+    document.createElement("div");
 
 
   div.textContent =
@@ -1845,17 +1476,6 @@ function escapeHTML(
 
 /* =========================================================
    THEME
-   =========================================================
-
-   LIGHT = DEFAULT
-
-   DARK = OPTIONAL
-
-   Important:
-   We intentionally default to light.
-
-   If there is no saved preference,
-   light mode is used.
    ========================================================= */
 
 function setupTheme() {
@@ -1872,13 +1492,11 @@ function setupTheme() {
 
 
   /*
-    Default:
-    LIGHT
-  */
+   * Light theme is the default.
+   */
 
   if (
-    savedTheme ===
-    "dark"
+    savedTheme === "dark"
   ) {
 
     document.body.classList.add(
@@ -1929,7 +1547,7 @@ function setupTheme() {
 
 
 /* =========================================================
-   UPDATE THEME BUTTON
+   THEME BUTTON
    ========================================================= */
 
 function updateThemeButton() {
@@ -1944,14 +1562,6 @@ function updateThemeButton() {
       "dark-theme"
     );
 
-
-  /*
-    Moon = currently light,
-    clicking switches to dark.
-
-    Sun = currently dark,
-    clicking switches to light.
-  */
 
   themeButton.textContent =
     isDark
@@ -1978,7 +1588,7 @@ function updateThemeButton() {
 
 
 /* =========================================================
-   START APPLICATION
+   START
    ========================================================= */
 
 if (
