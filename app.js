@@ -5,15 +5,31 @@ const NOTES_FOLDER = "notes";
 const sidebar = document.getElementById("sidebar");
 const content = document.getElementById("content");
 const searchInput = document.getElementById("search");
-const currentTopic = document.getElementById("current-topic");
+const themeButton = document.getElementById("theme-button");
 
 let topics = [];
 let currentTopicIndex = -1;
 
 
-/* ========================================
-   GET ALL MARKDOWN FILES
-======================================== */
+/* =========================================================
+   INITIALIZE
+   ========================================================= */
+
+function initialize() {
+  configureMarkdown();
+  setupSearch();
+  setupKeyboardShortcuts();
+  setupMobileMenu();
+  setupTheme();
+
+  loadTopics();
+}
+
+
+/* =========================================================
+   LOAD NOTES FROM GITHUB
+   ========================================================= */
+
 async function loadTopics() {
   try {
     const apiUrl =
@@ -22,10 +38,16 @@ async function loadTopics() {
     const response = await fetch(apiUrl);
 
     if (!response.ok) {
-      throw new Error("Could not load notes from GitHub.");
+      throw new Error(
+        `GitHub API returned ${response.status}`
+      );
     }
 
     const files = await response.json();
+
+    if (!Array.isArray(files)) {
+      throw new Error("Invalid notes response.");
+    }
 
     topics = files
       .filter(file =>
@@ -43,29 +65,38 @@ async function loadTopics() {
 
     createSidebar(topics);
 
-    if (topics.length > 0) {
-      loadMarkdown(topics[0]);
-    } else {
+    if (topics.length === 0) {
       showMessage(
-        "No notes yet",
+        "No notes yet ✦",
         "Add Markdown files to the notes folder."
       );
+
+      return;
     }
 
+    /*
+      Open the first note automatically.
+    */
+    loadMarkdown(topics[0]);
+
   } catch (error) {
-    console.error(error);
+    console.error(
+      "Failed to load notes:",
+      error
+    );
 
     showError(
       "Couldn’t load your notes.",
-      "Check that the notes folder exists in your GitHub repository."
+      "Please check that the notes folder exists in your GitHub repository."
     );
   }
 }
 
 
-/* ========================================
-   FILE NAME → DISPLAY NAME
-======================================== */
+/* =========================================================
+   FORMAT NOTE NAME
+   ========================================================= */
+
 function formatTopicName(filename) {
   return filename
     .replace(/\.md$/i, "")
@@ -75,9 +106,10 @@ function formatTopicName(filename) {
 }
 
 
-/* ========================================
-   SIDEBAR
-======================================== */
+/* =========================================================
+   CREATE SIDEBAR
+   ========================================================= */
+
 function createSidebar(items = topics) {
   const navigation =
     document.querySelector(".topic-navigation");
@@ -91,7 +123,7 @@ function createSidebar(items = topics) {
   if (items.length === 0) {
     navigation.innerHTML = `
       <div class="no-results">
-        No notes found
+        Nothing found ✦
       </div>
     `;
 
@@ -99,48 +131,71 @@ function createSidebar(items = topics) {
   }
 
   items.forEach(topic => {
-
     const button =
       document.createElement("button");
 
     button.type = "button";
-    button.className = "topic-button";
 
+    button.className =
+      "topic-button";
+
+    /*
+      Cute replacement for ├──
+    */
     button.innerHTML = `
-      <span class="tree-symbol">├──</span>
+      <span class="topic-dot">✦</span>
+
       <span class="topic-name">
         ${escapeHTML(topic.file)}
       </span>
     `;
 
-    button.addEventListener("click", () => {
-      loadMarkdown(topic);
-    });
+    button.addEventListener(
+      "click",
+      () => loadMarkdown(topic)
+    );
 
     navigation.appendChild(button);
   });
+
+  /*
+    Restore active note after search/sidebar rebuild.
+  */
+  if (
+    currentTopicIndex >= 0 &&
+    topics[currentTopicIndex]
+  ) {
+    updateActiveTopic(
+      topics[currentTopicIndex]
+    );
+  }
 }
 
 
-/* ========================================
+/* =========================================================
    LOAD MARKDOWN NOTE
-======================================== */
+   ========================================================= */
+
 async function loadMarkdown(topic) {
   try {
 
     showLoading();
 
     /*
-      Find the current note in the complete
-      topic list.
-
-      This is used by Previous / Next.
+      Find current note in the complete notes list.
     */
     currentTopicIndex =
       topics.findIndex(
         item => item.file === topic.file
       );
 
+    /*
+      Fetch the Markdown file from the local
+      GitHub Pages notes directory.
+
+      This is preferable to GitHub API content because
+      the site itself is hosted from GitHub Pages.
+    */
     const response =
       await fetch(
         `notes/${encodeURIComponent(topic.file)}`
@@ -155,53 +210,58 @@ async function loadMarkdown(topic) {
     const markdown =
       await response.text();
 
-    if (typeof marked === "undefined") {
+    if (
+      typeof marked === "undefined"
+    ) {
       throw new Error(
-        "Markdown parser is not available."
+        "Marked.js is not available."
       );
     }
 
     /*
-      Render the Markdown first.
+      Convert Markdown to HTML.
     */
-    content.innerHTML =
+    const renderedHTML =
       marked.parse(markdown);
 
     /*
-      Update current topic information.
+      Render the note.
     */
-    updateCurrentTopic(topic);
-
-    updateActiveTopic(topic);
+    content.innerHTML =
+      renderedHTML;
 
     /*
-      Add navigation at the TOP.
+      Tell CSS that this is a real note,
+      not the homepage.
     */
-    addPageNavigation("top");
+    content.classList.add(
+      "note-loaded"
+    );
 
     /*
-      Existing content features.
+      Add Previous / Next at the TOP.
     */
-    addCopyButtons();
+    addPageNavigation();
 
+    /*
+      Additional enhancements.
+    */
     addHeadingIds();
-
+    addCopyButtons();
     setupExternalLinks();
 
     /*
-      Add navigation at the BOTTOM.
+      Highlight the active note.
     */
-    addPageNavigation("bottom");
+    updateActiveTopic(topic);
 
     /*
-      Close mobile sidebar after
-      selecting a note.
+      Close mobile sidebar.
     */
     closeMobileSidebar();
 
     /*
-      Scroll to the top whenever a new
-      page/note is opened.
+      Start at the top of the note.
     */
     window.scrollTo({
       top: 0,
@@ -210,7 +270,10 @@ async function loadMarkdown(topic) {
 
   } catch (error) {
 
-    console.error(error);
+    console.error(
+      "Failed to load note:",
+      error
+    );
 
     showError(
       "Couldn’t open this note.",
@@ -220,63 +283,57 @@ async function loadMarkdown(topic) {
 }
 
 
-/* ========================================
-   PREVIOUS / NEXT PAGE NAVIGATION
-======================================== */
-function addPageNavigation(position) {
+/* =========================================================
+   PREVIOUS / NEXT NAVIGATION
+   =========================================================
+
+   Navigation appears ONLY at the top.
+
+   There is intentionally no bottom navigation.
+   ========================================================= */
+
+function addPageNavigation() {
 
   /*
-    Remove any existing navigation for
-    this position.
+    Remove an existing navigation if one exists.
   */
   const existingNavigation =
     content.querySelector(
-      `.page-navigation-${position}`
+      ".page-navigation"
     );
 
   if (existingNavigation) {
     existingNavigation.remove();
   }
 
-
   /*
-    Don't show navigation if there is
-    only one note.
+    No navigation if there is only one note.
   */
   if (topics.length <= 1) {
     return;
   }
 
-
   const navigation =
     document.createElement("nav");
 
   navigation.className =
-    `page-navigation page-navigation-${position}`;
+    "page-navigation";
 
   navigation.setAttribute(
     "aria-label",
-    "Page navigation"
+    "Note navigation"
   );
 
 
-  /*
-    Find Previous and Next notes.
-  */
+  /* =======================================================
+     PREVIOUS
+     ======================================================= */
+
   const previousTopic =
     currentTopicIndex > 0
       ? topics[currentTopicIndex - 1]
       : null;
 
-  const nextTopic =
-    currentTopicIndex < topics.length - 1
-      ? topics[currentTopicIndex + 1]
-      : null;
-
-
-  /* ======================================
-     PREVIOUS BUTTON
-  ====================================== */
 
   const previousButton =
     document.createElement("button");
@@ -290,19 +347,20 @@ function addPageNavigation(position) {
   if (previousTopic) {
 
     previousButton.innerHTML = `
-      <span
-        class="page-nav-arrow"
-        aria-hidden="true"
-      >
+      <span class="page-nav-arrow">
         ←
       </span>
 
-      <span class="page-nav-label">
-        Previous
-      </span>
+      <span class="page-nav-copy">
 
-      <span class="page-nav-title">
-        ${escapeHTML(previousTopic.name)}
+        <span class="page-nav-label">
+          Previous
+        </span>
+
+        <span class="page-nav-title">
+          ${escapeHTML(previousTopic.name)}
+        </span>
+
       </span>
     `;
 
@@ -323,28 +381,35 @@ function addPageNavigation(position) {
     previousButton.disabled = true;
 
     previousButton.innerHTML = `
-      <span
-        class="page-nav-arrow"
-        aria-hidden="true"
-      >
+      <span class="page-nav-arrow">
         ←
       </span>
 
-      <span class="page-nav-label">
-        Previous
+      <span class="page-nav-copy">
+
+        <span class="page-nav-label">
+          Previous
+        </span>
+
+        <span class="page-nav-title">
+          Start
+        </span>
+
       </span>
     `;
-
-    previousButton.setAttribute(
-      "aria-label",
-      "No previous page"
-    );
   }
 
 
-  /* ======================================
-     NEXT BUTTON
-  ====================================== */
+  /* =======================================================
+     NEXT
+     ======================================================= */
+
+  const nextTopic =
+    currentTopicIndex <
+      topics.length - 1
+      ? topics[currentTopicIndex + 1]
+      : null;
+
 
   const nextButton =
     document.createElement("button");
@@ -358,18 +423,19 @@ function addPageNavigation(position) {
   if (nextTopic) {
 
     nextButton.innerHTML = `
-      <span class="page-nav-label">
-        Next
+      <span class="page-nav-copy">
+
+        <span class="page-nav-label">
+          Next
+        </span>
+
+        <span class="page-nav-title">
+          ${escapeHTML(nextTopic.name)}
+        </span>
+
       </span>
 
-      <span class="page-nav-title">
-        ${escapeHTML(nextTopic.name)}
-      </span>
-
-      <span
-        class="page-nav-arrow"
-        aria-hidden="true"
-      >
+      <span class="page-nav-arrow">
         →
       </span>
     `;
@@ -391,27 +457,27 @@ function addPageNavigation(position) {
     nextButton.disabled = true;
 
     nextButton.innerHTML = `
-      <span class="page-nav-label">
-        Next
+      <span class="page-nav-copy">
+
+        <span class="page-nav-label">
+          Next
+        </span>
+
+        <span class="page-nav-title">
+          You’re caught up ✦
+        </span>
+
       </span>
 
-      <span
-        class="page-nav-arrow"
-        aria-hidden="true"
-      >
+      <span class="page-nav-arrow">
         →
       </span>
     `;
-
-    nextButton.setAttribute(
-      "aria-label",
-      "No next page"
-    );
   }
 
 
   /*
-    Add buttons to navigation.
+    Add buttons.
   */
   navigation.appendChild(
     previousButton
@@ -423,45 +489,20 @@ function addPageNavigation(position) {
 
 
   /*
-    TOP:
-      Insert before Markdown content.
-
-    BOTTOM:
-      Append after Markdown content.
+    IMPORTANT:
+    Navigation is inserted BEFORE the note content.
   */
-  if (position === "top") {
-
-    content.insertBefore(
-      navigation,
-      content.firstChild
-    );
-
-  } else {
-
-    content.appendChild(
-      navigation
-    );
-  }
+  content.insertBefore(
+    navigation,
+    content.firstChild
+  );
 }
 
 
-/* ========================================
-   CURRENT TOPIC
-======================================== */
-function updateCurrentTopic(topic) {
+/* =========================================================
+   ACTIVE SIDEBAR NOTE
+   ========================================================= */
 
-  if (!currentTopic) {
-    return;
-  }
-
-  currentTopic.textContent =
-    topic.name;
-}
-
-
-/* ========================================
-   ACTIVE SIDEBAR ITEM
-======================================== */
 function updateActiveTopic(selectedTopic) {
 
   const buttons =
@@ -480,24 +521,22 @@ function updateActiveTopic(selectedTopic) {
       return;
     }
 
-    if (
+    const isActive =
       topicName.textContent.trim() ===
-      selectedTopic.file
-    ) {
+      selectedTopic.file;
 
-      button.classList.add("active");
-
-    } else {
-
-      button.classList.remove("active");
-    }
+    button.classList.toggle(
+      "active",
+      isActive
+    );
   });
 }
 
 
-/* ========================================
+/* =========================================================
    SEARCH
-======================================== */
+   ========================================================= */
+
 function setupSearch() {
 
   if (!searchInput) {
@@ -514,27 +553,21 @@ function setupSearch() {
           .trim();
 
 
+      /*
+        Empty search:
+        restore everything.
+      */
       if (!query) {
 
         createSidebar(topics);
-
-        /*
-          Restore active item after search
-          is cleared.
-        */
-        if (
-          currentTopicIndex >= 0 &&
-          topics[currentTopicIndex]
-        ) {
-          updateActiveTopic(
-            topics[currentTopicIndex]
-          );
-        }
 
         return;
       }
 
 
+      /*
+        Search filename and formatted name.
+      */
       const filtered =
         topics.filter(topic => {
 
@@ -557,9 +590,10 @@ function setupSearch() {
 }
 
 
-/* ========================================
+/* =========================================================
    KEYBOARD SHORTCUTS
-======================================== */
+   ========================================================= */
+
 function setupKeyboardShortcuts() {
 
   document.addEventListener(
@@ -567,12 +601,11 @@ function setupKeyboardShortcuts() {
     event => {
 
       /*
-        Cmd + K / Ctrl + K
-        Focus search
+        CMD + K / CTRL + K
+        Focus search.
       */
       if (
-        (event.metaKey ||
-          event.ctrlKey) &&
+        (event.metaKey || event.ctrlKey) &&
         event.key.toLowerCase() === "k"
       ) {
 
@@ -588,9 +621,11 @@ function setupKeyboardShortcuts() {
 
 
       /*
-        Escape
+        ESCAPE
       */
-      if (event.key === "Escape") {
+      if (
+        event.key === "Escape"
+      ) {
 
         if (searchInput) {
 
@@ -606,10 +641,9 @@ function setupKeyboardShortcuts() {
 
 
       /*
-        Left arrow:
-        Previous page
+        LEFT ARROW
+        Previous note.
       */
-
       if (
         event.key === "ArrowLeft" &&
         !isTypingInField(event)
@@ -622,17 +656,18 @@ function setupKeyboardShortcuts() {
           event.preventDefault();
 
           loadMarkdown(
-            topics[currentTopicIndex - 1]
+            topics[
+              currentTopicIndex - 1
+            ]
           );
         }
       }
 
 
       /*
-        Right arrow:
-        Next page
+        RIGHT ARROW
+        Next note.
       */
-
       if (
         event.key === "ArrowRight" &&
         !isTypingInField(event)
@@ -647,7 +682,9 @@ function setupKeyboardShortcuts() {
           event.preventDefault();
 
           loadMarkdown(
-            topics[currentTopicIndex + 1]
+            topics[
+              currentTopicIndex + 1
+            ]
           );
         }
       }
@@ -657,9 +694,10 @@ function setupKeyboardShortcuts() {
 }
 
 
-/* ========================================
+/* =========================================================
    CHECK IF USER IS TYPING
-======================================== */
+   ========================================================= */
+
 function isTypingInField(event) {
 
   const element =
@@ -682,25 +720,36 @@ function isTypingInField(event) {
 }
 
 
-/* ========================================
-   COPY CODE BUTTON
-======================================== */
+/* =========================================================
+   COPY CODE BLOCKS
+   ========================================================= */
+
 function addCopyButtons() {
 
   const codeBlocks =
-    content.querySelectorAll("pre");
+    content.querySelectorAll(
+      "pre"
+    );
+
 
   codeBlocks.forEach(pre => {
 
+    /*
+      Don't add twice.
+    */
     if (
-      pre.querySelector(".copy-button")
+      pre.querySelector(
+        ".copy-button"
+      )
     ) {
       return;
     }
 
 
     const button =
-      document.createElement("button");
+      document.createElement(
+        "button"
+      );
 
     button.type = "button";
 
@@ -711,12 +760,20 @@ function addCopyButtons() {
       "Copy";
 
 
+    button.setAttribute(
+      "aria-label",
+      "Copy code"
+    );
+
+
     button.addEventListener(
       "click",
       async () => {
 
         const code =
-          pre.querySelector("code");
+          pre.querySelector(
+            "code"
+          );
 
         if (!code) {
           return;
@@ -731,52 +788,115 @@ function addCopyButtons() {
 
 
           button.textContent =
-            "Copied";
+            "Copied ✦";
+
 
           button.classList.add(
             "copied"
           );
 
 
-          setTimeout(() => {
+          setTimeout(
+            () => {
 
-            button.textContent =
-              "Copy";
+              button.textContent =
+                "Copy";
 
-            button.classList.remove(
-              "copied"
-            );
+              button.classList.remove(
+                "copied"
+              );
 
-          }, 1400);
+            },
+            1400
+          );
 
 
         } catch (error) {
 
-          console.error(error);
+          console.error(
+            "Copy failed:",
+            error
+          );
 
-          button.textContent =
-            "Failed";
+
+          /*
+            Fallback for browsers where
+            clipboard API isn't available.
+          */
+          try {
+
+            const range =
+              document.createRange();
+
+            range.selectNodeContents(
+              code
+            );
 
 
-          setTimeout(() => {
+            const selection =
+              window.getSelection();
+
+            selection.removeAllRanges();
+
+            selection.addRange(
+              range
+            );
+
+
+            document.execCommand(
+              "copy"
+            );
+
+            selection.removeAllRanges();
+
 
             button.textContent =
-              "Copy";
+              "Copied ✦";
 
-          }, 1400);
+
+            setTimeout(
+              () => {
+                button.textContent =
+                  "Copy";
+              },
+              1400
+            );
+
+          } catch (fallbackError) {
+
+            console.error(
+              "Clipboard fallback failed:",
+              fallbackError
+            );
+
+            button.textContent =
+              "Failed";
+
+            setTimeout(
+              () => {
+                button.textContent =
+                  "Copy";
+              },
+              1400
+            );
+          }
         }
       }
     );
 
 
-    pre.appendChild(button);
+    pre.appendChild(
+      button
+    );
+
   });
 }
 
 
-/* ========================================
+/* =========================================================
    HEADING IDS
-======================================== */
+   ========================================================= */
+
 function addHeadingIds() {
 
   const headings =
@@ -788,90 +908,122 @@ function addHeadingIds() {
     new Set();
 
 
-  headings.forEach(heading => {
+  headings.forEach(
+    heading => {
 
-    let baseId =
-      heading.textContent
-        .toLowerCase()
-        .trim()
-        .replace(
-          /[^\w\s-]/g,
-          ""
-        )
-        .replace(
-          /\s+/g,
-          "-"
-        );
+      const text =
+        heading.textContent
+          .toLowerCase()
+          .trim();
 
 
-    if (!baseId) {
-      return;
+      let baseId =
+        text
+          .replace(
+            /[^\w\s-]/g,
+            ""
+          )
+          .replace(
+            /\s+/g,
+            "-"
+          );
+
+
+      if (!baseId) {
+        return;
+      }
+
+
+      let id =
+        baseId;
+
+      let counter =
+        2;
+
+
+      /*
+        Make IDs unique.
+      */
+      while (
+        usedIds.has(id)
+      ) {
+
+        id =
+          `${baseId}-${counter}`;
+
+        counter++;
+      }
+
+
+      usedIds.add(id);
+
+      heading.id =
+        id;
+
     }
-
-
-    let id =
-      baseId;
-
-    let counter =
-      2;
-
-
-    while (
-      usedIds.has(id)
-    ) {
-
-      id =
-        `${baseId}-${counter}`;
-
-      counter++;
-    }
-
-
-    usedIds.add(id);
-
-    heading.id =
-      id;
-  });
+  );
 }
 
 
-/* ========================================
+/* =========================================================
    EXTERNAL LINKS
-======================================== */
+   ========================================================= */
+
 function setupExternalLinks() {
 
   const links =
-    content.querySelectorAll("a");
+    content.querySelectorAll(
+      "a"
+    );
 
 
-  links.forEach(link => {
+  links.forEach(
+    link => {
 
-    const href =
-      link.getAttribute("href");
+      const href =
+        link.getAttribute(
+          "href"
+        );
 
 
-    if (
-      href &&
-      (
-        href.startsWith("http://") ||
-        href.startsWith("https://")
-      )
-    ) {
+      if (
+        href &&
+        (
+          href.startsWith(
+            "http://"
+          ) ||
+          href.startsWith(
+            "https://"
+          )
+        )
+      ) {
 
-      link.target =
-        "_blank";
+        link.target =
+          "_blank";
 
-      link.rel =
-        "noopener noreferrer";
+        link.rel =
+          "noopener noreferrer";
+
+      }
+
     }
-  });
+  );
 }
 
 
-/* ========================================
+/* =========================================================
    LOADING STATE
-======================================== */
+   ========================================================= */
+
 function showLoading() {
+
+  /*
+    Remove note styling while loading.
+  */
+  content.classList.remove(
+    "note-loaded"
+  );
+
 
   content.innerHTML = `
     <div class="loading">
@@ -887,13 +1039,19 @@ function showLoading() {
 }
 
 
-/* ========================================
-   MESSAGE
-======================================== */
+/* =========================================================
+   EMPTY MESSAGE
+   ========================================================= */
+
 function showMessage(
   title,
   message
 ) {
+
+  content.classList.remove(
+    "note-loaded"
+  );
+
 
   content.innerHTML = `
     <div class="empty-state">
@@ -911,13 +1069,19 @@ function showMessage(
 }
 
 
-/* ========================================
-   ERROR
-======================================== */
+/* =========================================================
+   ERROR MESSAGE
+   ========================================================= */
+
 function showError(
   title,
   message
 ) {
+
+  content.classList.remove(
+    "note-loaded"
+  );
+
 
   content.innerHTML = `
     <div class="error">
@@ -935,9 +1099,10 @@ function showError(
 }
 
 
-/* ========================================
+/* =========================================================
    MOBILE SIDEBAR
-======================================== */
+   ========================================================= */
+
 function setupMobileMenu() {
 
   const menuButton =
@@ -956,15 +1121,21 @@ function setupMobileMenu() {
     );
 
 
+  /*
+    OPEN
+  */
   if (menuButton) {
 
     menuButton.addEventListener(
       "click",
       () => {
 
-        sidebar.classList.add(
-          "mobile-open"
-        );
+        if (sidebar) {
+
+          sidebar.classList.add(
+            "mobile-open"
+          );
+        }
 
 
         if (overlay) {
@@ -978,11 +1149,15 @@ function setupMobileMenu() {
         document.body.classList.add(
           "sidebar-open"
         );
+
       }
     );
   }
 
 
+  /*
+    CLOSE BUTTON
+  */
   if (closeButton) {
 
     closeButton.addEventListener(
@@ -992,6 +1167,9 @@ function setupMobileMenu() {
   }
 
 
+  /*
+    CLICK OUTSIDE
+  */
   if (overlay) {
 
     overlay.addEventListener(
@@ -1002,9 +1180,10 @@ function setupMobileMenu() {
 }
 
 
-/* ========================================
+/* =========================================================
    CLOSE MOBILE SIDEBAR
-======================================== */
+   ========================================================= */
+
 function closeMobileSidebar() {
 
   if (sidebar) {
@@ -1035,9 +1214,10 @@ function closeMobileSidebar() {
 }
 
 
-/* ========================================
+/* =========================================================
    ESCAPE HTML
-======================================== */
+   ========================================================= */
+
 function escapeHTML(value) {
 
   const div =
@@ -1046,15 +1226,16 @@ function escapeHTML(value) {
     );
 
   div.textContent =
-    value;
+    String(value);
 
   return div.innerHTML;
 }
 
 
-/* ========================================
+/* =========================================================
    MARKDOWN CONFIGURATION
-======================================== */
+   ========================================================= */
+
 function configureMarkdown() {
 
   if (
@@ -1070,34 +1251,150 @@ function configureMarkdown() {
 
 
   marked.setOptions({
+
     gfm: true,
+
     breaks: true
+
   });
 }
 
 
-/* ========================================
-   INITIALIZE
-======================================== */
-function initialize() {
+/* =========================================================
+   THEME
+   =========================================================
 
-  configureMarkdown();
+   LIGHT = DEFAULT
 
-  setupSearch();
+   Clicking the button:
+   LIGHT → DARK
+   DARK  → LIGHT
 
-  setupKeyboardShortcuts();
+   The selection is remembered using localStorage.
+   ========================================================= */
 
-  setupMobileMenu();
+function setupTheme() {
 
-  loadTopics();
+  if (!themeButton) {
+    return;
+  }
+
+
+  const savedTheme =
+    localStorage.getItem(
+      "ai-curiosity-theme"
+    );
+
+
+  /*
+    Default is LIGHT.
+  */
+  if (
+    savedTheme === "dark"
+  ) {
+
+    document.body.classList.add(
+      "dark-theme"
+    );
+
+  } else {
+
+    document.body.classList.remove(
+      "dark-theme"
+    );
+  }
+
+
+  updateThemeButton();
+
+
+  /*
+    Toggle theme.
+  */
+  themeButton.addEventListener(
+    "click",
+    () => {
+
+      document.body.classList.toggle(
+        "dark-theme"
+      );
+
+
+      const isDark =
+        document.body.classList.contains(
+          "dark-theme"
+        );
+
+
+      localStorage.setItem(
+        "ai-curiosity-theme",
+        isDark
+          ? "dark"
+          : "light"
+      );
+
+
+      updateThemeButton();
+
+    }
+  );
 }
 
 
-/* ========================================
-   START
-======================================== */
+/* =========================================================
+   UPDATE THEME BUTTON
+   ========================================================= */
+
+function updateThemeButton() {
+
+  if (!themeButton) {
+    return;
+  }
+
+
+  const isDark =
+    document.body.classList.contains(
+      "dark-theme"
+    );
+
+
+  /*
+    Light mode:
+      show moon
+
+    Dark mode:
+      show sun
+  */
+  themeButton.textContent =
+    isDark
+      ? "☀"
+      : "☾";
+
+
+  themeButton.setAttribute(
+    "aria-label",
+    isDark
+      ? "Switch to light mode"
+      : "Switch to dark mode"
+  );
+
+
+  themeButton.setAttribute(
+    "title",
+    isDark
+      ? "Switch to light mode"
+      : "Switch to dark mode"
+  );
+}
+
+
+/* =========================================================
+   START APP
+   ========================================================= */
+
 if (
-  document.readyState === "loading"
+  document.readyState ===
+  "loading"
 ) {
 
   document.addEventListener(
@@ -1108,4 +1405,5 @@ if (
 } else {
 
   initialize();
+
 }
