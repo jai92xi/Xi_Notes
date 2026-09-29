@@ -78,10 +78,12 @@ function configureMarkdown() {
 
   marked.setOptions({
     gfm: true,
-    breaks: true
+    breaks: true,
+    sanitize: false
   });
 
 }
+
 
 
 /* =========================================================
