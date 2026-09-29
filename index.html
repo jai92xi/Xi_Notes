@@ -27,7 +27,7 @@
        MOBILE HEADER
        ===================================================== -->
 
-  <header>
+  <header class="mobile-header">
 
     <div class="header-actions">
 
@@ -36,6 +36,8 @@
         class="menu-button"
         type="button"
         aria-label="Open contents"
+        aria-controls="sidebar"
+        aria-expanded="false"
         title="Open contents"
       >
         ☰
@@ -53,6 +55,7 @@
   <div
     id="sidebar-overlay"
     class="sidebar-overlay"
+    aria-hidden="true"
   ></div>
 
 
@@ -63,21 +66,23 @@
   <aside
     id="sidebar"
     class="sidebar"
+    aria-label="Contents"
   >
 
-    <!-- Three-line contents toggle -->
+    <!-- Contents toggle -->
 
     <button
       id="contents-toggle"
       class="contents-toggle"
       type="button"
       aria-expanded="true"
+      aria-controls="topic-navigation"
       aria-label="Hide contents"
       title="Hide contents"
     >
-      <span></span>
-      <span></span>
-      <span></span>
+      <span aria-hidden="true"></span>
+      <span aria-hidden="true"></span>
+      <span aria-hidden="true"></span>
     </button>
 
 
@@ -94,6 +99,7 @@
         type="search"
         placeholder="⌕  Search concepts..."
         autocomplete="off"
+        spellcheck="false"
         aria-label="Search concepts"
       >
 
@@ -107,18 +113,29 @@
       class="topic-navigation"
       aria-label="AI and ML concepts"
     >
+
       <div class="no-results">
         Loading concepts...
       </div>
+
     </nav>
 
 
     <!-- Footer -->
 
     <div class="sidebar-footer">
+
       <span>Made with</span>
-      <span class="footer-love">♥</span>
+
+      <span
+        class="footer-love"
+        aria-hidden="true"
+      >
+        ♥
+      </span>
+
       <span>&amp; curiosity</span>
+
     </div>
 
   </aside>
@@ -128,8 +145,10 @@
        MAIN
        ===================================================== -->
 
-  <main id="main">
-
+  <main
+    id="main"
+    tabindex="-1"
+  >
 
     <!-- ===================================================
          TOP PREVIOUS / NEXT NAVIGATION
@@ -148,6 +167,7 @@
         class="page-nav-button previous-page"
         type="button"
         disabled
+        aria-disabled="true"
         aria-label="Previous note"
       >
 
@@ -183,6 +203,7 @@
         class="page-nav-button next-page"
         type="button"
         disabled
+        aria-disabled="true"
         aria-label="Next note"
       >
 
@@ -222,6 +243,8 @@
       <article
         id="content"
         class="content"
+        aria-live="polite"
+        aria-busy="false"
       >
 
         <div class="loading">
