@@ -1,26 +1,16 @@
-> 🧠 **xxEARLY STOPPING**
+> 🧠 **EARLY STOPPING**
 >
-> Early stopping is a **regularization technique** that **prevents overfitting** by stopping training when **validation performance stops improving**.
+> Early stopping is a **regularization technique** that **helps prevent overfitting** by stopping training when **validation performance stops improving**.
 
-<img src="../images/early_stopping1.png" alt="Early Stopping" width="100%">
+**Training loss** keeps **decreasing** 📉, but **validation loss** starts **increasing** 📈 (or stops improving) → the model is beginning to overfit → **stop training**.
 
----
-
-### 🧪 Keras
 
 ```python
 early_stop = callbacks.EarlyStopping(
-    monitor="val_loss",
-    patience=5,
-    min_delta=1e-4,
-    mode="min",
-    restore_best_weights=True
+    monitor              = "val_loss",  # monitor validation loss during training
+    patience             = 5,          # wait 5 epochs for improvement before stopping
+    min_delta            = 0.001,      # minimum change considered as an improvement
+    mode                 = "min",      # lower validation loss is better
+    restore_best_weights = True        # restore weights from the best epoch
 )
-
-model.fit(
-    x_train, y_train,
-    validation_data=(x_val, y_val),
-    epochs=200,
-    batch_size=64,
-    callbacks=[early_stop]
-)
+```
