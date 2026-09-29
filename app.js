@@ -8,7 +8,6 @@ const GITHUB_REPO = "Xi_Notes";
 const GITHUB_BRANCH = "main";
 const NOTES_FOLDER = "notes";
 
-
 let topics = [];
 let currentTopicIndex = -1;
 
@@ -17,63 +16,103 @@ let currentTopicIndex = -1;
    DOM
    ========================================================= */
 
-const sidebar =
-  document.getElementById("sidebar");
+let sidebar;
+let content;
+let searchInput;
+let themeButton;
+let menuButton;
+let closeSidebarButton;
+let sidebarOverlay;
 
-const content =
-  document.getElementById("content");
+let contentsToggle;
+let topicNavigation;
 
-const searchInput =
-  document.getElementById("search");
-
-const themeButton =
-  document.getElementById("theme-button");
-
-const menuButton =
-  document.getElementById("menu-button");
-
-const closeSidebarButton =
-  document.getElementById("close-sidebar");
-
-const sidebarOverlay =
-  document.getElementById("sidebar-overlay");
+let previousButton;
+let nextButton;
+let previousTitle;
+let nextTitle;
 
 
 /* =========================================================
    INITIALIZE
    ========================================================= */
 
-document.addEventListener(
-  "DOMContentLoaded",
-  () => {
+document.addEventListener("DOMContentLoaded", () => {
 
-    configureMarkdown();
+  /* -----------------------------
+     Get DOM elements
+     ----------------------------- */
 
-    setupTheme();
+  sidebar =
+    document.getElementById("sidebar");
 
-    setupSearch();
+  content =
+    document.getElementById("content");
 
-    setupKeyboardShortcuts();
+  searchInput =
+    document.getElementById("search");
 
-    setupMobileMenu();
+  themeButton =
+    document.getElementById("theme-button");
 
-    setupContentsToggle();
+  menuButton =
+    document.getElementById("menu-button");
 
-    loadTopics();
+  closeSidebarButton =
+    document.getElementById("close-sidebar");
 
-  }
-);
+  sidebarOverlay =
+    document.getElementById("sidebar-overlay");
+
+  contentsToggle =
+    document.getElementById("contents-toggle");
+
+  topicNavigation =
+    document.getElementById("topic-navigation");
+
+  previousButton =
+    document.getElementById("previous-button");
+
+  nextButton =
+    document.getElementById("next-button");
+
+  previousTitle =
+    document.getElementById("previous-title");
+
+  nextTitle =
+    document.getElementById("next-title");
+
+
+  /* -----------------------------
+     Setup
+     ----------------------------- */
+
+  configureMarkdown();
+
+  setupTheme();
+
+  setupSearch();
+
+  setupKeyboardShortcuts();
+
+  setupContentsToggle();
+
+  setupMobileMenu();
+
+  setupTopNavigation();
+
+  loadTopics();
+
+});
 
 
 /* =========================================================
-   MARKDOWN CONFIGURATION
+   MARKDOWN
    ========================================================= */
 
 function configureMarkdown() {
 
-  if (
-    typeof marked === "undefined"
-  ) {
+  if (typeof marked === "undefined") {
 
     console.error(
       "Marked.js was not loaded."
@@ -100,13 +139,20 @@ async function loadTopics() {
 
     showLoadingSidebar();
 
-
     const apiURL =
-      `https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}/contents/${NOTES_FOLDER}?ref=${GITHUB_BRANCH}`;
+      `https://api.github.com/repos/` +
+      `${GITHUB_USER}/` +
+      `${GITHUB_REPO}/contents/` +
+      `${NOTES_FOLDER}?ref=${GITHUB_BRANCH}`;
 
 
     const response =
-      await fetch(apiURL);
+      await fetch(
+        apiURL,
+        {
+          cache: "no-cache"
+        }
+      );
 
 
     if (!response.ok) {
@@ -124,7 +170,6 @@ async function loadTopics() {
 
     topics =
       files
-
         .filter(
           file =>
             file.type === "file" &&
@@ -132,41 +177,19 @@ async function loadTopics() {
               .toLowerCase()
               .endsWith(".md")
         )
-
         .map(
           file => ({
-
-            /*
-             * IMPORTANT:
-             *
-             * Keep the REAL filename exactly
-             * as GitHub returns it.
-             *
-             * Do not generate this filename
-             * from the display name.
-             */
-
             file: file.name,
-
-            /*
-             * Human-friendly display name.
-             */
 
             name:
               formatTopicName(
                 file.name
               ),
 
-            /*
-             * Keep GitHub's download URL too.
-             */
-
             url:
               file.download_url
-
           })
         )
-
         .sort(
           (a, b) =>
             a.name.localeCompare(
@@ -199,14 +222,12 @@ async function loadTopics() {
 
     }
 
-
   } catch (error) {
 
     console.error(
       "Could not load topics:",
       error
     );
-
 
     showError(
       "Couldn’t load your notes.",
@@ -226,32 +247,26 @@ function formatTopicName(filename) {
 
   let name =
     filename
-
       .replace(
         /\.md$/i,
         ""
       )
-
       .replace(
         /[_-]+/g,
         " "
       )
-
       .replace(
         /([a-z0-9])([A-Z])/g,
         "$1 $2"
       )
-
       .replace(
         /([A-Z]+)([A-Z][a-z])/g,
         "$1 $2"
       )
-
       .replace(
         /\s+/g,
         " "
       )
-
       .trim();
 
 
@@ -341,23 +356,17 @@ function formatTopicName(filename) {
 
 function createSidebar(items) {
 
-  const navigation =
-    document.querySelector(
-      ".topic-navigation"
-    );
-
-
-  if (!navigation) {
+  if (!topicNavigation) {
     return;
   }
 
 
-  navigation.innerHTML = "";
+  topicNavigation.innerHTML = "";
 
 
   if (items.length === 0) {
 
-    navigation.innerHTML = `
+    topicNavigation.innerHTML = `
       <div class="no-results">
         Nothing found ✦
       </div>
@@ -383,7 +392,6 @@ function createSidebar(items) {
 
     button.innerHTML = `
       <span class="topic-dot">✦</span>
-
       <span class="topic-name">
         ${escapeHTML(topic.name)}
       </span>
@@ -405,7 +413,7 @@ function createSidebar(items) {
     );
 
 
-    navigation.appendChild(
+    topicNavigation.appendChild(
       button
     );
 
@@ -427,32 +435,6 @@ function createSidebar(items) {
 
 
 /* =========================================================
-   GET RAW MARKDOWN URL
-   ========================================================= */
-
-function getMarkdownURL(topic) {
-
-  /*
-   * Use the EXACT filename returned by
-   * GitHub's API.
-   *
-   * This avoids GitHub Pages relative-path
-   * problems.
-   */
-
-  return (
-    `https://raw.githubusercontent.com/` +
-    `${GITHUB_USER}/` +
-    `${GITHUB_REPO}/` +
-    `${GITHUB_BRANCH}/` +
-    `${NOTES_FOLDER}/` +
-    `${encodeURIComponent(topic.file)}`
-  );
-
-}
-
-
-/* =========================================================
    LOAD MARKDOWN
    ========================================================= */
 
@@ -461,36 +443,37 @@ async function loadMarkdown(
   scrollToTop = true
 ) {
 
+  if (!topic || !content) {
+    return;
+  }
+
+
   try {
 
     showLoading();
 
 
-    currentTopicIndex =
+    const index =
       topics.findIndex(
         item =>
           item.file === topic.file
       );
 
 
-    /*
-     * Fetch the exact Markdown file
-     * from GitHub raw content.
-     */
+    if (index === -1) {
+      return;
+    }
+
+
+    currentTopicIndex =
+      index;
+
+
+    updateTopNavigation();
+
 
     const markdownURL =
       getMarkdownURL(topic);
-
-
-    console.log(
-      "Loading note:",
-      topic.file
-    );
-
-    console.log(
-      "Markdown URL:",
-      markdownURL
-    );
 
 
     const response =
@@ -530,8 +513,9 @@ async function loadMarkdown(
     /*
      * Render Markdown.
      *
-     * HTML written inside the .md
-     * file is preserved.
+     * HTML written inside
+     * the Markdown file is
+     * preserved by marked.
      */
 
     const html =
@@ -550,15 +534,13 @@ async function loadMarkdown(
 
 
     /*
-     * Fix relative images.
+     * Fix images such as:
+     *
+     * ../images/early_stopping1.png
      */
 
     fixMarkdownImages();
 
-
-    /*
-     * Other content processing.
-     */
 
     addHeadingIds();
 
@@ -566,23 +548,19 @@ async function loadMarkdown(
 
     setupExternalLinks();
 
-    updateActiveTopic(
-      topic
-    );
+    updateActiveTopic(topic);
+
+    updateTopNavigation();
 
 
     if (scrollToTop) {
 
       window.scrollTo({
-
         top: 0,
-
         behavior: "smooth"
-
       });
 
     }
-
 
   } catch (error) {
 
@@ -603,7 +581,25 @@ async function loadMarkdown(
 
 
 /* =========================================================
-   FIX MARKDOWN IMAGES
+   GET MARKDOWN URL
+   ========================================================= */
+
+function getMarkdownURL(topic) {
+
+  return (
+    `https://raw.githubusercontent.com/` +
+    `${GITHUB_USER}/` +
+    `${GITHUB_REPO}/` +
+    `${GITHUB_BRANCH}/` +
+    `${NOTES_FOLDER}/` +
+    `${encodeURIComponent(topic.file)}`
+  );
+
+}
+
+
+/* =========================================================
+   IMAGE HANDLING
    ========================================================= */
 
 function fixMarkdownImages() {
@@ -619,139 +615,205 @@ function fixMarkdownImages() {
     );
 
 
-  images.forEach(
-    image => {
+  images.forEach(image => {
 
-      const source =
-        image.getAttribute(
-          "src"
-        );
+    const source =
+      image.getAttribute("src");
 
 
-      if (!source) {
-        return;
-      }
+    if (!source) {
+      return;
+    }
 
 
-      /*
-       * Absolute images don't need
-       * any modification.
-       */
+    /*
+     * Absolute URL
+     */
 
-      if (
+    if (
+      source.startsWith("http://") ||
+      source.startsWith("https://") ||
+      source.startsWith("//") ||
+      source.startsWith("data:") ||
+      source.startsWith("blob:")
+    ) {
 
-        source.startsWith(
-          "http://"
-        ) ||
+      image.loading = "lazy";
 
-        source.startsWith(
-          "https://"
-        ) ||
+      image.decoding = "async";
 
-        source.startsWith(
-          "//"
-        ) ||
-
-        source.startsWith(
-          "data:"
-        ) ||
-
-        source.startsWith(
-          "blob:"
-        )
-
-      ) {
-
-        image.loading =
-          "lazy";
-
-        image.decoding =
-          "async";
-
-        return;
-      }
+      return;
+    }
 
 
-      /*
-       * Markdown images are relative
-       * to the /notes/ folder.
-       *
-       * Example:
-       *
-       * ../images/early_stopping1.png
-       *
-       * becomes:
-       *
-       * https://raw.githubusercontent.com/
-       * jai92xi/Xi_Notes/main/images/
-       * early_stopping1.png
-       */
+    try {
 
-      try {
-
-        const notesBaseURL =
-          `https://raw.githubusercontent.com/` +
-          `${GITHUB_USER}/` +
-          `${GITHUB_REPO}/` +
-          `${GITHUB_BRANCH}/` +
-          `${NOTES_FOLDER}/`;
+      const notesBaseURL =
+        `https://raw.githubusercontent.com/` +
+        `${GITHUB_USER}/` +
+        `${GITHUB_REPO}/` +
+        `${GITHUB_BRANCH}/` +
+        `${NOTES_FOLDER}/`;
 
 
-        const imageURL =
-          new URL(
-            source,
-            notesBaseURL
-          );
-
-
-        image.src =
-          imageURL.href;
-
-
-      } catch (error) {
-
-        console.warn(
-          "Could not resolve image:",
+      const imageURL =
+        new URL(
           source,
-          error
+          notesBaseURL
         );
 
-      }
 
+      image.src =
+        imageURL.href;
 
-      image.loading =
-        "lazy";
+    } catch (error) {
 
-      image.decoding =
-        "async";
+      console.warn(
+        "Could not resolve image:",
+        source,
+        error
+      );
 
     }
-  );
+
+
+    image.loading =
+      "lazy";
+
+    image.decoding =
+      "async";
+
+  });
 
 }
 
 
 /* =========================================================
-   TOP NAVIGATION
+   PREVIOUS / NEXT NAVIGATION
    ========================================================= */
 
-function updateTopNavigation() {
+function setupTopNavigation() {
 
-  const navigation =
-    document.querySelector(
-      ".page-navigation"
+  /*
+   * IMPORTANT:
+   *
+   * We use the buttons already
+   * present in index.html.
+   *
+   * We do NOT recreate them.
+   */
+
+  if (
+    previousButton
+  ) {
+
+    previousButton.addEventListener(
+      "click",
+      event => {
+
+        event.preventDefault();
+
+        event.stopPropagation();
+
+        goToPrevious();
+
+      }
     );
 
+  }
 
-  if (!navigation) {
+
+  if (
+    nextButton
+  ) {
+
+    nextButton.addEventListener(
+      "click",
+      event => {
+
+        event.preventDefault();
+
+        event.stopPropagation();
+
+        goToNext();
+
+      }
+    );
+
+  }
+
+
+  updateTopNavigation();
+
+}
+
+
+function goToPrevious() {
+
+  if (
+    currentTopicIndex <= 0
+  ) {
     return;
   }
 
 
-  navigation.innerHTML = "";
+  const previous =
+    topics[
+      currentTopicIndex - 1
+    ];
 
 
-  if (topics.length <= 1) {
+  if (!previous) {
+    return;
+  }
+
+
+  loadMarkdown(
+    previous,
+    true
+  );
+
+}
+
+
+function goToNext() {
+
+  if (
+    currentTopicIndex < 0 ||
+    currentTopicIndex >=
+      topics.length - 1
+  ) {
+
+    return;
+  }
+
+
+  const next =
+    topics[
+      currentTopicIndex + 1
+    ];
+
+
+  if (!next) {
+    return;
+  }
+
+
+  loadMarkdown(
+    next,
+    true
+  );
+
+}
+
+
+function updateTopNavigation() {
+
+  if (
+    !previousButton ||
+    !nextButton
+  ) {
+
     return;
   }
 
@@ -760,86 +822,24 @@ function updateTopNavigation() {
    * PREVIOUS
    */
 
-  const previous =
-    currentTopicIndex > 0
-      ? topics[
-          currentTopicIndex - 1
-        ]
-      : null;
+  const hasPrevious =
+    currentTopicIndex > 0;
 
 
-  const previousButton =
-    document.createElement(
-      "button"
-    );
+  previousButton.disabled =
+    !hasPrevious;
 
 
-  previousButton.type =
-    "button";
+  if (
+    previousTitle
+  ) {
 
-  previousButton.className =
-    "page-nav-button previous-page";
-
-
-  if (previous) {
-
-    previousButton.innerHTML = `
-      <span class="page-nav-arrow">
-        ←
-      </span>
-
-      <span class="page-nav-copy">
-
-        <span class="page-nav-label">
-          Previous
-        </span>
-
-        <span class="page-nav-title">
-          ${escapeHTML(
-            previous.name
-          )}
-        </span>
-
-      </span>
-    `;
-
-
-    previousButton.addEventListener(
-      "click",
-      () => {
-
-        loadMarkdown(
-          previous,
-          true
-        );
-
-      }
-    );
-
-
-  } else {
-
-    previousButton.disabled =
-      true;
-
-
-    previousButton.innerHTML = `
-      <span class="page-nav-arrow">
-        ←
-      </span>
-
-      <span class="page-nav-copy">
-
-        <span class="page-nav-label">
-          Previous
-        </span>
-
-        <span class="page-nav-title">
-          Start
-        </span>
-
-      </span>
-    `;
+    previousTitle.textContent =
+      hasPrevious
+        ? topics[
+            currentTopicIndex - 1
+          ].name
+        : "Start";
 
   }
 
@@ -848,100 +848,28 @@ function updateTopNavigation() {
    * NEXT
    */
 
-  const next =
+  const hasNext =
+    currentTopicIndex >= 0 &&
     currentTopicIndex <
-      topics.length - 1
-
-      ? topics[
-          currentTopicIndex + 1
-        ]
-
-      : null;
+      topics.length - 1;
 
 
-  const nextButton =
-    document.createElement(
-      "button"
-    );
+  nextButton.disabled =
+    !hasNext;
 
 
-  nextButton.type =
-    "button";
+  if (
+    nextTitle
+  ) {
 
-  nextButton.className =
-    "page-nav-button next-page";
-
-
-  if (next) {
-
-    nextButton.innerHTML = `
-      <span class="page-nav-copy">
-
-        <span class="page-nav-label">
-          Next
-        </span>
-
-        <span class="page-nav-title">
-          ${escapeHTML(
-            next.name
-          )}
-        </span>
-
-      </span>
-
-      <span class="page-nav-arrow">
-        →
-      </span>
-    `;
-
-
-    nextButton.addEventListener(
-      "click",
-      () => {
-
-        loadMarkdown(
-          next,
-          true
-        );
-
-      }
-    );
-
-
-  } else {
-
-    nextButton.disabled =
-      true;
-
-
-    nextButton.innerHTML = `
-      <span class="page-nav-copy">
-
-        <span class="page-nav-label">
-          Next
-        </span>
-
-        <span class="page-nav-title">
-          You're caught up ✦
-        </span>
-
-      </span>
-
-      <span class="page-nav-arrow">
-        →
-      </span>
-    `;
+    nextTitle.textContent =
+      hasNext
+        ? topics[
+            currentTopicIndex + 1
+          ].name
+        : "You're caught up ✦";
 
   }
-
-
-  navigation.appendChild(
-    previousButton
-  );
-
-  navigation.appendChild(
-    nextButton
-  );
 
 }
 
@@ -954,41 +882,41 @@ function updateActiveTopic(
   topic
 ) {
 
+  if (!topicNavigation) {
+    return;
+  }
+
+
   const buttons =
-    document.querySelectorAll(
+    topicNavigation.querySelectorAll(
       ".topic-button"
     );
 
 
-  buttons.forEach(
-    button => {
+  buttons.forEach(button => {
 
-      const name =
-        button.querySelector(
-          ".topic-name"
-        );
-
-
-      if (!name) {
-        return;
-      }
-
-
-      const active =
-        name.textContent.trim() ===
-        topic.name;
-
-
-      button.classList.toggle(
-        "active",
-        active
+    const name =
+      button.querySelector(
+        ".topic-name"
       );
 
+
+    if (!name) {
+      return;
     }
-  );
 
 
-  updateTopNavigation();
+    const active =
+      name.textContent.trim() ===
+      topic.name;
+
+
+    button.classList.toggle(
+      "active",
+      active
+    );
+
+  });
 
 }
 
@@ -1014,6 +942,11 @@ function setupSearch() {
           .trim();
 
 
+      /*
+       * Empty search:
+       * show everything again.
+       */
+
       if (!query) {
 
         createSidebar(
@@ -1026,17 +959,23 @@ function setupSearch() {
 
       const filtered =
         topics.filter(
-          topic =>
+          topic => {
 
-            topic.name
-              .toLowerCase()
-              .includes(query)
+            const name =
+              topic.name
+                .toLowerCase();
 
-            ||
+            const filename =
+              topic.file
+                .toLowerCase();
 
-            topic.file
-              .toLowerCase()
-              .includes(query)
+
+            return (
+              name.includes(query) ||
+              filename.includes(query)
+            );
+
+          }
         );
 
 
@@ -1061,17 +1000,14 @@ function setupKeyboardShortcuts() {
     event => {
 
       /*
-       * CMD/CTRL + K
+       * CMD / CTRL + K
        */
 
       if (
-
         (event.ctrlKey ||
           event.metaKey) &&
-
         event.key.toLowerCase() ===
           "k"
-
       ) {
 
         event.preventDefault();
@@ -1099,17 +1035,15 @@ function setupKeyboardShortcuts() {
 
         if (searchInput) {
 
-          searchInput.value =
-            "";
+          searchInput.value = "";
 
           searchInput.blur();
 
+          createSidebar(
+            topics
+          );
+
         }
-
-
-        createSidebar(
-          topics
-        );
 
 
         closeMobileSidebar();
@@ -1122,12 +1056,9 @@ function setupKeyboardShortcuts() {
        */
 
       if (
-
         event.key ===
           "ArrowLeft" &&
-
         !isTyping(event)
-
       ) {
 
         if (
@@ -1137,12 +1068,7 @@ function setupKeyboardShortcuts() {
 
           event.preventDefault();
 
-
-          loadMarkdown(
-            topics[
-              currentTopicIndex - 1
-            ]
-          );
+          goToPrevious();
 
         }
 
@@ -1154,32 +1080,20 @@ function setupKeyboardShortcuts() {
        */
 
       if (
-
         event.key ===
           "ArrowRight" &&
-
         !isTyping(event)
-
       ) {
 
         if (
-
-          currentTopicIndex >=
-            0 &&
-
+          currentTopicIndex >= 0 &&
           currentTopicIndex <
             topics.length - 1
-
         ) {
 
           event.preventDefault();
 
-
-          loadMarkdown(
-            topics[
-              currentTopicIndex + 1
-            ]
-          );
+          goToNext();
 
         }
 
@@ -1197,66 +1111,66 @@ function setupKeyboardShortcuts() {
 
 function setupContentsToggle() {
 
-  const toggle =
-    document.getElementById(
-      "contents-toggle"
-    );
-
-
-  const sidebarElement =
-    document.getElementById(
-      "sidebar"
-    );
-
-
   if (
-    !toggle ||
-    !sidebarElement
+    !contentsToggle ||
+    !sidebar
   ) {
 
     return;
-
   }
 
 
   /*
-   * Contents open by default.
+   * Open by default.
    */
 
-  sidebarElement.classList.remove(
+  sidebar.classList.remove(
     "contents-hidden"
   );
 
 
-  toggle.setAttribute(
-    "aria-label",
-    "Hide contents"
-  );
-
-
-  toggle.setAttribute(
-    "title",
-    "Hide contents"
-  );
-
-
-  toggle.setAttribute(
+  contentsToggle.setAttribute(
     "aria-expanded",
     "true"
   );
 
 
-  toggle.addEventListener(
+  contentsToggle.setAttribute(
+    "aria-label",
+    "Hide contents"
+  );
+
+
+  contentsToggle.setAttribute(
+    "title",
+    "Hide contents"
+  );
+
+
+  contentsToggle.addEventListener(
     "click",
-    () => {
+    event => {
+
+      event.preventDefault();
+
+      event.stopPropagation();
+
 
       const hidden =
-        sidebarElement.classList.toggle(
+        sidebar.classList.toggle(
           "contents-hidden"
         );
 
 
-      toggle.setAttribute(
+      contentsToggle.setAttribute(
+        "aria-expanded",
+        hidden
+          ? "false"
+          : "true"
+      );
+
+
+      contentsToggle.setAttribute(
         "aria-label",
         hidden
           ? "Show contents"
@@ -1264,372 +1178,12 @@ function setupContentsToggle() {
       );
 
 
-      toggle.setAttribute(
+      contentsToggle.setAttribute(
         "title",
         hidden
           ? "Show contents"
           : "Hide contents"
       );
-
-
-      toggle.setAttribute(
-        "aria-expanded",
-        hidden
-          ? "false"
-          : "true"
-      );
-
-    }
-  );
-
-}
-
-
-/* =========================================================
-   TYPING CHECK
-   ========================================================= */
-
-function isTyping(event) {
-
-  const element =
-    event.target;
-
-
-  if (!element) {
-    return false;
-  }
-
-
-  const tag =
-    element.tagName
-      ? element.tagName.toLowerCase()
-      : "";
-
-
-  return (
-
-    tag === "input" ||
-
-    tag === "textarea" ||
-
-    element.isContentEditable
-
-  );
-
-}
-
-
-/* =========================================================
-   COPY BUTTONS
-   ========================================================= */
-
-function addCopyButtons() {
-
-  const codeBlocks =
-    content.querySelectorAll(
-      "pre > code"
-    );
-
-
-  codeBlocks.forEach(
-    code => {
-
-      const pre =
-        code.parentElement;
-
-
-      if (
-        pre.querySelector(
-          ".copy-button"
-        )
-      ) {
-
-        return;
-
-      }
-
-
-      const button =
-        document.createElement(
-          "button"
-        );
-
-
-      button.type =
-        "button";
-
-      button.className =
-        "copy-button";
-
-      button.textContent =
-        "Copy";
-
-
-      button.addEventListener(
-        "click",
-        async () => {
-
-          try {
-
-            await navigator.clipboard.writeText(
-              code.innerText
-            );
-
-
-            button.textContent =
-              "Copied ✦";
-
-
-            button.classList.add(
-              "copied"
-            );
-
-
-            setTimeout(
-              () => {
-
-                button.textContent =
-                  "Copy";
-
-
-                button.classList.remove(
-                  "copied"
-                );
-
-              },
-              1400
-            );
-
-
-          } catch (error) {
-
-            fallbackCopy(
-              code.innerText,
-              button
-            );
-
-          }
-
-        }
-      );
-
-
-      pre.appendChild(
-        button
-      );
-
-    }
-  );
-
-}
-
-
-/* =========================================================
-   FALLBACK COPY
-   ========================================================= */
-
-function fallbackCopy(
-  text,
-  button
-) {
-
-  const textarea =
-    document.createElement(
-      "textarea"
-    );
-
-
-  textarea.value =
-    text;
-
-
-  textarea.style.position =
-    "fixed";
-
-
-  textarea.style.left =
-    "-9999px";
-
-
-  document.body.appendChild(
-    textarea
-  );
-
-
-  textarea.select();
-
-
-  try {
-
-    document.execCommand(
-      "copy"
-    );
-
-
-    button.textContent =
-      "Copied ✦";
-
-
-    button.classList.add(
-      "copied"
-    );
-
-
-    setTimeout(
-      () => {
-
-        button.textContent =
-          "Copy";
-
-
-        button.classList.remove(
-          "copied"
-        );
-
-      },
-      1400
-    );
-
-
-  } catch (error) {
-
-    console.error(
-      "Copy failed:",
-      error
-    );
-
-  }
-
-
-  textarea.remove();
-
-}
-
-
-/* =========================================================
-   HEADING IDS
-   ========================================================= */
-
-function addHeadingIds() {
-
-  const headings =
-    content.querySelectorAll(
-      "h1, h2, h3, h4"
-    );
-
-
-  const used =
-    new Set();
-
-
-  headings.forEach(
-    heading => {
-
-      const text =
-        heading.textContent
-          .toLowerCase()
-          .trim();
-
-
-      let id =
-        text
-
-          .replace(
-            /[^\w\s-]/g,
-            ""
-          )
-
-          .replace(
-            /\s+/g,
-            "-"
-          );
-
-
-      if (!id) {
-        return;
-      }
-
-
-      const original =
-        id;
-
-
-      let counter =
-        2;
-
-
-      while (
-        used.has(id)
-      ) {
-
-        id =
-          `${original}-${counter}`;
-
-        counter++;
-
-      }
-
-
-      used.add(id);
-
-      heading.id =
-        id;
-
-    }
-  );
-
-}
-
-
-/* =========================================================
-   EXTERNAL LINKS
-   ========================================================= */
-
-function setupExternalLinks() {
-
-  const links =
-    content.querySelectorAll(
-      "a"
-    );
-
-
-  links.forEach(
-    link => {
-
-      const href =
-        link.getAttribute(
-          "href"
-        );
-
-
-      if (
-
-        href &&
-
-        (
-
-          href.startsWith(
-            "http://"
-          )
-
-          ||
-
-          href.startsWith(
-            "https://"
-          )
-
-        )
-
-      ) {
-
-        link.target =
-          "_blank";
-
-
-        link.rel =
-          "noopener noreferrer";
-
-      }
 
     }
   );
@@ -1647,7 +1201,13 @@ function setupMobileMenu() {
 
     menuButton.addEventListener(
       "click",
-      openMobileSidebar
+      event => {
+
+        event.preventDefault();
+
+        openMobileSidebar();
+
+      }
     );
 
   }
@@ -1657,7 +1217,13 @@ function setupMobileMenu() {
 
     closeSidebarButton.addEventListener(
       "click",
-      closeMobileSidebar
+      event => {
+
+        event.preventDefault();
+
+        closeMobileSidebar();
+
+      }
     );
 
   }
@@ -1772,7 +1338,10 @@ function setupTheme() {
 
   themeButton.addEventListener(
     "click",
-    () => {
+    event => {
+
+      event.preventDefault();
+
 
       document.body.classList.toggle(
         "dark-theme"
@@ -1839,10 +1408,366 @@ function updateThemeButton() {
 
 
 /* =========================================================
+   COPY BUTTONS
+   ========================================================= */
+
+function addCopyButtons() {
+
+  if (!content) {
+    return;
+  }
+
+
+  const codeBlocks =
+    content.querySelectorAll(
+      "pre > code"
+    );
+
+
+  codeBlocks.forEach(code => {
+
+    const pre =
+      code.parentElement;
+
+
+    if (
+      pre.querySelector(
+        ".copy-button"
+      )
+    ) {
+
+      return;
+
+    }
+
+
+    const button =
+      document.createElement(
+        "button"
+      );
+
+
+    button.type =
+      "button";
+
+    button.className =
+      "copy-button";
+
+    button.textContent =
+      "Copy";
+
+
+    button.addEventListener(
+      "click",
+      async event => {
+
+        event.preventDefault();
+
+        event.stopPropagation();
+
+
+        try {
+
+          await navigator.clipboard.writeText(
+            code.innerText
+          );
+
+
+          button.textContent =
+            "Copied ✦";
+
+
+          button.classList.add(
+            "copied"
+          );
+
+
+          setTimeout(
+            () => {
+
+              button.textContent =
+                "Copy";
+
+              button.classList.remove(
+                "copied"
+              );
+
+            },
+            1400
+          );
+
+        } catch (error) {
+
+          fallbackCopy(
+            code.innerText,
+            button
+          );
+
+        }
+
+      }
+    );
+
+
+    pre.appendChild(
+      button
+    );
+
+  });
+
+}
+
+
+/* =========================================================
+   FALLBACK COPY
+   ========================================================= */
+
+function fallbackCopy(
+  text,
+  button
+) {
+
+  const textarea =
+    document.createElement(
+      "textarea"
+    );
+
+
+  textarea.value =
+    text;
+
+
+  textarea.style.position =
+    "fixed";
+
+  textarea.style.left =
+    "-9999px";
+
+
+  document.body.appendChild(
+    textarea
+  );
+
+
+  textarea.select();
+
+
+  try {
+
+    document.execCommand(
+      "copy"
+    );
+
+
+    button.textContent =
+      "Copied ✦";
+
+
+    button.classList.add(
+      "copied"
+    );
+
+
+    setTimeout(
+      () => {
+
+        button.textContent =
+          "Copy";
+
+        button.classList.remove(
+          "copied"
+        );
+
+      },
+      1400
+    );
+
+  } catch (error) {
+
+    console.error(
+      "Copy failed:",
+      error
+    );
+
+  }
+
+
+  textarea.remove();
+
+}
+
+
+/* =========================================================
+   HEADING IDS
+   ========================================================= */
+
+function addHeadingIds() {
+
+  if (!content) {
+    return;
+  }
+
+
+  const headings =
+    content.querySelectorAll(
+      "h1, h2, h3, h4"
+    );
+
+
+  const used =
+    new Set();
+
+
+  headings.forEach(
+    heading => {
+
+      const text =
+        heading.textContent
+          .toLowerCase()
+          .trim();
+
+
+      let id =
+        text
+          .replace(
+            /[^\w\s-]/g,
+            ""
+          )
+          .replace(
+            /\s+/g,
+            "-"
+          );
+
+
+      if (!id) {
+        return;
+      }
+
+
+      const original =
+        id;
+
+
+      let counter =
+        2;
+
+
+      while (
+        used.has(id)
+      ) {
+
+        id =
+          `${original}-${counter}`;
+
+        counter++;
+
+      }
+
+
+      used.add(id);
+
+      heading.id =
+        id;
+
+    }
+  );
+
+}
+
+
+/* =========================================================
+   EXTERNAL LINKS
+   ========================================================= */
+
+function setupExternalLinks() {
+
+  if (!content) {
+    return;
+  }
+
+
+  const links =
+    content.querySelectorAll(
+      "a"
+    );
+
+
+  links.forEach(
+    link => {
+
+      const href =
+        link.getAttribute(
+          "href"
+        );
+
+
+      if (
+        href &&
+        (
+          href.startsWith(
+            "http://"
+          ) ||
+          href.startsWith(
+            "https://"
+          )
+        )
+      ) {
+
+        link.target =
+          "_blank";
+
+
+        link.rel =
+          "noopener noreferrer";
+
+      }
+
+    }
+  );
+
+}
+
+
+/* =========================================================
+   TYPING CHECK
+   ========================================================= */
+
+function isTyping(event) {
+
+  const element =
+    event.target;
+
+
+  if (!element) {
+    return false;
+  }
+
+
+  const tag =
+    element.tagName
+      ? element.tagName.toLowerCase()
+      : "";
+
+
+  return (
+    tag === "input" ||
+    tag === "textarea" ||
+    element.isContentEditable
+  );
+
+}
+
+
+/* =========================================================
    LOADING
    ========================================================= */
 
 function showLoading() {
+
+  if (!content) {
+    return;
+  }
+
 
   content.innerHTML = `
     <div class="loading">
@@ -1866,18 +1791,12 @@ function showLoading() {
 
 function showLoadingSidebar() {
 
-  const navigation =
-    document.querySelector(
-      ".topic-navigation"
-    );
-
-
-  if (!navigation) {
+  if (!topicNavigation) {
     return;
   }
 
 
-  navigation.innerHTML = `
+  topicNavigation.innerHTML = `
     <div class="no-results">
       Loading concepts...
     </div>
@@ -1894,6 +1813,11 @@ function showMessage(
   title,
   message
 ) {
+
+  if (!content) {
+    return;
+  }
+
 
   content.innerHTML = `
     <div class="empty-state">
@@ -1920,6 +1844,11 @@ function showError(
   title,
   message
 ) {
+
+  if (!content) {
+    return;
+  }
+
 
   content.innerHTML = `
     <div class="error">
