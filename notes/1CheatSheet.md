@@ -1,7 +1,6 @@
-<details>
-<summary>## **Overfitting:**</summary>
-1. <mark>**Early Stopping**</mark> - **Regularization technique** - **stops training** when **validation performance** stops improving
-</details>
+### Overfitting
+
+* **Early Stopping**: A regularization technique that stops training when validation performance stops improving.
 
 ---
 **Forward Propagation vs Backward Propagation**: 
