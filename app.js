@@ -14,26 +14,13 @@ const NOTES_TITLE = "AI & ML Key Concepts";
    DOM ELEMENTS
    ========================================================= */
 
-const sidebar =
-  document.getElementById("sidebar");
-
-const content =
-  document.getElementById("content");
-
-const searchInput =
-  document.getElementById("search");
-
-const themeButton =
-  document.getElementById("theme-button");
-
-const menuButton =
-  document.getElementById("menu-button");
-
-const closeSidebarButton =
-  document.getElementById("close-sidebar");
-
-const sidebarOverlay =
-  document.getElementById("sidebar-overlay");
+const sidebar = document.getElementById("sidebar");
+const content = document.getElementById("content");
+const searchInput = document.getElementById("search");
+const themeButton = document.getElementById("theme-button");
+const menuButton = document.getElementById("menu-button");
+const closeSidebarButton = document.getElementById("close-sidebar");
+const sidebarOverlay = document.getElementById("sidebar-overlay");
 
 
 /* =========================================================
@@ -41,7 +28,6 @@ const sidebarOverlay =
    ========================================================= */
 
 let topics = [];
-
 let currentTopicIndex = -1;
 
 
@@ -50,19 +36,29 @@ let currentTopicIndex = -1;
    ========================================================= */
 
 function initialize() {
-
   configureMarkdown();
-
   setupSearch();
-
   setupKeyboardShortcuts();
-
   setupMobileMenu();
-
   setupTheme();
-
   loadTopics();
+}
 
+
+/* =========================================================
+   MARKDOWN CONFIGURATION
+   ========================================================= */
+
+function configureMarkdown() {
+  if (typeof marked === "undefined") {
+    console.error("Marked.js is not loaded.");
+    return;
+  }
+
+  marked.setOptions({
+    gfm: true,
+    breaks: true
+  });
 }
 
 
@@ -71,88 +67,59 @@ function initialize() {
    ========================================================= */
 
 async function loadTopics() {
-
   try {
-
     showLoadingSidebar();
 
     const apiUrl =
       `https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}/contents/${NOTES_FOLDER}`;
 
-    const response =
-      await fetch(apiUrl);
+    const response = await fetch(apiUrl);
 
     if (!response.ok) {
-
       throw new Error(
         `GitHub API returned ${response.status}`
       );
-
     }
 
-    const files =
-      await response.json();
+    const files = await response.json();
 
     if (!Array.isArray(files)) {
-
-      throw new Error(
-        "Invalid notes response."
-      );
-
+      throw new Error("Invalid notes response.");
     }
 
-    topics =
-      files
-        .filter(file =>
-          file.type === "file" &&
-          file.name
-            .toLowerCase()
-            .endsWith(".md")
+    topics = files
+      .filter(file =>
+        file.type === "file" &&
+        file.name.toLowerCase().endsWith(".md")
+      )
+      .map(file => ({
+        file: file.name,
+        name: formatTopicName(file.name),
+        url: file.download_url
+      }))
+      .sort((a, b) =>
+        a.name.localeCompare(
+          b.name,
+          undefined,
+          {
+            numeric: true,
+            sensitivity: "base"
+          }
         )
-        .map(file => ({
-
-          file: file.name,
-
-          name:
-            formatTopicName(file.name),
-
-          url:
-            file.download_url
-
-        }))
-        .sort((a, b) =>
-          a.name.localeCompare(
-            b.name,
-            undefined,
-            {
-              numeric: true,
-              sensitivity: "base"
-            }
-          )
-        );
-
+      );
 
     createSidebar(topics);
 
-
     if (topics.length > 0) {
-
-      await loadMarkdown(
-        topics[0],
-        false
-      );
-
+      await loadMarkdown(topics[0], false);
     } else {
-
       showMessage(
         "No notes yet",
         "Add Markdown files to the notes folder."
       );
-
     }
 
   } catch (error) {
-
     console.error(
       "Failed to load notes:",
       error
@@ -162,9 +129,7 @@ async function loadTopics() {
       "Couldn’t load your notes.",
       "Please check that the notes folder exists in your GitHub repository."
     );
-
   }
-
 }
 
 
@@ -174,87 +139,64 @@ async function loadTopics() {
 
 function formatTopicName(filename) {
 
-  let name =
-    filename
-      .replace(/\.md$/i, "")
-      .replace(/[_-]+/g, " ")
-      .replace(/([a-z0-9])([A-Z])/g, "$1 $2")
-      .replace(/([A-Z]+)([A-Z][a-z])/g, "$1 $2")
-      .replace(/\s+/g, " ")
-      .trim();
+  let name = filename
+    .replace(/\.md$/i, "")
+    .replace(/[_-]+/g, " ")
+    .replace(/([a-z0-9])([A-Z])/g, "$1 $2")
+    .replace(/([A-Z]+)([A-Z][a-z])/g, "$1 $2")
+    .replace(/\s+/g, " ")
+    .trim();
 
-
-  name =
-    name
-      .toLowerCase()
-      .split(" ")
-      .filter(Boolean)
-      .map(word =>
-        word.charAt(0).toUpperCase() +
-        word.slice(1)
-      )
-      .join(" ");
-
+  name = name
+    .toLowerCase()
+    .split(" ")
+    .filter(Boolean)
+    .map(word =>
+      word.charAt(0).toUpperCase() +
+      word.slice(1)
+    )
+    .join(" ");
 
   const abbreviations = {
-
     "Ai": "AI",
     "Ml": "ML",
     "Llm": "LLM",
     "Llms": "LLMs",
-
     "Nlp": "NLP",
     "Cv": "CV",
-
     "Rag": "RAG",
     "Vllm": "vLLM",
-
     "Gpu": "GPU",
     "Gpus": "GPUs",
-
     "Cpu": "CPU",
     "Cpus": "CPUs",
-
     "Api": "API",
     "Apis": "APIs",
-
     "Mlp": "MLP",
-
     "Cnn": "CNN",
     "Cnns": "CNNs",
-
     "Rnn": "RNN",
     "Rnns": "RNNs",
-
     "Lstm": "LSTM",
-
     "Lora": "LoRA",
-
     "Sql": "SQL",
     "Json": "JSON",
-
     "Pytorch": "PyTorch",
     "Tensorflow": "TensorFlow",
-
     "Knn": "KNN",
     "Svm": "SVM",
-
-    "Xgboost": "XGBoost"
-
+    "Xgboost": "XGBoost",
+    "Keras": "Keras"
   };
 
-
-  name =
-    name
-      .split(" ")
-      .map(word =>
-        abbreviations[word] || word
-      )
-      .join(" ");
-
+  name = name
+    .split(" ")
+    .map(word =>
+      abbreviations[word] || word
+    )
+    .join(" ");
 
   return name;
-
 }
 
 
@@ -265,85 +207,57 @@ function formatTopicName(filename) {
 function createSidebar(items = topics) {
 
   const navigation =
-    document.querySelector(
-      ".topic-navigation"
-    );
-
+    document.querySelector(".topic-navigation");
 
   if (!navigation) {
     return;
   }
 
-
   navigation.innerHTML = "";
 
-
   if (items.length === 0) {
-
     navigation.innerHTML = `
       <div class="no-results">
         Nothing found ✦
       </div>
     `;
-
     return;
-
   }
-
 
   items.forEach(topic => {
 
     const button =
       document.createElement("button");
 
-
-    button.type =
-      "button";
-
-    button.className =
-      "topic-button";
-
+    button.type = "button";
+    button.className = "topic-button";
 
     button.innerHTML = `
       <span class="topic-dot">✦</span>
-
       <span class="topic-name">
         ${escapeHTML(topic.name)}
       </span>
     `;
 
-
     button.addEventListener(
       "click",
       () => {
-
-        loadMarkdown(
-          topic,
-          true
-        );
-
+        loadMarkdown(topic, true);
+        closeMobileSidebar();
       }
     );
 
-
-    navigation.appendChild(
-      button
-    );
-
+    navigation.appendChild(button);
   });
-
 
   if (
     currentTopicIndex >= 0 &&
     topics[currentTopicIndex]
   ) {
-
     updateActiveTopic(
       topics[currentTopicIndex]
     );
-
   }
-
 }
 
 
@@ -360,52 +274,60 @@ async function loadMarkdown(
 
     showLoading();
 
-
     currentTopicIndex =
       topics.findIndex(
-        item =>
-          item.file === topic.file
+        item => item.file === topic.file
       );
 
+    /*
+     * Fetch the Markdown from GitHub Pages.
+     *
+     * Using ./notes/ keeps this compatible
+     * with the GitHub Pages project path.
+     */
+
+    const markdownURL =
+      `./${NOTES_FOLDER}/${encodeURIComponent(topic.file)}`;
 
     const response =
-      await fetch(
-        `notes/${encodeURIComponent(topic.file)}`
-      );
-
+      await fetch(markdownURL);
 
     if (!response.ok) {
-
       throw new Error(
         `Unable to load ${topic.file}`
       );
-
     }
-
 
     const markdown =
       await response.text();
 
-
-    if (
-      typeof marked ===
-      "undefined"
-    ) {
-
+    if (typeof marked === "undefined") {
       throw new Error(
         "Marked.js is not available."
       );
-
     }
 
+
+    /* =====================================================
+       RENDER MARKDOWN
+
+       marked.parse() allows normal HTML contained inside
+       the Markdown document to remain HTML.
+
+       Therefore this works:
+
+       <div style="display:flex; ...">
+
+       <img src="../images/example.png">
+
+       </div>
+       ===================================================== */
 
     const renderedHTML =
       marked.parse(markdown);
 
-
     content.innerHTML =
       renderedHTML;
-
 
     content.classList.add(
       "note-loaded"
@@ -413,41 +335,45 @@ async function loadMarkdown(
 
 
     /*
-     * IMPORTANT:
-     *
-     * Markdown images such as:
-     *
-     *   ![Early Stopping](../images/early_stopping1.png)
-     *
-     * need to resolve correctly on GitHub Pages.
-     *
-     * This function converts relative image URLs
-     * into absolute GitHub Pages URLs.
+     * Fix relative image paths.
      */
 
     fixMarkdownImages();
 
 
+    /*
+     * Add IDs to headings.
+     */
+
     addHeadingIds();
+
+
+    /*
+     * Add copy buttons to code blocks.
+     */
 
     addCopyButtons();
 
+
+    /*
+     * Make external links open in a new tab.
+     */
+
     setupExternalLinks();
+
+
+    /*
+     * Update sidebar and top navigation.
+     */
 
     updateActiveTopic(topic);
 
 
-    /*
-     * Sidebar intentionally stays open.
-     */
-
     if (scrollToTop) {
-
       window.scrollTo({
         top: 0,
         behavior: "smooth"
       });
-
     }
 
   } catch (error) {
@@ -457,33 +383,16 @@ async function loadMarkdown(
       error
     );
 
-
     showError(
       "Couldn’t open this note.",
       topic.file
     );
-
   }
-
 }
 
 
 /* =========================================================
    FIX MARKDOWN IMAGES
-   =========================================================
-
-   Examples:
-
-   ../images/example.png
-   → /Xi_Notes/images/example.png
-
-   ./images/example.png
-   → /Xi_Notes/notes/images/example.png
-
-   images/example.png
-   → /Xi_Notes/notes/images/example.png
-
-   Absolute URLs are left untouched.
    ========================================================= */
 
 function fixMarkdownImages() {
@@ -492,16 +401,13 @@ function fixMarkdownImages() {
     return;
   }
 
-
   const images =
     content.querySelectorAll("img");
-
 
   images.forEach(image => {
 
     const source =
       image.getAttribute("src");
-
 
     if (!source) {
       return;
@@ -509,7 +415,7 @@ function fixMarkdownImages() {
 
 
     /*
-     * Leave external images alone.
+     * External images are left untouched.
      */
 
     if (
@@ -519,40 +425,39 @@ function fixMarkdownImages() {
       source.startsWith("data:") ||
       source.startsWith("blob:")
     ) {
-
       return;
-
     }
 
 
     /*
-     * Leave root-relative URLs alone.
+     * Root-relative paths are left untouched.
      */
 
     if (source.startsWith("/")) {
-
-      image.loading =
-        "lazy";
-
-      image.decoding =
-        "async";
-
+      image.loading = "lazy";
+      image.decoding = "async";
       return;
-
     }
 
 
     /*
-     * Build URL relative to:
+     * Markdown lives in:
      *
      * /Xi_Notes/notes/
+     *
+     * So:
+     *
+     * ../images/file.png
+     *
+     * correctly becomes:
+     *
+     * /Xi_Notes/images/file.png
      */
 
-    const basePath =
-      `${window.location.origin}/${GITHUB_REPO}/${NOTES_FOLDER}/`;
-
-
     try {
+
+      const basePath =
+        `${window.location.origin}/${GITHUB_REPO}/${NOTES_FOLDER}/`;
 
       const absoluteURL =
         new URL(
@@ -560,29 +465,23 @@ function fixMarkdownImages() {
           basePath
         );
 
-
       image.src =
         absoluteURL.href;
-
 
     } catch (error) {
 
       console.warn(
         "Could not resolve image:",
-        source
+        source,
+        error
       );
 
     }
 
-
-    image.loading =
-      "lazy";
-
-    image.decoding =
-      "async";
+    image.loading = "lazy";
+    image.decoding = "async";
 
   });
-
 }
 
 
@@ -597,40 +496,32 @@ function updateTopNavigation() {
       ".top-bar .page-navigation"
     );
 
-
   if (!topNavigation) {
     return;
   }
 
-
   topNavigation.innerHTML = "";
-
 
   if (topics.length <= 1) {
     return;
   }
 
 
-  /* =======================================================
+  /* =====================================================
      PREVIOUS
-     ======================================================= */
+     ===================================================== */
 
   const previousTopic =
     currentTopicIndex > 0
       ? topics[currentTopicIndex - 1]
       : null;
 
-
   const previousButton =
     document.createElement("button");
 
-
-  previousButton.type =
-    "button";
-
+  previousButton.type = "button";
   previousButton.className =
     "page-nav-button previous-page";
-
 
   if (previousTopic) {
 
@@ -652,29 +543,21 @@ function updateTopNavigation() {
       </span>
     `;
 
-
     previousButton.setAttribute(
       "aria-label",
       `Previous: ${previousTopic.name}`
     );
 
-
     previousButton.addEventListener(
       "click",
       () => {
-
-        loadMarkdown(
-          previousTopic,
-          true
-        );
-
+        loadMarkdown(previousTopic, true);
       }
     );
 
   } else {
 
-    previousButton.disabled =
-      true;
+    previousButton.disabled = true;
 
     previousButton.innerHTML = `
       <span class="page-nav-arrow">
@@ -693,33 +576,25 @@ function updateTopNavigation() {
 
       </span>
     `;
-
   }
 
 
-  /* =======================================================
+  /* =====================================================
      NEXT
-     ======================================================= */
+     ===================================================== */
 
   const nextTopic =
     currentTopicIndex <
       topics.length - 1
-
       ? topics[currentTopicIndex + 1]
-
       : null;
-
 
   const nextButton =
     document.createElement("button");
 
-
-  nextButton.type =
-    "button";
-
+  nextButton.type = "button";
   nextButton.className =
     "page-nav-button next-page";
-
 
   if (nextTopic) {
 
@@ -741,29 +616,21 @@ function updateTopNavigation() {
       </span>
     `;
 
-
     nextButton.setAttribute(
       "aria-label",
       `Next: ${nextTopic.name}`
     );
 
-
     nextButton.addEventListener(
       "click",
       () => {
-
-        loadMarkdown(
-          nextTopic,
-          true
-        );
-
+        loadMarkdown(nextTopic, true);
       }
     );
 
   } else {
 
-    nextButton.disabled =
-      true;
+    nextButton.disabled = true;
 
     nextButton.innerHTML = `
       <span class="page-nav-copy">
@@ -782,7 +649,6 @@ function updateTopNavigation() {
         →
       </span>
     `;
-
   }
 
 
@@ -790,11 +656,9 @@ function updateTopNavigation() {
     previousButton
   );
 
-
   topNavigation.appendChild(
     nextButton
   );
-
 }
 
 
@@ -811,7 +675,6 @@ function updateActiveTopic(
       ".topic-button"
     );
 
-
   buttons.forEach(button => {
 
     const topicName =
@@ -819,27 +682,21 @@ function updateActiveTopic(
         ".topic-name"
       );
 
-
     if (!topicName) {
       return;
     }
-
 
     const isActive =
       topicName.textContent.trim() ===
       selectedTopic.name;
 
-
     button.classList.toggle(
       "active",
       isActive
     );
-
   });
 
-
   updateTopNavigation();
-
 }
 
 
@@ -853,7 +710,6 @@ function setupSearch() {
     return;
   }
 
-
   searchInput.addEventListener(
     "input",
     event => {
@@ -863,21 +719,15 @@ function setupSearch() {
           .toLowerCase()
           .trim();
 
-
       if (!query) {
-
         createSidebar(topics);
-
         return;
-
       }
-
 
       const filtered =
         topics.filter(topic => {
 
           return (
-
             topic.name
               .toLowerCase()
               .includes(query)
@@ -887,19 +737,13 @@ function setupSearch() {
             topic.file
               .toLowerCase()
               .includes(query)
-
           );
 
         });
 
-
-      createSidebar(
-        filtered
-      );
-
+      createSidebar(filtered);
     }
   );
-
 }
 
 
@@ -913,45 +757,30 @@ function setupKeyboardShortcuts() {
     "keydown",
     event => {
 
-
       if (
-        (event.metaKey ||
-          event.ctrlKey) &&
-
+        (event.metaKey || event.ctrlKey) &&
         event.key.toLowerCase() === "k"
       ) {
 
         event.preventDefault();
 
-
         if (searchInput) {
-
           searchInput.focus();
-
           searchInput.select();
-
         }
-
       }
 
 
-      if (
-        event.key === "Escape"
-      ) {
+      if (event.key === "Escape") {
 
         if (searchInput) {
-
           searchInput.value = "";
-
           searchInput.blur();
-
         }
-
 
         createSidebar(topics);
 
         closeMobileSidebar();
-
       }
 
 
@@ -960,20 +789,14 @@ function setupKeyboardShortcuts() {
         !isTypingInField(event)
       ) {
 
-        if (
-          currentTopicIndex > 0
-        ) {
+        if (currentTopicIndex > 0) {
 
           event.preventDefault();
 
           loadMarkdown(
-            topics[
-              currentTopicIndex - 1
-            ]
+            topics[currentTopicIndex - 1]
           );
-
         }
-
       }
 
 
@@ -991,23 +814,18 @@ function setupKeyboardShortcuts() {
           event.preventDefault();
 
           loadMarkdown(
-            topics[
-              currentTopicIndex + 1
-            ]
+            topics[currentTopicIndex + 1]
           );
-
         }
-
       }
 
     }
   );
-
 }
 
 
 /* =========================================================
-   CHECK INPUT
+   CHECK IF USER IS TYPING
    ========================================================= */
 
 function isTypingInField(event) {
@@ -1015,24 +833,20 @@ function isTypingInField(event) {
   const element =
     event.target;
 
-
   if (!element) {
     return false;
   }
-
 
   const tag =
     element.tagName
       ? element.tagName.toLowerCase()
       : "";
 
-
   return (
     tag === "input" ||
     tag === "textarea" ||
     element.isContentEditable
   );
-
 }
 
 
@@ -1048,9 +862,7 @@ function setupMobileMenu() {
       "click",
       openMobileSidebar
     );
-
   }
-
 
   if (closeSidebarButton) {
 
@@ -1058,9 +870,7 @@ function setupMobileMenu() {
       "click",
       closeMobileSidebar
     );
-
   }
-
 
   if (sidebarOverlay) {
 
@@ -1068,13 +878,7 @@ function setupMobileMenu() {
       "click",
       closeMobileSidebar
     );
-
   }
-
-
-  /*
-   * The notes list is NOT automatically collapsed.
-   */
 
 }
 
@@ -1086,27 +890,20 @@ function setupMobileMenu() {
 function openMobileSidebar() {
 
   if (sidebar) {
-
     sidebar.classList.add(
       "mobile-open"
     );
-
   }
 
-
   if (sidebarOverlay) {
-
     sidebarOverlay.classList.add(
       "active"
     );
-
   }
-
 
   document.body.classList.add(
     "sidebar-open"
   );
-
 }
 
 
@@ -1117,27 +914,20 @@ function openMobileSidebar() {
 function closeMobileSidebar() {
 
   if (sidebar) {
-
     sidebar.classList.remove(
       "mobile-open"
     );
-
   }
 
-
   if (sidebarOverlay) {
-
     sidebarOverlay.classList.remove(
       "active"
     );
-
   }
-
 
   document.body.classList.remove(
     "sidebar-open"
   );
-
 }
 
 
@@ -1150,7 +940,6 @@ function addCopyButtons() {
   const codeBlocks =
     content.querySelectorAll("pre");
 
-
   codeBlocks.forEach(pre => {
 
     if (
@@ -1158,31 +947,23 @@ function addCopyButtons() {
         ".copy-button"
       )
     ) {
-
       return;
-
     }
-
 
     const button =
       document.createElement("button");
 
-
-    button.type =
-      "button";
-
+    button.type = "button";
     button.className =
       "copy-button";
 
     button.textContent =
       "Copy";
 
-
     button.setAttribute(
       "aria-label",
       "Copy code"
     );
-
 
     button.addEventListener(
       "click",
@@ -1191,22 +972,18 @@ function addCopyButtons() {
         const code =
           pre.querySelector("code");
 
-
         if (!code) {
           return;
         }
 
-
         const codeText =
           code.innerText;
-
 
         try {
 
           await navigator.clipboard.writeText(
             codeText
           );
-
 
           showCopiedState(button);
 
@@ -1216,17 +993,12 @@ function addCopyButtons() {
             codeText,
             button
           );
-
         }
-
       }
     );
 
-
     pre.appendChild(button);
-
   });
-
 }
 
 
@@ -1243,7 +1015,6 @@ function showCopiedState(button) {
     "copied"
   );
 
-
   setTimeout(
     () => {
 
@@ -1257,7 +1028,6 @@ function showCopiedState(button) {
     },
     1400
   );
-
 }
 
 
@@ -1277,7 +1047,6 @@ function fallbackCopy(
         "textarea"
       );
 
-
     textarea.value =
       text;
 
@@ -1287,22 +1056,17 @@ function fallbackCopy(
     textarea.style.opacity =
       "0";
 
-
     document.body.appendChild(
       textarea
     );
 
-
     textarea.select();
-
 
     document.execCommand(
       "copy"
     );
 
-
     textarea.remove();
-
 
     showCopiedState(button);
 
@@ -1312,9 +1076,7 @@ function fallbackCopy(
       "Copy failed:",
       error
     );
-
   }
-
 }
 
 
@@ -1329,10 +1091,8 @@ function addHeadingIds() {
       "h1, h2, h3, h4"
     );
 
-
   const usedIds =
     new Set();
-
 
   headings.forEach(heading => {
 
@@ -1340,7 +1100,6 @@ function addHeadingIds() {
       heading.textContent
         .toLowerCase()
         .trim();
-
 
     let baseId =
       text
@@ -1353,18 +1112,15 @@ function addHeadingIds() {
           "-"
         );
 
-
     if (!baseId) {
       return;
     }
-
 
     let id =
       baseId;
 
     let counter =
       2;
-
 
     while (
       usedIds.has(id)
@@ -1374,17 +1130,13 @@ function addHeadingIds() {
         `${baseId}-${counter}`;
 
       counter++;
-
     }
-
 
     usedIds.add(id);
 
     heading.id =
       id;
-
   });
-
 }
 
 
@@ -1397,12 +1149,10 @@ function setupExternalLinks() {
   const links =
     content.querySelectorAll("a");
 
-
   links.forEach(link => {
 
     const href =
       link.getAttribute("href");
-
 
     if (
       href &&
@@ -1417,36 +1167,8 @@ function setupExternalLinks() {
 
       link.rel =
         "noopener noreferrer";
-
     }
-
   });
-
-}
-
-
-/* =========================================================
-   MARKDOWN CONFIGURATION
-   ========================================================= */
-
-function configureMarkdown() {
-
-  if (
-    typeof marked ===
-    "undefined"
-  ) {
-    return;
-  }
-
-
-  marked.setOptions({
-
-    gfm: true,
-
-    breaks: true
-
-  });
-
 }
 
 
@@ -1460,7 +1182,6 @@ function showLoading() {
     "note-loaded"
   );
 
-
   content.innerHTML = `
     <div class="loading">
 
@@ -1472,7 +1193,6 @@ function showLoading() {
 
     </div>
   `;
-
 }
 
 
@@ -1487,18 +1207,15 @@ function showLoadingSidebar() {
       ".topic-navigation"
     );
 
-
   if (!navigation) {
     return;
   }
-
 
   navigation.innerHTML = `
     <div class="no-results">
       Loading concepts...
     </div>
   `;
-
 }
 
 
@@ -1515,7 +1232,6 @@ function showMessage(
     "note-loaded"
   );
 
-
   content.innerHTML = `
     <div class="empty-state">
 
@@ -1529,7 +1245,6 @@ function showMessage(
 
     </div>
   `;
-
 }
 
 
@@ -1546,7 +1261,6 @@ function showError(
     "note-loaded"
   );
 
-
   content.innerHTML = `
     <div class="error">
 
@@ -1560,7 +1274,6 @@ function showError(
 
     </div>
   `;
-
 }
 
 
@@ -1571,15 +1284,14 @@ function showError(
 function escapeHTML(value) {
 
   const div =
-    document.createElement("div");
-
+    document.createElement(
+      "div"
+    );
 
   div.textContent =
     String(value);
 
-
   return div.innerHTML;
-
 }
 
 
@@ -1593,20 +1305,16 @@ function setupTheme() {
     return;
   }
 
-
   const savedTheme =
     localStorage.getItem(
       "shared-ai-notes-theme"
     );
 
-
   /*
    * Light theme is the default.
    */
 
-  if (
-    savedTheme === "dark"
-  ) {
+  if (savedTheme === "dark") {
 
     document.body.classList.add(
       "dark-theme"
@@ -1617,12 +1325,9 @@ function setupTheme() {
     document.body.classList.remove(
       "dark-theme"
     );
-
   }
 
-
   updateThemeButton();
-
 
   themeButton.addEventListener(
     "click",
@@ -1632,12 +1337,10 @@ function setupTheme() {
         "dark-theme"
       );
 
-
       const isDark =
         document.body.classList.contains(
           "dark-theme"
         );
-
 
       localStorage.setItem(
         "shared-ai-notes-theme",
@@ -1646,12 +1349,9 @@ function setupTheme() {
           : "light"
       );
 
-
       updateThemeButton();
-
     }
   );
-
 }
 
 
@@ -1665,18 +1365,15 @@ function updateThemeButton() {
     return;
   }
 
-
   const isDark =
     document.body.classList.contains(
       "dark-theme"
     );
 
-
   themeButton.textContent =
     isDark
       ? "☀"
       : "☾";
-
 
   themeButton.setAttribute(
     "aria-label",
@@ -1685,14 +1382,12 @@ function updateThemeButton() {
       : "Switch to dark theme"
   );
 
-
   themeButton.setAttribute(
     "title",
     isDark
       ? "Switch to light theme"
       : "Switch to dark theme"
   );
-
 }
 
 
