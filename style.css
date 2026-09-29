@@ -1,32 +1,34 @@
 /* =========================================================
-   AI & ML KEY CONCEPTS
-   GEN-Z STYLE
+   AI & ML KEY CONCEPTS — GEN Z STYLE
    ========================================================= */
 
 :root {
   --bg: #ffffff;
-  --surface: #faf8ff;
+  --surface: #fbf9ff;
   --surface-2: #f4f0ff;
-  --border: #e8e1f5;
 
-  --text: #272331;
-  --muted: #81788f;
+  --text: #282333;
+  --muted: #82788f;
 
-  --purple: #7c5cff;
-  --purple-dark: #6042df;
+  --border: #e8e1f4;
+
+  --purple: #7657ff;
+  --purple-dark: #5d40d8;
   --purple-soft: #eee9ff;
 
-  --pink: #ff6fb5;
+  --pink: #ff6cad;
   --blue: #5b8cff;
-  --mint: #48c9a4;
+  --mint: #45c7a2;
   --yellow: #ffc857;
+  --orange: #ff895f;
 
   --code-bg: #f7f5fa;
 
-  --sidebar-width: 280px;
+  --sidebar-width: 265px;
+
   --content-max: 900px;
 
-  --radius: 12px;
+  --radius: 14px;
 }
 
 
@@ -37,20 +39,22 @@
 body.dark-theme {
   --bg: #121018;
   --surface: #1d1925;
-  --surface-2: #262033;
-  --border: #373044;
+  --surface-2: #272136;
 
   --text: #f2edf8;
   --muted: #aaa0b8;
 
-  --purple: #a78bfa;
-  --purple-dark: #c0aaff;
-  --purple-soft: #30284a;
+  --border: #393147;
 
-  --pink: #ff82c1;
-  --blue: #82a7ff;
-  --mint: #63d8b5;
-  --yellow: #ffd76a;
+  --purple: #a98cff;
+  --purple-dark: #c0adff;
+  --purple-soft: #31284b;
+
+  --pink: #ff83bd;
+  --blue: #82a6ff;
+  --mint: #65d9b7;
+  --yellow: #ffd66b;
+  --orange: #ff9b7a;
 
   --code-bg: #19161f;
 }
@@ -85,7 +89,7 @@ body {
     sans-serif;
 
   font-size: 15px;
-  line-height: 1.7;
+  line-height: 1.65;
 
   transition:
     background-color 0.2s ease,
@@ -104,68 +108,45 @@ input {
 
 header {
   position: sticky;
+
   top: 0;
+
   z-index: 1000;
 
   height: 62px;
 
   display: flex;
+
   align-items: center;
-  justify-content: space-between;
+
+  justify-content: flex-end;
 
   padding: 0 22px;
 
-  background: rgba(255, 255, 255, 0.96);
+  background:
+    rgba(255, 255, 255, 0.96);
 
-  border-bottom: 1px solid var(--border);
+  border-bottom:
+    1px solid var(--border);
 
-  backdrop-filter: blur(12px);
+  backdrop-filter:
+    blur(12px);
 }
 
 body.dark-theme header {
-  background: rgba(18, 16, 24, 0.96);
+  background:
+    rgba(18, 16, 24, 0.96);
 }
 
-
-/* =========================================================
-   BRAND
-   ========================================================= */
-
-.brand,
-.logo {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-
-  color: var(--text);
-
-  text-decoration: none;
-
-  font-size: 17px;
-  font-weight: 750;
-
-  letter-spacing: -0.25px;
+.header-spacer {
+  flex: 1;
 }
-
-.brand span:first-child,
-.logo span:first-child {
-  color: var(--purple);
-
-  font-size: 19px;
-
-  text-shadow:
-    0 0 14px
-    rgba(124, 92, 255, 0.35);
-}
-
-
-/* =========================================================
-   HEADER ACTIONS
-   ========================================================= */
 
 .header-actions {
   display: flex;
+
   align-items: center;
+
   gap: 8px;
 }
 
@@ -180,16 +161,22 @@ body.dark-theme header {
   height: 36px;
 
   display: inline-flex;
+
   align-items: center;
   justify-content: center;
 
   padding: 0;
 
-  border: 1px solid var(--border);
+  border:
+    1px solid var(--border);
+
   border-radius: 9px;
 
-  background: var(--surface);
-  color: var(--text);
+  background:
+    var(--surface);
+
+  color:
+    var(--text);
 
   cursor: pointer;
 
@@ -203,15 +190,20 @@ body.dark-theme header {
 
 #theme-button:hover,
 .theme-button:hover {
-  background: var(--purple-soft);
-  border-color: var(--purple);
+  background:
+    var(--purple-soft);
 
-  color: var(--purple);
+  border-color:
+    var(--purple);
+
+  color:
+    var(--purple);
 }
 
 #theme-button:active,
 .theme-button:active {
-  transform: scale(0.94);
+  transform:
+    scale(0.94);
 }
 
 
@@ -231,18 +223,23 @@ body.dark-theme header {
 
   padding: 0;
 
-  border: 1px solid var(--border);
+  border:
+    1px solid var(--border);
+
   border-radius: 9px;
 
-  background: var(--surface);
-  color: var(--text);
+  background:
+    var(--surface);
+
+  color:
+    var(--text);
 
   cursor: pointer;
 }
 
 
 /* =========================================================
-   APP LAYOUT
+   APP
    ========================================================= */
 
 .app {
@@ -262,18 +259,24 @@ body.dark-theme header {
   position: fixed;
 
   top: 62px;
+
   left: 0;
+
   bottom: 0;
 
-  width: var(--sidebar-width);
+  width:
+    var(--sidebar-width);
 
   overflow-y: auto;
 
-  padding: 18px 16px 22px;
+  padding:
+    14px 14px 20px;
 
-  background: var(--bg);
+  background:
+    var(--bg);
 
-  border-right: 1px solid var(--border);
+  border-right:
+    1px solid var(--border);
 
   z-index: 900;
 
@@ -285,29 +288,34 @@ body.dark-theme header {
 
 
 /* =========================================================
-   THREE-LINE CONTENTS BUTTON
+   THREE LINE CONTENTS BUTTON
    ========================================================= */
 
 .contents-toggle {
-  width: 38px;
-  height: 34px;
+  width: 36px;
+  height: 32px;
 
   display: flex;
 
   flex-direction: column;
+
   align-items: center;
   justify-content: center;
 
   gap: 4px;
 
-  margin: 0 0 15px;
+  margin:
+    0 0 13px;
 
   padding: 0;
 
-  border: 1px solid var(--border);
+  border:
+    1px solid var(--border);
+
   border-radius: 9px;
 
-  background: var(--surface);
+  background:
+    var(--surface);
 
   cursor: pointer;
 
@@ -325,41 +333,23 @@ body.dark-theme header {
 
   border-radius: 10px;
 
-  background: var(--purple);
+  background:
+    var(--purple);
 
   transition:
     width 0.2s ease;
 }
 
 .contents-toggle:hover {
-  background: var(--purple-soft);
-  border-color: var(--purple);
+  background:
+    var(--purple-soft);
+
+  border-color:
+    var(--purple);
 }
 
 .contents-toggle:hover span:nth-child(2) {
-  width: 13px;
-}
-
-
-/* =========================================================
-   SIDEBAR HEADER
-   ========================================================= */
-
-.sidebar-header {
-  margin-bottom: 15px;
-}
-
-.sidebar-title {
-  margin: 0 0 11px;
-
-  color: var(--purple);
-
-  font-size: 12px;
-  font-weight: 800;
-
-  letter-spacing: 0.1em;
-
-  text-transform: uppercase;
+  width: 12px;
 }
 
 
@@ -367,45 +357,57 @@ body.dark-theme header {
    SEARCH
    ========================================================= */
 
+.sidebar-header {
+  margin-bottom:
+    10px;
+}
+
 #search,
 .search-input {
   width: 100%;
 
-  height: 38px;
+  height: 37px;
 
-  padding: 8px 11px;
+  padding:
+    7px 10px;
 
-  border: 1px solid var(--border);
-  border-radius: 9px;
+  border:
+    1px solid var(--border);
 
-  outline: none;
+  border-radius:
+    9px;
 
-  background: var(--surface);
+  outline:
+    none;
 
-  color: var(--text);
+  background:
+    var(--surface);
 
-  font-size: 13px;
+  color:
+    var(--text);
+
+  font-size:
+    12px;
 
   transition:
     border-color 0.2s ease,
-    box-shadow 0.2s ease,
-    background 0.2s ease;
+    box-shadow 0.2s ease;
 }
 
 #search::placeholder,
 .search-input::placeholder {
-  color: var(--muted);
+  color:
+    var(--muted);
 }
 
 #search:focus,
 .search-input:focus {
-  border-color: var(--purple);
-
-  background: var(--bg);
+  border-color:
+    var(--purple);
 
   box-shadow:
     0 0 0 3px
-    rgba(124, 92, 255, 0.1);
+    rgba(118, 87, 255, 0.1);
 }
 
 
@@ -418,32 +420,47 @@ body.dark-theme header {
 
   flex-direction: column;
 
-  gap: 4px;
+  gap: 1px;
 }
 
 .topic-button {
   width: 100%;
 
+  min-height:
+    31px;
+
   display: flex;
+
   align-items: center;
 
-  gap: 9px;
+  gap: 7px;
 
-  padding: 8px 9px;
+  padding:
+    4px 7px;
 
-  border: 1px solid transparent;
-  border-radius: 8px;
+  border:
+    1px solid transparent;
 
-  background: transparent;
+  border-radius:
+    7px;
 
-  color: var(--text);
+  background:
+    transparent;
 
-  text-align: left;
+  color:
+    var(--text);
 
-  cursor: pointer;
+  text-align:
+    left;
 
-  font-size: 13px;
-  line-height: 1.35;
+  cursor:
+    pointer;
+
+  font-size:
+    12.5px;
+
+  line-height:
+    1.25;
 
   transition:
     background 0.15s ease,
@@ -453,57 +470,84 @@ body.dark-theme header {
 }
 
 .topic-button:hover {
-  background: var(--surface-2);
+  background:
+    var(--surface-2);
 
-  border-color: var(--border);
+  border-color:
+    var(--border);
 
-  transform: translateX(2px);
+  transform:
+    translateX(2px);
 }
 
 .topic-button.active {
-  background: var(--purple-soft);
+  background:
+    var(--purple-soft);
 
   border-color:
-    rgba(124, 92, 255, 0.18);
+    rgba(118, 87, 255, 0.18);
 
-  color: var(--purple-dark);
+  color:
+    var(--purple-dark);
 }
 
 body.dark-theme .topic-button.active {
-  color: var(--purple);
+  color:
+    var(--purple);
 }
 
+
+/* =========================================================
+   COLORFUL CONTENT BULLETS
+   ========================================================= */
+
 .topic-dot {
-  flex: 0 0 auto;
+  flex:
+    0 0 auto;
 
-  color: var(--pink);
+  color:
+    var(--pink);
 
-  font-size: 10px;
+  font-size:
+    8px;
 
   text-shadow:
     0 0 8px
-    rgba(255, 111, 181, 0.35);
+    rgba(255, 108, 173, 0.35);
 }
 
 .topic-button:nth-child(2n) .topic-dot {
-  color: var(--blue);
+  color:
+    var(--blue);
 }
 
 .topic-button:nth-child(3n) .topic-dot {
-  color: var(--mint);
+  color:
+    var(--mint);
 }
 
 .topic-button:nth-child(4n) .topic-dot {
-  color: var(--yellow);
+  color:
+    var(--yellow);
+}
+
+.topic-button:nth-child(5n) .topic-dot {
+  color:
+    var(--orange);
 }
 
 .topic-name {
-  overflow: hidden;
+  overflow:
+    hidden;
 
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  text-overflow:
+    ellipsis;
 
-  font-size: 13px;
+  white-space:
+    nowrap;
+
+  font-size:
+    12.5px;
 }
 
 
@@ -512,15 +556,70 @@ body.dark-theme .topic-button.active {
    ========================================================= */
 
 .sidebar-footer {
-  margin-top: 26px;
+  display: flex;
 
-  color: var(--muted);
+  align-items: center;
 
-  font-size: 11px;
+  justify-content: center;
 
-  line-height: 1.5;
+  flex-wrap: wrap;
 
-  text-align: center;
+  gap: 4px;
+
+  margin-top:
+    19px;
+
+  padding:
+    7px 4px;
+
+  color:
+    var(--muted);
+
+  font-size:
+    10.5px;
+
+  font-weight:
+    600;
+
+  line-height:
+    1.5;
+}
+
+.sidebar-footer span:nth-child(1) {
+  color:
+    var(--purple);
+}
+
+.sidebar-footer span:nth-child(2) {
+  color:
+    var(--orange);
+}
+
+.sidebar-footer span:nth-child(3) {
+  color:
+    var(--yellow);
+}
+
+.sidebar-footer span:nth-child(7) {
+  color:
+    var(--blue);
+}
+
+.sidebar-footer span:nth-child(8) {
+  color:
+    var(--mint);
+}
+
+.footer-love {
+  color:
+    var(--pink);
+
+  font-size:
+    14px;
+
+  text-shadow:
+    0 0 10px
+    rgba(255, 108, 173, 0.4);
 }
 
 
@@ -529,21 +628,26 @@ body.dark-theme .topic-button.active {
    ========================================================= */
 
 #sidebar.contents-hidden {
-  width: 58px;
+  width:
+    58px;
 
   padding:
-    18px 10px;
+    14px 10px;
 }
 
 #sidebar.contents-hidden .sidebar-header,
 #sidebar.contents-hidden .topic-navigation,
 #sidebar.contents-hidden .sidebar-footer {
-  display: none;
+  display:
+    none;
 }
 
 #sidebar.contents-hidden .contents-toggle {
-  margin-left: auto;
-  margin-right: auto;
+  margin-left:
+    auto;
+
+  margin-right:
+    auto;
 }
 
 
@@ -559,22 +663,21 @@ main,
   margin-left:
     var(--sidebar-width);
 
-  min-width: 0;
+  min-width:
+    0;
 
   transition:
     width 0.25s ease,
     margin-left 0.25s ease;
 }
 
-
-/* Expand content when sidebar is collapsed */
-
 body:has(#sidebar.contents-hidden) main,
 body:has(#sidebar.contents-hidden) #main {
   width:
     calc(100% - 58px);
 
-  margin-left: 58px;
+  margin-left:
+    58px;
 }
 
 
@@ -585,54 +688,90 @@ body:has(#sidebar.contents-hidden) #main {
 .page-navigation {
   position: sticky;
 
-  top: 62px;
+  top: 72px;
 
   z-index: 800;
 
-  width: 100%;
+  width:
+    calc(100% - 44px);
 
-  display: flex;
+  max-width:
+    1050px;
 
-  justify-content: space-between;
+  margin:
+    10px auto 0;
 
-  gap: 12px;
+  padding:
+    7px;
 
-  padding: 9px 22px;
+  display:
+    flex;
+
+  justify-content:
+    space-between;
+
+  gap:
+    8px;
 
   background:
-    rgba(255, 255, 255, 0.96);
+    rgba(255, 255, 255, 0.94);
 
-  border-bottom:
-    1px solid var(--border);
+  border:
+    1px solid #e7e0f3;
+
+  border-radius:
+    16px;
+
+  box-shadow:
+    0 5px 20px
+    rgba(67, 48, 105, 0.07);
 
   backdrop-filter:
-    blur(12px);
+    blur(14px);
 }
 
 body.dark-theme .page-navigation {
   background:
-    rgba(18, 16, 24, 0.96);
+    rgba(29, 25, 37, 0.94);
+
+  border-color:
+    #3a3248;
+
+  box-shadow:
+    0 5px 20px
+    rgba(0, 0, 0, 0.18);
 }
 
 .page-nav-button {
-  min-width: 175px;
+  min-width:
+    180px;
 
-  display: flex;
+  display:
+    flex;
 
-  align-items: center;
+  align-items:
+    center;
 
-  gap: 9px;
+  gap:
+    9px;
 
-  padding: 8px 11px;
+  padding:
+    8px 12px;
 
-  border: 1px solid var(--border);
-  border-radius: 9px;
+  border:
+    1px solid transparent;
 
-  background: var(--surface);
+  border-radius:
+    11px;
 
-  color: var(--text);
+  background:
+    transparent;
 
-  cursor: pointer;
+  color:
+    var(--text);
+
+  cursor:
+    pointer;
 
   transition:
     background 0.15s ease,
@@ -641,71 +780,103 @@ body.dark-theme .page-navigation {
 }
 
 .page-nav-button:hover:not(:disabled) {
-  background: var(--purple-soft);
+  background:
+    var(--purple-soft);
 
-  border-color: var(--purple);
+  border-color:
+    rgba(118, 87, 255, 0.18);
 
-  transform: translateY(-1px);
+  transform:
+    translateY(-1px);
 }
 
 .page-nav-button:disabled {
-  opacity: 0.45;
+  opacity:
+    0.4;
 
-  cursor: default;
+  cursor:
+    default;
 }
 
 .previous-page {
-  text-align: left;
+  text-align:
+    left;
 }
 
 .next-page {
-  justify-content: flex-end;
+  justify-content:
+    flex-end;
 
-  text-align: right;
+  text-align:
+    right;
 }
 
 .page-nav-arrow {
-  flex: 0 0 auto;
+  flex:
+    0 0 auto;
 
-  color: var(--purple);
+  color:
+    var(--purple);
 
-  font-size: 17px;
-  font-weight: 700;
+  font-size:
+    17px;
+
+  font-weight:
+    700;
 }
 
 .page-nav-copy {
-  display: flex;
+  display:
+    flex;
 
-  flex-direction: column;
+  flex-direction:
+    column;
 
-  min-width: 0;
+  min-width:
+    0;
 }
 
 .page-nav-label {
-  color: var(--muted);
+  color:
+    var(--muted);
 
-  font-size: 10px;
-  font-weight: 700;
+  font-size:
+    9px;
 
-  line-height: 1.2;
+  font-weight:
+    800;
 
-  letter-spacing: 0.06em;
+  line-height:
+    1.2;
 
-  text-transform: uppercase;
+  letter-spacing:
+    0.06em;
+
+  text-transform:
+    uppercase;
 }
 
 .page-nav-title {
-  overflow: hidden;
+  overflow:
+    hidden;
 
-  color: var(--text);
+  color:
+    var(--text);
 
-  font-size: 12px;
-  font-weight: 650;
+  font-size:
+    12px;
 
-  line-height: 1.4;
+  font-weight:
+    650;
 
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  line-height:
+    1.4;
+
+  text-overflow:
+    ellipsis;
+
+  white-space:
+    nowrap;
 }
 
 
@@ -714,41 +885,51 @@ body.dark-theme .page-navigation {
    ========================================================= */
 
 .content-wrapper {
-  width: 100%;
+  width:
+    100%;
 
   max-width:
     calc(var(--content-max) + 80px);
 
-  margin: 0 auto;
+  margin:
+    0 auto;
 
   padding:
-    32px 40px 80px;
+    24px 40px 80px;
 }
 
 #content,
 .content {
-  width: 100%;
+  width:
+    100%;
 
-  max-width: var(--content-max);
+  max-width:
+    var(--content-max);
 
-  margin: 0 auto;
+  margin:
+    0 auto;
 
-  font-size: 16px;
+  font-size:
+    16px;
 }
 
 
 /* =========================================================
-   BLOG-LIKE CONTENT BOX
+   BLOG CONTENT BOX
    ========================================================= */
 
 #content {
-  padding: 34px 38px;
+  padding:
+    34px 38px;
 
-  background: var(--bg);
+  background:
+    var(--bg);
 
-  border: 1px solid var(--border);
+  border:
+    1px solid var(--border);
 
-  border-radius: 14px;
+  border-radius:
+    14px;
 
   box-shadow:
     0 4px 20px
@@ -768,55 +949,61 @@ body.dark-theme #content {
 
 #content h1,
 .content h1 {
-  margin-top: 0;
+  margin-top:
+    0;
 
-  margin-bottom: 24px;
+  margin-bottom:
+    24px;
 
-  color: var(--text);
+  color:
+    var(--text);
 
-  font-size: 32px;
+  font-size:
+    32px;
 
-  line-height: 1.2;
+  line-height:
+    1.2;
 
-  letter-spacing: -0.7px;
+  letter-spacing:
+    -0.7px;
 }
 
 #content h2,
 .content h2 {
-  margin-top: 40px;
+  margin-top:
+    40px;
 
-  margin-bottom: 15px;
+  margin-bottom:
+    15px;
 
-  color: var(--text);
+  color:
+    var(--text);
 
-  font-size: 24px;
+  font-size:
+    24px;
 
-  line-height: 1.3;
+  line-height:
+    1.3;
 }
 
 #content h3,
 .content h3 {
-  margin-top: 30px;
+  margin-top:
+    30px;
 
-  margin-bottom: 12px;
+  margin-bottom:
+    12px;
 
-  color: var(--text);
+  color:
+    var(--text);
 
-  font-size: 19px;
-}
-
-#content h4,
-.content h4 {
-  margin-top: 25px;
-
-  margin-bottom: 10px;
-
-  font-size: 17px;
+  font-size:
+    19px;
 }
 
 
 /* =========================================================
-   TEXT
+   PARAGRAPHS
    ========================================================= */
 
 #content p,
@@ -827,149 +1014,211 @@ body.dark-theme #content {
 
 #content strong,
 .content strong {
-  color: var(--text);
+  color:
+    var(--text);
 
-  font-weight: 700;
-}
-
-#content a,
-.content a {
-  color: var(--purple);
-
-  font-weight: 600;
-
-  text-decoration: none;
-}
-
-#content a:hover,
-.content a:hover {
-  color: var(--pink);
-
-  text-decoration: underline;
+  font-weight:
+    700;
 }
 
 
 /* =========================================================
-   MARKDOWN IMAGES
+   LINKS
    ========================================================= */
 
-/*
-   Markdown:
+#content a,
+.content a {
+  color:
+    var(--purple);
 
-   ![Early Stopping](../images/early_stopping1.png)
+  font-weight:
+    600;
 
-   Default image width = 30%.
-*/
+  text-decoration:
+    none;
+}
+
+#content a:hover,
+.content a:hover {
+  color:
+    var(--pink);
+
+  text-decoration:
+    underline;
+}
+
+
+/* =========================================================
+   GEN-Z DEFINITION / BLOCKQUOTE
+   ========================================================= */
+
+#content blockquote,
+.content blockquote {
+  position:
+    relative;
+
+  margin:
+    24px 0;
+
+  padding:
+    17px 20px;
+
+  border:
+    1px solid #e5dcff;
+
+  border-left:
+    4px solid var(--purple);
+
+  border-radius:
+    13px;
+
+  background:
+    linear-gradient(
+      135deg,
+      #f5f1ff 0%,
+      #fff5fb 52%,
+      #f0f8ff 100%
+    );
+
+  color:
+    #40384c;
+
+  box-shadow:
+    0 6px 20px
+    rgba(124, 92, 255, 0.07);
+}
+
+#content blockquote p,
+.content blockquote p {
+  margin:
+    0 0 8px;
+}
+
+#content blockquote p:first-child,
+.content blockquote p:first-child {
+  color:
+    #6846e8;
+
+  font-size:
+    14px;
+
+  font-weight:
+    800;
+
+  letter-spacing:
+    0.02em;
+}
+
+#content blockquote p:last-child,
+.content blockquote p:last-child {
+  margin-bottom:
+    0;
+
+  color:
+    #4c4655;
+
+  font-size:
+    15px;
+
+  line-height:
+    1.7;
+}
+
+#content blockquote strong,
+.content blockquote strong {
+  color:
+    #5d3fd3;
+
+  font-weight:
+    750;
+}
+
+
+/* =========================================================
+   DARK MODE BLOCKQUOTE
+   ========================================================= */
+
+body.dark-theme #content blockquote,
+body.dark-theme .content blockquote {
+  border-color:
+    #40355d;
+
+  background:
+    linear-gradient(
+      135deg,
+      #29223e 0%,
+      #352332 52%,
+      #202d40 100%
+    );
+
+  color:
+    #e9e3f0;
+
+  box-shadow:
+    0 6px 20px
+    rgba(0, 0, 0, 0.2);
+}
+
+body.dark-theme #content blockquote p:first-child,
+body.dark-theme .content blockquote p:first-child {
+  color:
+    #b59cff;
+}
+
+body.dark-theme #content blockquote p:last-child,
+body.dark-theme .content blockquote p:last-child {
+  color:
+    #ddd5e7;
+}
+
+body.dark-theme #content blockquote strong,
+body.dark-theme .content blockquote strong {
+  color:
+    #c3adff;
+}
+
+
+/* =========================================================
+   IMAGES
+   ========================================================= */
 
 #content img,
 .content img {
-  display: block;
+  display:
+    block;
 
-  width: 30%;
+  width:
+    30%;
 
-  max-width: 450px;
+  max-width:
+    450px;
 
-  height: auto;
+  height:
+    auto;
 
   margin:
     24px auto;
 
-  border-radius: 10px;
+  border:
+    1px solid var(--border);
 
-  border: 1px solid var(--border);
+  border-radius:
+    10px;
 
   box-shadow:
     0 5px 18px
     rgba(50, 40, 80, 0.08);
 }
 
-
-/*
-   Respect explicit width attributes
-   from Markdown HTML.
-
-   Example:
-
-   <img src="..." width="40%">
-*/
-
 #content img[width],
 .content img[width] {
-  max-width: 100%;
+  max-width:
+    100%;
 }
 
 
 /* =========================================================
-   BLOCKQUOTES
-   ========================================================= */
-
-#content blockquote,
-.content blockquote {
-  margin:
-    22px 0;
-
-  padding:
-    14px 18px;
-
-  border-left:
-    4px solid var(--purple);
-
-  border-radius:
-    0 9px 9px 0;
-
-  background:
-    var(--surface);
-
-  color:
-    var(--muted);
-}
-
-#content blockquote p:last-child,
-.content blockquote p:last-child {
-  margin-bottom: 0;
-}
-
-
-/* =========================================================
-   HORIZONTAL RULE
-   ========================================================= */
-
-#content hr,
-.content hr {
-  margin:
-    30px 0;
-
-  border: 0;
-
-  border-top:
-    1px solid var(--border);
-}
-
-
-/* =========================================================
-   LISTS
-   ========================================================= */
-
-#content ul,
-#content ol,
-.content ul,
-.content ol {
-  margin:
-    0 0 20px;
-
-  padding-left:
-    27px;
-}
-
-#content li,
-.content li {
-  margin:
-    5px 0;
-}
-
-
-/* =========================================================
-   INLINE CODE
+   CODE
    ========================================================= */
 
 #content code,
@@ -997,16 +1246,13 @@ body.dark-theme #content {
     0.9em;
 }
 
-
-/* =========================================================
-   CODE BLOCK
-   ========================================================= */
-
 #content pre,
 .content pre {
-  position: relative;
+  position:
+    relative;
 
-  overflow-x: auto;
+  overflow-x:
+    auto;
 
   margin:
     22px 0;
@@ -1026,19 +1272,26 @@ body.dark-theme #content {
 
 #content pre code,
 .content pre code {
-  display: block;
+  display:
+    block;
 
-  padding: 0;
+  padding:
+    0;
 
-  background: transparent;
+  background:
+    transparent;
 
-  color: var(--text);
+  color:
+    var(--text);
 
-  font-size: 13px;
+  font-size:
+    13px;
 
-  line-height: 1.65;
+  line-height:
+    1.65;
 
-  white-space: pre;
+  white-space:
+    pre;
 }
 
 
@@ -1047,10 +1300,14 @@ body.dark-theme #content {
    ========================================================= */
 
 .copy-button {
-  position: absolute;
+  position:
+    absolute;
 
-  top: 9px;
-  right: 9px;
+  top:
+    9px;
+
+  right:
+    9px;
 
   padding:
     5px 9px;
@@ -1095,12 +1352,35 @@ body.dark-theme #content {
 
 
 /* =========================================================
+   LISTS
+   ========================================================= */
+
+#content ul,
+#content ol,
+.content ul,
+.content ol {
+  margin:
+    0 0 20px;
+
+  padding-left:
+    27px;
+}
+
+#content li,
+.content li {
+  margin:
+    5px 0;
+}
+
+
+/* =========================================================
    TABLES
    ========================================================= */
 
 #content table,
 .content table {
-  width: 100%;
+  width:
+    100%;
 
   margin:
     22px 0;
@@ -1152,6 +1432,23 @@ body.dark-theme #content {
 
 
 /* =========================================================
+   HORIZONTAL RULE
+   ========================================================= */
+
+#content hr,
+.content hr {
+  margin:
+    30px 0;
+
+  border:
+    0;
+
+  border-top:
+    1px solid var(--border);
+}
+
+
+/* =========================================================
    LOADING
    ========================================================= */
 
@@ -1161,9 +1458,11 @@ body.dark-theme #content {
 }
 
 .loading-line {
-  width: 100%;
+  width:
+    100%;
 
-  height: 13px;
+  height:
+    13px;
 
   margin-bottom:
     13px;
@@ -1181,17 +1480,20 @@ body.dark-theme #content {
 }
 
 .loading-line.short {
-  width: 60%;
+  width:
+    60%;
 }
 
 @keyframes loadingPulse {
   0%,
   100% {
-    opacity: 0.5;
+    opacity:
+      0.5;
   }
 
   50% {
-    opacity: 1;
+    opacity:
+      1;
   }
 }
 
@@ -1228,13 +1530,13 @@ body.dark-theme #content {
 
 .no-results {
   padding:
-    14px 9px;
+    10px 7px;
 
   color:
     var(--muted);
 
   font-size:
-    12px;
+    11px;
 }
 
 
@@ -1244,13 +1546,17 @@ body.dark-theme #content {
 
 #sidebar-overlay,
 .sidebar-overlay {
-  display: none;
+  display:
+    none;
 
-  position: fixed;
+  position:
+    fixed;
 
-  inset: 0;
+  inset:
+    0;
 
-  z-index: 850;
+  z-index:
+    850;
 
   background:
     rgba(20, 15, 30, 0.38);
@@ -1258,7 +1564,8 @@ body.dark-theme #content {
 
 #sidebar-overlay.active,
 .sidebar-overlay.active {
-  display: block;
+  display:
+    block;
 }
 
 
@@ -1267,8 +1574,11 @@ body.dark-theme #content {
    ========================================================= */
 
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width:
+    8px;
+
+  height:
+    8px;
 }
 
 ::-webkit-scrollbar-track {
@@ -1310,7 +1620,8 @@ body.dark-theme #content {
 @media (max-width: 800px) {
 
   header {
-    height: 58px;
+    height:
+      58px;
 
     padding:
       0 14px;
@@ -1324,7 +1635,8 @@ body.dark-theme #content {
 
   #sidebar,
   .sidebar {
-    top: 58px;
+    top:
+      58px;
 
     width:
       min(
@@ -1348,21 +1660,25 @@ body.dark-theme #content {
 
   main,
   #main {
-    width: 100%;
+    width:
+      100%;
 
-    margin-left: 0;
+    margin-left:
+      0;
   }
 
   body:has(#sidebar.contents-hidden) main,
   body:has(#sidebar.contents-hidden) #main {
-    width: 100%;
+    width:
+      100%;
 
-    margin-left: 0;
+    margin-left:
+      0;
   }
 
   .content-wrapper {
     padding:
-      22px 16px 55px;
+      20px 16px 55px;
   }
 
   #content {
@@ -1389,12 +1705,17 @@ body.dark-theme #content {
   }
 
   .page-navigation {
-    top: 58px;
+    top:
+      68px;
 
-    padding:
-      8px 12px;
+    width:
+      calc(100% - 24px);
 
-    gap: 7px;
+    margin-top:
+      8px;
+
+    border-radius:
+      14px;
   }
 
   .page-nav-button {
@@ -1421,10 +1742,15 @@ body.dark-theme #content {
 
 @media (max-width: 480px) {
 
+  header {
+    height:
+      56px;
+  }
+
   .brand,
   .logo {
-    font-size:
-      15px;
+    display:
+      none;
   }
 
   #theme-button,
