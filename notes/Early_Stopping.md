@@ -1,29 +1,8 @@
-<div class="note-intro">
+> 🧠 **EARLY STOPPING**
+>
+> Early stopping is a **regularization technique** that **prevents overfitting** by stopping training when **validation performance stops improving**.
 
-  <div class="note-intro-definition">
-
-    <strong>🧠 EARLY STOPPING</strong>
-
-    <p>
-      Early stopping is a
-      <strong>regularization technique</strong>
-      that <strong>prevents overfitting</strong>
-      by stopping training when
-      <strong>validation performance stops improving</strong>.
-    </p>
-
-  </div>
-
-  <div class="note-intro-image">
-
-    <img
-      src="../images/early_stopping1.png"
-      alt="Early Stopping"
-    >
-
-  </div>
-
-</div>
+![Early Stopping](../images/early_stopping1.png)
 
 ---
 
@@ -45,28 +24,3 @@ model.fit(
     batch_size=64,
     callbacks=[early_stop]
 )
-````
-
- ### ⚙️ Key Parameters
-
- | Parameter | Meaning |
-| --- | --- |
-| `monitor="val_loss"` | 👀 Monitor validation loss |
-| `patience=5` | ⏳ Wait 5 epochs without improvement |
-| `min_delta=1e-4` | 🔎 Minimum change considered an improvement |
-| `mode="min"` | 📉 Lower value is better |
-| `restore_best_weights=True` | ⭐ Restore weights from the best epoch |
-
-> ⭐ **Important:** In the example, Epoch 3 has the lowest `val_loss (0.40)`, so `restore_best_weights=True` restores the **Epoch 3 weights**.
-
----
-
- ### 🧩 Can Be Combined With
-
- **Dropout** → Randomly removes neurons\
- **L2 / Weight Decay** → Penalizes large weights\
- **Data Augmentation** → Creates varied training examples\
- **Early Stopping** → Stops when validation performance worsens
-
- > 🎯 **Takeaway:**\
->  **Train → Monitor Validation → Detect Overfitting → Stop → Restore Best Weights**
