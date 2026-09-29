@@ -10,23 +10,11 @@
 
   <meta
     name="description"
-    content="AI & ML Key Concepts — concise notes on artificial intelligence and machine learning."
+    content="AI & ML Key Concepts — practical notes and concepts worth sharing."
   >
 
   <title>AI & ML Key Concepts</title>
 
-  <!-- Markdown renderer -->
-  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-
-  <!-- Syntax highlighting -->
-  <link
-    rel="stylesheet"
-    href="https://cdn.jsdelivr.net/npm/highlight.js@11.11.1/styles/github.min.css"
-  >
-
-  <script src="https://cdn.jsdelivr.net/npm/highlight.js@11.11.1/lib/highlight.min.js"></script>
-
-  <!-- Main stylesheet -->
   <link
     rel="stylesheet"
     href="style.css"
@@ -36,23 +24,19 @@
 <body>
 
   <!-- =====================================================
-       HEADER
+       MOBILE HEADER
        ===================================================== -->
 
   <header>
 
-    <div class="header-spacer"></div>
-
     <div class="header-actions">
 
-      <!-- Mobile menu -->
       <button
         id="menu-button"
         class="menu-button"
         type="button"
         aria-label="Open contents"
-        aria-controls="sidebar"
-        aria-expanded="false"
+        title="Open contents"
       >
         ☰
       </button>
@@ -63,216 +47,198 @@
 
 
   <!-- =====================================================
-       APP
+       SIDEBAR OVERLAY
        ===================================================== -->
 
-  <div class="app">
+  <div
+    id="sidebar-overlay"
+    class="sidebar-overlay"
+  ></div>
 
-    <!-- Mobile sidebar overlay -->
+
+  <!-- =====================================================
+       SIDEBAR / CONTENTS
+       ===================================================== -->
+
+  <aside
+    id="sidebar"
+    class="sidebar"
+  >
+
+    <!-- Three-line contents toggle -->
+
+    <button
+      id="contents-toggle"
+      class="contents-toggle"
+      type="button"
+      aria-expanded="true"
+      aria-label="Hide contents"
+      title="Hide contents"
+    >
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+
+
+    <!-- Search -->
+
     <div
-      id="sidebar-overlay"
-      class="sidebar-overlay"
-    ></div>
+      id="sidebar-header"
+      class="sidebar-header"
+    >
+
+      <input
+        id="search"
+        class="search-input"
+        type="search"
+        placeholder="⌕  Search concepts..."
+        autocomplete="off"
+        aria-label="Search concepts"
+      >
+
+    </div>
+
+
+    <!-- Topics -->
+
+    <nav
+      id="topic-navigation"
+      class="topic-navigation"
+      aria-label="AI and ML concepts"
+    >
+      <div class="no-results">
+        Loading concepts...
+      </div>
+    </nav>
+
+
+    <!-- Footer -->
+
+    <div class="sidebar-footer">
+      <span>Made with</span>
+      <span class="footer-love">♥</span>
+      <span>&amp; curiosity</span>
+    </div>
+
+  </aside>
+
+
+  <!-- =====================================================
+       MAIN
+       ===================================================== -->
+
+  <main id="main">
 
 
     <!-- ===================================================
-         SIDEBAR / CONTENTS
+         TOP PREVIOUS / NEXT NAVIGATION
          =================================================== -->
 
-    <aside
-      id="sidebar"
-      class="sidebar"
-      aria-label="Notes navigation"
+    <nav
+      id="page-navigation"
+      class="page-navigation"
+      aria-label="Note navigation"
     >
 
-      <!-- Three-line contents toggle -->
+      <!-- Previous -->
+
       <button
-        id="contents-toggle"
-        class="contents-toggle"
+        id="previous-button"
+        class="page-nav-button previous-page"
         type="button"
-        aria-label="Hide contents"
-        aria-controls="sidebar"
-        aria-expanded="true"
-        title="Hide contents"
+        disabled
+        aria-label="Previous note"
       >
-        <span></span>
-        <span></span>
-        <span></span>
+
+        <span
+          class="page-nav-arrow"
+          aria-hidden="true"
+        >
+          ←
+        </span>
+
+        <span class="page-nav-copy">
+
+          <span class="page-nav-label">
+            Previous
+          </span>
+
+          <span
+            id="previous-title"
+            class="page-nav-title"
+          >
+            Start
+          </span>
+
+        </span>
+
       </button>
 
 
-      <!-- Search -->
-      <div class="sidebar-header">
+      <!-- Next -->
 
-        <input
-          id="search"
-          class="search-input"
-          type="search"
-          placeholder="⌕  Search concepts..."
-          aria-label="Search concepts"
-          autocomplete="off"
-        >
-
-      </div>
-
-
-      <!-- =================================================
-           NOTES LIST
-
-           app.js automatically loads the actual filenames
-           from the GitHub notes/ directory.
-
-           Example:
-
-           Early_Stopping.md
-           ->
-           Early Stopping
-
-           batch-normalization.md
-           ->
-           Batch Normalization
-           ================================================= -->
-
-      <nav
-        id="topic-navigation"
-        class="topic-navigation"
-        aria-label="AI and ML concepts"
+      <button
+        id="next-button"
+        class="page-nav-button next-page"
+        type="button"
+        disabled
+        aria-label="Next note"
       >
-        <div class="no-results">
-          Loading concepts...
-        </div>
-      </nav>
 
+        <span class="page-nav-copy">
 
-      <!-- Footer -->
-      <div class="sidebar-footer">
+          <span class="page-nav-label">
+            Next
+          </span>
 
-        <span>Made with</span>
+          <span
+            id="next-title"
+            class="page-nav-title"
+          >
+            You're caught up ✦
+          </span>
 
-        <span
-          class="footer-love"
-          aria-hidden="true"
-        >
-          ♥
         </span>
 
-        <span>&amp;</span>
+        <span
+          class="page-nav-arrow"
+          aria-hidden="true"
+        >
+          →
+        </span>
 
-        <span>curiosity</span>
+      </button>
 
-      </div>
-
-    </aside>
+    </nav>
 
 
     <!-- ===================================================
-         MAIN
+         NOTE CONTENT
          =================================================== -->
 
-    <main id="main">
+    <div class="content-wrapper">
 
-
-      <!-- =================================================
-           PREVIOUS / NEXT NAVIGATION
-
-           This is the ONLY previous/next navigation.
-           There is intentionally no bottom navigation.
-           ================================================= -->
-
-      <nav
-        id="page-navigation"
-        class="page-navigation"
-        aria-label="Post navigation"
+      <article
+        id="content"
+        class="content"
       >
 
-        <!-- app.js populates Previous / Next -->
-        <button
-          class="page-nav-button previous-page"
-          type="button"
-          disabled
-        >
+        <div class="loading">
 
-          <span
-            class="page-nav-arrow"
-            aria-hidden="true"
-          >
-            ←
-          </span>
+          <div class="loading-line"></div>
 
-          <span class="page-nav-copy">
+          <div class="loading-line short"></div>
 
-            <span class="page-nav-label">
-              Previous
-            </span>
+          <div class="loading-line"></div>
 
-            <span class="page-nav-title">
-              —
-            </span>
+        </div>
 
-          </span>
+      </article>
 
-        </button>
+    </div>
 
-
-        <button
-          class="page-nav-button next-page"
-          type="button"
-          disabled
-        >
-
-          <span class="page-nav-copy">
-
-            <span class="page-nav-label">
-              Next
-            </span>
-
-            <span class="page-nav-title">
-              —
-            </span>
-
-          </span>
-
-          <span
-            class="page-nav-arrow"
-            aria-hidden="true"
-          >
-            →
-          </span>
-
-        </button>
-
-      </nav>
-
-
-      <!-- =================================================
-           NOTE CONTENT
-           ================================================= -->
-
-      <div class="content-wrapper">
-
-        <article
-          id="content"
-          class="content"
-          aria-live="polite"
-        >
-
-          <div class="loading">
-
-            <div class="loading-line"></div>
-
-            <div class="loading-line"></div>
-
-            <div class="loading-line short"></div>
-
-          </div>
-
-        </article>
-
-      </div>
-
-    </main>
-
-  </div>
+  </main>
 
 
   <!-- =====================================================
@@ -291,43 +257,21 @@
 
 
   <!-- =====================================================
-       APP JAVASCRIPT
+       MARKED.JS
        ===================================================== -->
 
-  <script src="app.js"></script>
+  <script
+    src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"
+  ></script>
 
 
   <!-- =====================================================
-       HIGHLIGHT.JS
+       APP
        ===================================================== -->
 
-  <script>
-    document.addEventListener(
-      "DOMContentLoaded",
-      () => {
-
-        if (
-          typeof hljs !== "undefined"
-        ) {
-
-          hljs.configure({
-            languages: [
-              "javascript",
-              "python",
-              "bash",
-              "json",
-              "yaml",
-              "html",
-              "css",
-              "sql"
-            ]
-          });
-
-        }
-
-      }
-    );
-  </script>
+  <script
+    src="app.js"
+  ></script>
 
 </body>
 </html>
