@@ -1,16 +1,14 @@
-## Confusion Matrix
-
-A **confusion matrix** is an <mark>**N×N grid**</mark> used to <mark>evaluate the **performance of a classification model**</mark> by comparing the actual labels with the predicted labels.
+> <mark>**Confusion Matrix**</mark>
+>
+>A **confusion matrix** is an <mark>**N×N grid**</mark> used to <mark>evaluate the **performance of a classification model**</mark> by comparing the actual labels with the predicted labels.
 
 For **binary classification**, it is a **2×2 matrix** containing:
-
 - **True Positive (TP)** — Actual positive, predicted positive.
 - **True Negative (TN)** — Actual negative, predicted negative.
 - **False Positive (FP)** — Actual negative, predicted positive.
 - **False Negative (FN)** — Actual positive, predicted negative.
 
 From these, we can derive several metrics:
-
 1. **Accuracy** — How many predictions are correct overall?  
    Example: Out of 10 predictions, 6 are correct → **60% accuracy**
 
