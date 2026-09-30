@@ -1,17 +1,13 @@
-1. **Overfitting**
-* **Early Stopping**: A **regularization** technique - prevents **overfitting** - by **stopping training** when <mark>**validation performance stops improving**</mark>.
-
+#### **Overfitting**
+* **Early Stopping**: A **regularization** technique - prevents **overfitting** - by **stopping training** when **validation performance stops improving**.
 ---
-#### <mark>**Forward Propagation vs Backward Propagation**: </mark>
-1. Forward  Propagation - <mark> makes predictions </mark>
-2. Backward Propagation - <mark> learns from prediction error</mark> and updates model weights.
-
+#### **Forward Propagation vs Backward Propagation**: 
+1. Forward  Propagation -  makes predictions 
+2. Backward Propagation -  learns from prediction error and updates model weights.
 ---
-#### <mark>**VANISHING GRADIENT**: </mark>
-**Vanishing Gradient:** During **backpropagation**, <mark>gradients become **extremely small**</mark> as they move toward **earlier layers**, causing **very small weight updates** and making those layers <mark>**learn very slowly or effectively stop learning**</mark>.
-
+#### **VANISHING GRADIENT**: 
+**Vanishing Gradient:** During **backpropagation**, gradients become **extremely small** as they move toward **earlier layers**, causing **very small weight updates** and making those layers **learn very slowly or effectively stop learning**.
 ---
-#### <mark>**CONFUSION MATRIX**: </mark>
-**N×N grid** - used to <mark>**evaluate a classification model**</mark> by comparing **actual labels vs predicted labels**.
-
+#### **CONFUSION MATRIX**: 
+**N×N grid** - used to **evaluate a classification model** by comparing **actual labels vs predicted labels**.
 ---
