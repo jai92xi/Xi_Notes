@@ -11,7 +11,9 @@ Consider a **deep neural network** that uses the **sigmoid activation function**
 During **backpropagation**, these derivatives contribute **multiplicatively** to the gradient. Since each sigmoid derivative is at most **0.25**, repeated multiplication across many layers can make the **gradient extremely small**.
 
 As a result, the **earlier-layer weights** receive **very small updates**, causing those layers to **learn very slowly** or **effectively stop learning**.
+
 ---
+
 #### **Solutions to Overcome the Vanishing Gradient Problem:**
 
 ```text
