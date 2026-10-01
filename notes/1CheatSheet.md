@@ -21,3 +21,10 @@
 ##### **DIFFERENT EMBEDDING MODELS FOR QUERY AND VECTOR**
 * Use the **same embedding model** for both queries and documents - (a) can have different dimensions - so dimension-mismatch error. (b) same dimension but different vector coordinates - irrelevant chunks.
 * or use a **pair of encoders explicitly trained to produce embeddings in the same shared space**, such as **DPR**
+---
+##### **POSITIONAL ENCODING**
+* **RNN** : processes **tokens sequentially** → order is naturally captured.
+**Transformer**: processes **all tokens in parallel** → self-attention alone **doesn't know token order**. >> “Dog🐶 bites man” ≠ “Man bites dog🐶” same
+- **Absolute PE:** Encodes the **exact position** of each token. `A = 5, B = 15` → may struggle with **positions beyond the trained context length**.
+- **Relative PE (RPE):** Encodes the **relative distance/position** between tokens. `B is +10 from A` → relative position is **explicitly used in attention**.
+- **RoPE:** Encodes position by **rotating Q and K** according to their positions, so their **interaction captures relative position**.
