@@ -801,9 +801,9 @@ body {
 
   color: var(--text-soft);
 
-  font-size: 15px;
+  font-size: 14px;
 
-  line-height: 1.85;
+  line-height: 1.35;
 }
 
 .content strong {
