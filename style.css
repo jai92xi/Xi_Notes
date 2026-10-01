@@ -797,7 +797,7 @@ body {
 }
 
 .content p {
-  margin: 0 0 1.15em;
+  margin: 0 0 0.35em;
 
   color: var(--text-soft);
 
@@ -1528,19 +1528,14 @@ input:focus-visible {
   }
 
   .content p {
-  margin:
-    0 0 0.35em;
+    margin: 0 0 0.35em;
 
-  color:
-    var(--text-soft);
+    color: var(--text-soft);
 
-  font-size:
-    15px;
+    font-size: 15px;
 
-  line-height:
-    1.75;
-}
-
+    line-height: 1.75;
+  }
 
   .content blockquote {
     margin-left: 0;
