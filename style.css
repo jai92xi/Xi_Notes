@@ -1528,10 +1528,19 @@ input:focus-visible {
   }
 
   .content p {
-    font-size: 14px;
+  margin:
+    0 0 0.35em;
 
-    line-height: 1.78;
-  }
+  color:
+    var(--text-soft);
+
+  font-size:
+    15px;
+
+  line-height:
+    1.75;
+}
+
 
   .content blockquote {
     margin-left: 0;
