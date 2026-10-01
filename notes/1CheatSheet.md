@@ -18,3 +18,6 @@
 * **Confusion Matrix**: An **N×N grid** used to **evaluate a classification model** by comparing **actual labels** vs **predicted labels**.
 * **Metrics:** Accuracy, Precision, Recall, F1-Score, Specificity, ROC-AUC, PR-AUC, Balanced Accuracy, FPR, FNR
 ---
+##### **DIFFERENT EMBEDDING MODELS FOR QUERY AND VECTOR**
+* Use the **same embedding model** for both queries and documents - (a) can have different dimensions - so dimension-mismatch error. (b) same dimension but different vector coordinates - irrelevant chunks.
+* or use a **pair of encoders explicitly trained to produce embeddings in the same shared space**, such as **DPR**
