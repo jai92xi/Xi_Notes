@@ -31,10 +31,10 @@
 ---
 ##### **HALLUCINATION**
 Hallucination happens when the **retrieved context doesn't contain enough relevant information**, causing the model to **generate unsupported information** instead. So, use methods to **prevent invention and improve retrieval quality**. 
-| Prevent Invention | Improve Query | Improve Retrieval | Improve Context | Base Knowledge |
+| Prevent Invention | Improve Query | Improve Retrieval | Improve Context | Verify Answer |
 |---|---|---|---|---|
-| Grounding prompt | Query rewriting | Chunking | Remove irrelevant / duplicate chunks | Domain fine-tuning |
-| Abstention | Query decomposition | Parent-child retrieval | Context compression | |
-| Temperature control | HyDE | Hybrid search | Conflict resolution | |
-| | | Reranker | | |
-| | | MMR | | |
+| Grounding prompt | Query rewriting | Chunking | Remove irrelevant chunks | Claim verification |
+| Abstention | Query decomposition | Parent-child retrieval | Remove duplicate chunks | Citation/evidence verification |
+| "Don't guess" | HyDE | Hybrid search | Context compression | Groundedness check |
+|  |  | Reranker | Conflict resolution | Retry / regenerate / abstain |
+|  |  | MMR |  |  |
