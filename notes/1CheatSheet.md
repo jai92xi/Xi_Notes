@@ -28,3 +28,12 @@
 - **Absolute PE:** Encodes the **exact position** of each token. `A = 5, B = 15` → may struggle with **positions beyond the trained context length**.
 - **Relative PE (RPE):** Encodes the **relative distance/position** between tokens. `B is +10 from A` → relative position is **explicitly used in attention**.
 - **RoPE:** Encodes position by **rotating Q and K** according to their positions, so their **interaction captures relative position**.
+---
+##### **HALLUCINATION**
+| Prevent Invention | Improve Query | Improve Retrieval | Improve Context | Base Knowledge |
+|---|---|---|---|---|
+| Grounding prompt | Query rewriting | Chunking | Remove irrelevant / duplicate chunks | Domain fine-tuning |
+| Abstention | Query decomposition | Parent-child retrieval | Context compression | |
+| Temperature control | HyDE | Hybrid search | Conflict resolution | |
+| | | Reranker | | |
+| | | MMR | | |
