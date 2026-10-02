@@ -1,7 +1,3 @@
-Yes — if you mean a **Databricks `%md` cell**, use this format:
-
-````
-%md
 
 # Production RAG: Solving Context Fragmentation
 
