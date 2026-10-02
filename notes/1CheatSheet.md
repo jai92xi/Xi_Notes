@@ -39,8 +39,10 @@ Hallucination happens when the **retrieved context doesn't contain enough releva
 |  |  | Reranker | Conflict resolution | Retry / regenerate / abstain |
 |  |  | MMR |  |  |
 ----
-### **Retrieval** : **Recall@K**, **Precision@K**, **Hit Rate@K**, **MRR**, **nDCG@K**, **MAP@K**, **Retrieval Latency**
-### **Context** : **Context Recall [Ragas]**, **Context Precision [Ragas]**, **Redundancy/Diversity**
-### **Generation** : **Faithfulness [Ragas]**, **Answer Relevance [Ragas]**, **Answer Correctness [Ragas]**, **Answer Completeness**, **Citation Correctness**, **Citation Completeness**
-### **System** : **End-to-End Latency**, **Cost**, **Token Usage**, **Failure Rate**, **Throughput**, **Availability**, **User Satisfaction**
+##### <mark>**RAG EVALUATION**</mark>
+* **Retrieval**  :  Recall@K, Precision@K, Hit Rate@K, MRR, nDCG@K, MAP@K, Retrieval Latency
+* **Context** 	 : 	Context Recall [Ragas], Context Precision [Ragas], Redundancy/Diversity
+* **Generation** : 	Faithfulness [Ragas], Answer Relevance [Ragas], Answer Correctness [Ragas], Answer Completeness, Citation Correctness, Citation Completeness
+* **System** 	   : 	End-to-End Latency, Cost, Token Usage, Failure Rate, Throughput, Availability, User Satisfaction
+
 ---
