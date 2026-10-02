@@ -30,6 +30,7 @@
 - **RoPE:** Encodes position by **rotating Q and K** according to their positions, so their **interaction captures relative position**.
 ---
 ##### **HALLUCINATION**
+Hallucination happens when the **retrieved context doesn't contain enough relevant information**, causing the model to **generate unsupported information** instead. So, use methods to **prevent invention and improve retrieval quality**. 
 | Prevent Invention | Improve Query | Improve Retrieval | Improve Context | Base Knowledge |
 |---|---|---|---|---|
 | Grounding prompt | Query rewriting | Chunking | Remove irrelevant / duplicate chunks | Domain fine-tuning |
