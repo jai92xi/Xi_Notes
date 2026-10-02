@@ -3,8 +3,6 @@
 ```
 HALLUCINATION
      │
-     │  Model does not find sufficient reliable evidence
-     │  → starts generating unsupported information
      │
      ├── Prevent Invention
      │   ├── **Grounding prompt**
