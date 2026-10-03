@@ -40,10 +40,30 @@ At each decoding step, we need the new token's Q to determine what information i
 **No.** The new Q still attends to all cached K/V:
 
 ---
+> 🧠 A model has **32 layers**, **32 query heads**, and uses **Grouped-Query Attention (GQA)** with **8 KV heads**. The **head dimension** is **128**, and the KV cache is stored in **FP16**. You serve a **batch of 4 sequences**, each with **8,192 tokens** in context.
+
+> **KV Cache** = 2 × **layers** × **sequence length** × **batch** × **KV heads** × **head dimension** × **bytes**
+
+> = 2 × **32** × **8192** × **4** × **8** × **128** × **2 bytes**
+> **≈ 4 GB** 🚀
+
+---
 This memory requirement can become a major bottleneck for long-context or high-concurrency inference. 
-Techniques such as GQA/MQA, KV-cache quantization, and systems such as PagedAttention help reduce or manage that memory cost.
-- **GQA/MQA:** reduce the number of K/V heads → smaller cache.
-- **KV quantization:** use fewer bits → smaller cache.
-- **PagedAttention:** manages KV-cache memory more efficiently.
+Techniques such as **GQA/MQA, KV-cache quantization**, and **PagedAttention** help reduce or efficiently manage KV-cache memory.
+
+- **GQA/MQA** → Reduce **K/V heads** → 📉 smaller cache.
+  - **MQA** → All query heads share **one K/V head**.
+  - **GQA** → Query heads are grouped, with each group sharing **one K/V head**.
+  - _Example:_ **32 Query heads → 8 KV heads**.
+
+- **KV Quantization** → Use fewer bits → 📉 smaller cache.
+  - _FP16 = 2 bytes_ | _INT8 = 1 byte_ 💾
+
+- **PagedAttention** → 🧩 Efficient **KV-cache memory management**.
+  - Divides cache into fixed-size **blocks/pages**, allowing requests to use non-contiguous blocks.
+  - `Request A → Block 1 → Block 4 → Block 7`
+  - `Request B → Block 2`
+  - `Request C → Block 3 → Block 5 → Block 6`
+  - 🎯 **Key idea:** Allocate memory **on demand** → less fragmentation + better GPU utilization.
 
 ---
