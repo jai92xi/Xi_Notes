@@ -50,11 +50,9 @@ Hallucination happens when the **retrieved context doesn't contain enough releva
 **Stores:** Past **Key & Value (K/V)** tensors.
 - ⚡ **Benefit:** Avoids recomputation → **faster LLM inference**.
 - 💾 **Trade-off:** Uses extra **GPU memory**, grows with context length.
-- 🎯 **Used in:** Autoregressive **generation/decoding**.
-- ⚠️ **Bottleneck:** Long contexts → large KV cache → high VRAM usage.
 
-###### <mark>**OPTIMIZATIONS**</mark>
- - **GQA/MQA** → Fewer **K/V heads** → 📉 smaller cache.
+#### <mark>**OPTIMIZATIONS**</mark>
+- **GQA/MQA** → Fewer **K/V heads** → 📉 smaller cache.
 - **KV Quantization** → Fewer **bits per K/V** → 📉 lower memory.
 - **PagedAttention** → Efficiently **manages KV-cache memory** → less fragmentation.
 
