@@ -22,3 +22,6 @@ Suppose a document ranks:
 **RRF score** would be:
 
 $$RRF(d) = \frac{1}{60 + 2} + \frac{1}{60 + 5} = \frac{1}{62} + \frac{1}{65} \approx 0.0315$$
+
+
+https://jai92xi.github.io/AIBrainBox/?id=XI-00024
