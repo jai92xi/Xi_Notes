@@ -31,6 +31,10 @@ Because during inference:
 
 ---
 
+> A Transformer doesn’t automatically remember intermediate results between steps, so **without KV caching, it has to recompute K/V for previous tokens each time.**
+
+---
+
 #### Why don't we cache Q?
 At each decoding step, we need the new token's Q to determine what information it should retrieve from previous tokens. The previous tokens' Q values have already served their purpose
 
