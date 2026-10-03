@@ -57,3 +57,7 @@ Hallucination happens when the **retrieved context doesn't contain enough releva
 - **PagedAttention** → Efficiently **manages KV-cache memory** → less fragmentation.
 
 ---
+#### <mark>**🧠 MMR - Maximal Marginal Relevance**</mark>
+- retrieval **reranking** strategy 💡
+- selects documents that are **relevant to the user query** 🌱 while also **being different from the chunks already selected** 𐦂𖨆𐀪𖠋
+- reducing **redundant or duplicate** content.📉
