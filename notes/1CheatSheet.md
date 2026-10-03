@@ -46,3 +46,9 @@ Hallucination happens when the **retrieved context doesn't contain enough releva
 * **System** 	   : 	End-to-End Latency, Cost, Token Usage, Failure Rate, Throughput, Availability, User Satisfaction
 
 ---
+#### <mark>**KV CACHE**</mark>
+**KV Cache stores previous tokens' K/V representations so future decoding steps can reuse them instead of recomputing them, trading GPU memory for faster inference.
+- **GQA/MQA**          : reduce the number of K/V heads → smaller cache.
+- **KV quantization**  : use fewer bits → smaller cache.
+- **PagedAttention**   : manages KV-cache memory more efficiently.
+---
