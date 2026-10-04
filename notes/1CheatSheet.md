@@ -65,3 +65,17 @@ Hallucination happens when the **retrieved context doesn't contain enough releva
 - retrieval **reranking** strategy 💡
 - selects documents that are **relevant to the user query** 🌱 while also **being different from the chunks already selected** 𐦂𖨆𐀪𖠋
 - reducing **redundant or duplicate** content.📉
+---
+#### <mark>**🥷 Types of Attention in Transformers**</mark>
+> 1. **Self-Attention** 🔄                    — Tokens attend to other tokens in the same sequence.
+> 2. **Multi-Head Attention (MHA)** 🧠       — Multiple attention heads learn different relationships in parallel.
+> 3. **Causal / Masked Self-Attention** 🎯    — Tokens attend only to previous tokens.
+> 4. **Cross-Attention** 🔀                  — One sequence attends to another sequence.
+
+> 5. **Multi-Query Attention (MQA)** 💾      — Multiple Q heads share one K/V head.
+> 6. **Grouped-Query Attention (GQA)** 🧩    — Groups of Q heads share K/V heads.
+
+> 7. **Sparse Attention** 🕸️                 — Tokens attend only to selected tokens.
+> 8. **Local/Window Attention** 🪟            — Tokens attend only to nearby tokens.
+> 9. **Global Attention** 🌐                  — Selected tokens attend across the entire sequence.
+---
