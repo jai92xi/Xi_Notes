@@ -11,8 +11,12 @@
 2. **Backward Propagation** - learns from **prediction error** and **updates model weights**.
 ---
 #### <mark>**VANISHING GRADIENT**</mark>
-* **Vanishing Gradient**: During **backpropagation**, gradients become **extremely small** toward **earlier layers**, causing **very small weight updates** and **slow learning**.
+* During **backpropagation**, gradients become **extremely small** toward **earlier layers**, causing **very small weight updates** and **slow learning**.
 * Methods: ReLU, Leaky ReLU; Batch/Layer Normalization; Residual Connection (ResNet); He/Xavier weight initialization.
+---
+#### <mark>**EXPLODING GRADIENT**</mark>
+* During **backpropagation**, gradients become **extremely large**, causing **huge weight updates**, **unstable training**, and sometimes **Inf/NaN loss**.
+* Methods: **Gradient Clipping**; Reduce Learning Rate; Batch/Layer Normalization; Proper Weight Initialization; Residual Connection (ResNet).
 ---
 #### <mark>**CONFUSION MATRIX**</mark>
 * **Confusion Matrix**: An **N×N grid** used to **evaluate a classification model** by comparing **actual labels** vs **predicted labels**.
