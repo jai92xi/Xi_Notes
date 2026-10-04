@@ -1,5 +1,4 @@
-> ### 💥 **Exploding Gradient**
->
+### 💥 **Exploding Gradient**
 > During **backpropagation**, gradients become **extremely large**, causing **huge weight updates** and unstable training.
 
 - **Main Causes 🚨:** **High learning rate**, very deep networks, poor weight initialization, repeated multiplication of large derivatives.
@@ -15,3 +14,7 @@
 - **Key Difference:**
   - 🐢 **Vanishing Gradient** → gradients **too small** → slow/no learning.
   - 💥 **Exploding Gradient** → gradients **too large** → unstable training / NaN.
+
+https://jai92xi.github.io/AIBrainBox/?id=XI-00029
+https://jai92xi.github.io/AIBrainBox/?id=XI-00030
+https://jai92xi.github.io/AIBrainBox/?id=XI-00016
