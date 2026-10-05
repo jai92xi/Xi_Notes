@@ -1,5 +1,5 @@
 /* =========================================================
-   AI & ML KEY CONCEPTS
+   🧠 AI & ML KEY CONCEPTS
    style.css
    ========================================================= */
 
@@ -11,79 +11,85 @@
 :root {
 
   --bg:
-    #f8f6ff;
+    #f8f5ff;
 
   --bg-main:
     #faf9ff;
 
   --bg-sidebar:
-    #f0edff;
+    #f0ebff;
 
   --bg-card:
     #ffffff;
 
   --bg-soft:
-    #eeebff;
+    #eee8ff;
 
   --bg-code:
-    #171522;
+    #f4f1f8;
 
   --bg-inline:
-    #ebe7ff;
+    #eee9ff;
 
   --text:
-    #27242f;
+    #292532;
 
   --text-soft:
-    #686273;
+    #6f687a;
 
   --text-muted:
-    #938da0;
+    #938b9e;
 
   --heading:
-    #211d29;
+    #211c2b;
 
   --border:
-    #ddd8ea;
+    #dcd5e8;
 
   --border-strong:
-    #c8c0db;
+    #c8bddb;
 
   --accent:
-    #7657d9;
+    #8061dc;
 
   --accent-dark:
-    #5033a8;
+    #6241bf;
 
   --accent-soft:
-    #e8e2ff;
+    #e9e2ff;
 
   --accent-pink:
-    #ff7eb6;
+    #ff75b5;
 
   --accent-blue:
-    #62b8ff;
+    #65bfff;
 
   --accent-yellow:
-    #ffd166;
+    #ffd76a;
+
+  --nav-bg:
+    #2d253c;
+
+  --nav-border:
+    #514265;
 
   --link:
-    #6547c7;
+    #6545c4;
 
   --link-hover:
-    #402799;
+    #432a9a;
 
   --code-text:
-    #eeeeee;
+    #18151d;
 
   --sidebar-width:
     270px;
 
   --content-width:
-    780px;
+    820px;
 
   --nav-height:
-    56px;
+    58px;
 
   --font-body:
     "DM Sans",
@@ -104,14 +110,13 @@
     monospace;
 
   --shadow:
-    0 8px 30px rgba(79, 56, 145, 0.08);
+    0 10px 32px rgba(78, 55, 135, 0.08);
 
   --shadow-small:
-    0 3px 12px rgba(79, 56, 145, 0.08);
+    0 4px 14px rgba(78, 55, 135, 0.08);
 
   --transition:
     160ms ease;
-
 }
 
 
@@ -122,77 +127,76 @@
 body.dark-theme {
 
   --bg:
-    #14121c;
+    #14121b;
 
   --bg-main:
     #17151f;
 
   --bg-sidebar:
-    #1d1929;
+    #1e1929;
 
   --bg-card:
-    #201c2c;
+    #211c2d;
 
   --bg-soft:
-    #29223b;
+    #2b2440;
 
   --bg-code:
-    #100e15;
+    #f0edf4;
 
   --bg-inline:
-    #302942;
+    #302744;
 
   --text:
-    #e6e1ed;
+    #e8e3ed;
 
   --text-soft:
-    #b2aabd;
+    #b4acbf;
 
   --text-muted:
-    #81798c;
+    #847b90;
 
   --heading:
-    #f4eff9;
+    #f5f0f8;
 
   --border:
-    #352e43;
+    #393143;
 
   --border-strong:
-    #4b415d;
+    #50445e;
 
   --accent:
-    #a991ff;
+    #aa94ff;
 
   --accent-dark:
-    #c1b2ff;
+    #c3b5ff;
 
   --accent-soft:
-    #30264a;
+    #33284d;
 
   --accent-pink:
-    #ff83bd;
+    #ff84bd;
 
   --accent-blue:
-    #72c3ff;
+    #72c7ff;
 
   --accent-yellow:
-    #ffd978;
+    #ffda77;
+
+  --nav-bg:
+    #211b2d;
+
+  --nav-border:
+    #4d3d62;
 
   --link:
-    #b4a0ff;
+    #b9a6ff;
 
   --link-hover:
-    #d0c5ff;
+    #d2c8ff;
 
   --code-text:
-    #eeeeee;
-
-  --shadow:
-    0 10px 35px rgba(0, 0, 0, 0.25);
-
-  --shadow-small:
-    0 4px 16px rgba(0, 0, 0, 0.22);
-
+    #18151d;
 }
 
 
@@ -216,7 +220,6 @@ html {
 
   background:
     var(--bg);
-
 }
 
 
@@ -251,7 +254,6 @@ body {
   transition:
     background-color 180ms ease,
     color 180ms ease;
-
 }
 
 
@@ -260,7 +262,6 @@ input {
 
   font:
     inherit;
-
 }
 
 
@@ -268,7 +269,6 @@ button {
 
   color:
     inherit;
-
 }
 
 
@@ -276,7 +276,6 @@ a {
 
   color:
     inherit;
-
 }
 
 
@@ -287,7 +286,6 @@ a {
 
   color:
     #241b38;
-
 }
 
 
@@ -298,7 +296,6 @@ body.dark-theme ::selection {
 
   color:
     #ffffff;
-
 }
 
 
@@ -314,7 +311,6 @@ body.dark-theme ::selection {
   scrollbar-color:
     var(--border-strong)
     transparent;
-
 }
 
 
@@ -325,7 +321,6 @@ body.dark-theme ::selection {
 
   height:
     7px;
-
 }
 
 
@@ -333,7 +328,6 @@ body.dark-theme ::selection {
 
   background:
     transparent;
-
 }
 
 
@@ -344,7 +338,6 @@ body.dark-theme ::selection {
 
   border-radius:
     999px;
-
 }
 
 
@@ -352,7 +345,6 @@ body.dark-theme ::selection {
 
   background:
     var(--accent);
-
 }
 
 
@@ -364,7 +356,6 @@ body.dark-theme ::selection {
 
   display:
     none;
-
 }
 
 
@@ -410,7 +401,6 @@ body.dark-theme ::selection {
   transition:
     width 200ms ease,
     transform 220ms ease;
-
 }
 
 
@@ -418,25 +408,38 @@ body.dark-theme ::selection {
    COLLAPSED SIDEBAR
    ========================================================= */
 
+/*
+ * IMPORTANT:
+ *
+ * When collapsed:
+ *
+ * - search field disappears
+ * - the search box border disappears
+ * - only the show-contents icon remains
+ * - no horizontal line is visible
+ * - sidebar becomes a very small icon rail
+ */
+
 .sidebar.contents-hidden {
 
   width:
-    58px;
-
+    50px;
 }
 
 
-/*
- * Keep the collapse control visible.
- * The navigation remains as a narrow rail instead
- * of disappearing completely.
- */
-
 .sidebar.contents-hidden .sidebar-header {
 
-  padding:
-    10px 11px;
+  width:
+    50px;
 
+  padding:
+    10px 7px;
+
+  background:
+    transparent;
+
+  border:
+    0;
 }
 
 
@@ -448,12 +451,20 @@ body.dark-theme ::selection {
   height:
     36px;
 
-  justify-content:
-    center;
-
   padding:
     0;
 
+  justify-content:
+    center;
+
+  background:
+    transparent;
+
+  border:
+    0;
+
+  box-shadow:
+    none;
 }
 
 
@@ -461,31 +472,14 @@ body.dark-theme ::selection {
 
   display:
     none;
-
 }
 
-
-.sidebar.contents-hidden .contents-toggle {
-
-  margin:
-    0;
-
-}
-
-
-/*
- * Hide topics only after the sidebar is collapsed.
- */
 
 .sidebar.contents-hidden .topic-navigation,
 .sidebar.contents-hidden .sidebar-footer {
 
-  visibility:
-    hidden;
-
-  opacity:
-    0;
-
+  display:
+    none;
 }
 
 
@@ -503,7 +497,6 @@ body.dark-theme ::selection {
 
   background:
     var(--bg-sidebar);
-
 }
 
 
@@ -540,7 +533,6 @@ body.dark-theme ::selection {
     width 180ms ease,
     background-color var(--transition),
     border-color var(--transition);
-
 }
 
 
@@ -551,8 +543,7 @@ body.dark-theme ::selection {
 
   box-shadow:
     0 0 0 3px
-    rgba(118, 87, 217, 0.10);
-
+    rgba(128, 97, 220, 0.10);
 }
 
 
@@ -587,7 +578,6 @@ body.dark-theme ::selection {
 
   font-size:
     12px;
-
 }
 
 
@@ -595,7 +585,6 @@ body.dark-theme ::selection {
 
   color:
     var(--text-muted);
-
 }
 
 
@@ -603,12 +592,11 @@ body.dark-theme ::selection {
 
   display:
     none;
-
 }
 
 
 /* =========================================================
-   COLLAPSE BUTTON
+   SHOW / HIDE CONTENTS ICON
    ========================================================= */
 
 .contents-toggle {
@@ -655,7 +643,6 @@ body.dark-theme ::selection {
   transition:
     background-color var(--transition),
     color var(--transition);
-
 }
 
 
@@ -666,7 +653,6 @@ body.dark-theme ::selection {
 
   color:
     var(--accent);
-
 }
 
 
@@ -677,12 +663,14 @@ body.dark-theme ::selection {
 
   outline-offset:
     2px;
-
 }
 
 
 /*
- * Hamburger / collapse icon
+ * EXPANDED STATE
+ *
+ * Three lines indicate:
+ * "hide contents"
  */
 
 .contents-toggle span {
@@ -703,8 +691,8 @@ body.dark-theme ::selection {
     currentColor;
 
   transition:
-    transform 180ms ease;
-
+    transform 180ms ease,
+    opacity 120ms ease;
 }
 
 
@@ -712,7 +700,6 @@ body.dark-theme ::selection {
 
   transform:
     translateY(-4px);
-
 }
 
 
@@ -720,7 +707,6 @@ body.dark-theme ::selection {
 
   transform:
     translateY(0);
-
 }
 
 
@@ -728,38 +714,56 @@ body.dark-theme ::selection {
 
   transform:
     translateY(4px);
-
 }
 
 
 /*
- * When collapsed, make the icon unmistakably
- * an "open sidebar" control.
+ * COLLAPSED STATE
+ *
+ * Chevron pointing RIGHT:
+ * "show contents"
+ *
+ * This fixes the previous reversed icon.
  */
 
 .contents-toggle.collapsed span:nth-child(1) {
 
-  transform:
-    translateY(0)
-    rotate(45deg);
+  width:
+    10px;
 
+  transform:
+    translate(
+      2px,
+      -3px
+    )
+    rotate(45deg);
 }
 
 
 .contents-toggle.collapsed span:nth-child(2) {
 
+  width:
+    13px;
+
+  transform:
+    translateX(0);
+
   opacity:
     0;
-
 }
 
 
 .contents-toggle.collapsed span:nth-child(3) {
 
-  transform:
-    translateY(0)
-    rotate(-45deg);
+  width:
+    10px;
 
+  transform:
+    translate(
+      2px,
+      3px
+    )
+    rotate(-45deg);
 }
 
 
@@ -779,48 +783,48 @@ body.dark-theme ::selection {
     auto;
 
   padding:
-    3px 10px 16px;
-
-  opacity:
-    1;
-
-  transition:
-    opacity 140ms ease;
-
+    4px 9px 18px;
 }
 
+
+/*
+ * Every navigation item has its OWN curved border.
+ */
 
 .topic-button {
 
   width:
     100%;
 
+  min-height:
+    34px;
+
   display:
     flex;
 
   align-items:
-    flex-start;
+    center;
 
   gap:
     8px;
 
   margin:
-    2px 0;
+    5px 0;
 
   padding:
     7px 10px;
 
   border:
-    0;
+    1px solid #d5c9ed;
 
   border-radius:
-    7px;
+    9px;
 
   background:
-    transparent;
+    rgba(255, 255, 255, 0.46);
 
   color:
-    var(--text-soft);
+    #625a70;
 
   text-align:
     left;
@@ -838,27 +842,33 @@ body.dark-theme ::selection {
     400;
 
   line-height:
-    1.45;
+    1.4;
 
   transition:
     background-color var(--transition),
+    border-color var(--transition),
     color var(--transition),
-    transform var(--transition);
-
+    transform var(--transition),
+    box-shadow var(--transition);
 }
 
 
 .topic-button:hover {
 
   background:
-    var(--accent-soft);
+    #e8ddff;
+
+  border-color:
+    #bca9e9;
 
   color:
-    var(--heading);
+    #40374e;
 
   transform:
-    translateX(1px);
+    translateX(2px);
 
+  box-shadow:
+    0 3px 10px rgba(108, 79, 177, 0.08);
 }
 
 
@@ -866,17 +876,48 @@ body.dark-theme ::selection {
 
   background:
     linear-gradient(
-      90deg,
-      var(--accent-soft),
-      rgba(232, 226, 255, 0.45)
+      135deg,
+      #e8dcff,
+      #e5edff
     );
 
+  border-color:
+    #b8a4e6;
+
   color:
-    var(--heading);
+    #392f49;
 
   font-weight:
     600;
 
+  box-shadow:
+    0 4px 12px rgba(108, 79, 177, 0.10);
+}
+
+
+body.dark-theme .topic-button {
+
+  background:
+    rgba(255, 255, 255, 0.025);
+
+  border-color:
+    #4b4059;
+
+  color:
+    #aaa0b5;
+}
+
+
+body.dark-theme .topic-button:hover {
+
+  background:
+    #332a45;
+
+  border-color:
+    #65547b;
+
+  color:
+    #eee8f5;
 }
 
 
@@ -884,11 +925,16 @@ body.dark-theme .topic-button.active {
 
   background:
     linear-gradient(
-      90deg,
-      #34294e,
-      #29223b
+      135deg,
+      #382d50,
+      #293649
     );
 
+  border-color:
+    #665580;
+
+  color:
+    #f1ebf7;
 }
 
 
@@ -896,9 +942,6 @@ body.dark-theme .topic-button.active {
 
   flex:
     0 0 auto;
-
-  margin-top:
-    2px;
 
   color:
     var(--accent);
@@ -908,7 +951,6 @@ body.dark-theme .topic-button.active {
 
   opacity:
     0;
-
 }
 
 
@@ -917,7 +959,6 @@ body.dark-theme .topic-button.active {
 
   opacity:
     1;
-
 }
 
 
@@ -928,7 +969,6 @@ body.dark-theme .topic-button.active {
 
   overflow-wrap:
     anywhere;
-
 }
 
 
@@ -942,7 +982,6 @@ body.dark-theme .topic-button.active {
 
   font-size:
     12px;
-
 }
 
 
@@ -972,7 +1011,6 @@ body.dark-theme .topic-button.active {
 
   white-space:
     nowrap;
-
 }
 
 
@@ -986,7 +1024,6 @@ body.dark-theme .topic-button.active {
 
   color:
     var(--accent-pink);
-
 }
 
 
@@ -1007,24 +1044,18 @@ main {
 
   transition:
     margin-left 200ms ease;
-
 }
 
-
-/*
- * When sidebar is collapsed, main moves left.
- */
 
 .sidebar.contents-hidden ~ main {
 
   margin-left:
-    58px;
-
+    50px;
 }
 
 
 /* =========================================================
-   TOP NAVIGATION
+   FIXED TOP NAVIGATION
    ========================================================= */
 
 .page-navigation {
@@ -1060,13 +1091,13 @@ main {
     0 26px;
 
   background:
-    rgba(38, 31, 55, 0.96);
+    var(--nav-bg);
 
   border-bottom:
-    1px solid rgba(255, 255, 255, 0.12);
+    1px solid var(--nav-border);
 
   box-shadow:
-    0 4px 18px rgba(40, 25, 72, 0.18);
+    0 5px 20px rgba(37, 24, 63, 0.20);
 
   backdrop-filter:
     blur(14px);
@@ -1076,19 +1107,13 @@ main {
 
   transition:
     left 200ms ease;
-
 }
 
-
-/*
- * Navigation follows collapsed sidebar.
- */
 
 .sidebar.contents-hidden ~ main .page-navigation {
 
   left:
-    58px;
-
+    50px;
 }
 
 
@@ -1110,19 +1135,19 @@ main {
     9px;
 
   padding:
-    6px 10px;
+    7px 11px;
 
   border:
     1px solid transparent;
 
   border-radius:
-    7px;
+    8px;
 
   background:
     transparent;
 
   color:
-    #d9d1e9;
+    #ddd5e8;
 
   cursor:
     pointer;
@@ -1134,43 +1159,39 @@ main {
     background-color var(--transition),
     border-color var(--transition),
     color var(--transition);
-
 }
 
 
 .page-nav-button:hover:not(:disabled) {
 
   background:
-    rgba(255, 255, 255, 0.08);
+    rgba(196, 174, 255, 0.10);
 
   border-color:
-    rgba(255, 255, 255, 0.12);
+    rgba(196, 174, 255, 0.22);
 
   color:
     #ffffff;
-
 }
 
 
 .page-nav-button:disabled {
 
   opacity:
-    0.42;
+    0.38;
 
   cursor:
     default;
-
 }
 
 
 .page-nav-button:focus-visible {
 
   outline:
-    2px solid #a991ff;
+    2px solid var(--accent);
 
   outline-offset:
     2px;
-
 }
 
 
@@ -1181,7 +1202,6 @@ main {
 
   text-align:
     right;
-
 }
 
 
@@ -1191,14 +1211,13 @@ main {
     0 0 auto;
 
   color:
-    #a991ff;
+    #b8a1ff;
 
   font-size:
     17px;
 
   line-height:
     1;
-
 }
 
 
@@ -1227,7 +1246,6 @@ main {
 
   white-space:
     nowrap;
-
 }
 
 
@@ -1240,15 +1258,24 @@ main {
   width:
     100%;
 
-  padding:
-    calc(var(--nav-height) + 42px) 36px 70px;
+  min-height:
+    100vh;
 
+  padding:
+    calc(var(--nav-height) + 38px)
+    34px
+    70px;
 }
 
 
 /* =========================================================
-   CONTENT
+   CONTENT CARD / CURVED BORDER
    ========================================================= */
+
+/*
+ * The complete note is now enclosed inside an independent
+ * curved border.
+ */
 
 .content {
 
@@ -1258,14 +1285,67 @@ main {
   max-width:
     var(--content-width);
 
+  min-height:
+    calc(100vh - var(--nav-height) - 108px);
+
   margin:
     0 auto;
+
+  padding:
+    34px 38px 45px;
+
+  background:
+    var(--bg-card);
+
+  border:
+    1px solid var(--border);
+
+  border-radius:
+    16px;
+
+  box-shadow:
+    var(--shadow);
 
   color:
     var(--text);
 
+  overflow-wrap:
+    break-word;
 }
 
+
+.content.note-loaded {
+
+  animation:
+    note-enter 180ms ease-out;
+}
+
+
+@keyframes note-enter {
+
+  from {
+
+    opacity:
+      0;
+
+    transform:
+      translateY(4px);
+  }
+
+  to {
+
+    opacity:
+      1;
+
+    transform:
+      translateY(0);
+  }
+}
+
+
+/* =========================================================
+   CONTENT HEADINGS
+   ========================================================= */
 
 .content h1,
 .content h2,
@@ -1291,7 +1371,6 @@ main {
 
   letter-spacing:
     -0.025em;
-
 }
 
 
@@ -1308,7 +1387,6 @@ main {
 
   letter-spacing:
     -0.04em;
-
 }
 
 
@@ -1328,7 +1406,6 @@ main {
 
   font-size:
     23px;
-
 }
 
 
@@ -1342,7 +1419,6 @@ main {
 
   font-size:
     19px;
-
 }
 
 
@@ -1356,7 +1432,6 @@ main {
 
   font-size:
     16px;
-
 }
 
 
@@ -1370,7 +1445,6 @@ main {
 
   font-size:
     15px;
-
 }
 
 
@@ -1387,7 +1461,6 @@ main {
 
   font-size:
     14px;
-
 }
 
 
@@ -1408,7 +1481,6 @@ main {
 
   line-height:
     1.82;
-
 }
 
 
@@ -1419,7 +1491,6 @@ main {
 
   font-weight:
     600;
-
 }
 
 
@@ -1427,7 +1498,6 @@ main {
 
   color:
     var(--text);
-
 }
 
 
@@ -1451,7 +1521,6 @@ main {
 
   transition:
     color var(--transition);
-
 }
 
 
@@ -1459,7 +1528,6 @@ main {
 
   color:
     var(--link-hover);
-
 }
 
 
@@ -1475,7 +1543,6 @@ main {
 
   padding-left:
     26px;
-
 }
 
 
@@ -1495,7 +1562,6 @@ main {
 
   line-height:
     1.75;
-
 }
 
 
@@ -1507,7 +1573,6 @@ main {
 
   margin-bottom:
     6px;
-
 }
 
 
@@ -1515,7 +1580,6 @@ main {
 
   color:
     var(--accent);
-
 }
 
 
@@ -1526,23 +1590,12 @@ main {
 
   font-weight:
     600;
-
 }
 
 
 /* =========================================================
    GEN-Z BLOCKQUOTE
    ========================================================= */
-
-/*
- * Markdown:
- *
- * > Confusion Matrix
- * >
- * > A confusion matrix is...
- *
- * becomes a colorful information block.
- */
 
 .content blockquote {
 
@@ -1553,31 +1606,30 @@ main {
     28px 0;
 
   padding:
-    17px 20px 17px 22px;
+    18px 21px 18px 23px;
 
   border:
-    1px solid #d8cdfd;
+    1px solid #d5c8f4;
 
   border-left:
     4px solid var(--accent);
 
   border-radius:
-    10px;
+    11px;
 
   background:
     linear-gradient(
       135deg,
-      #eee9ff 0%,
-      #f7eaff 52%,
-      #e8f4ff 100%
+      #eee8ff 0%,
+      #f8e9ff 50%,
+      #e8f5ff 100%
     );
 
   color:
-    #40394c;
+    #41394d;
 
   box-shadow:
     0 7px 22px rgba(103, 77, 178, 0.08);
-
 }
 
 
@@ -1590,7 +1642,7 @@ main {
     absolute;
 
   top:
-    12px;
+    11px;
 
   right:
     15px;
@@ -1600,7 +1652,6 @@ main {
 
   font-size:
     14px;
-
 }
 
 
@@ -1610,14 +1661,13 @@ main {
     0 0 8px;
 
   color:
-    #494252;
+    #4a4254;
 
   font-size:
     14px;
 
   line-height:
     1.72;
-
 }
 
 
@@ -1625,14 +1675,8 @@ main {
 
   margin-bottom:
     0;
-
 }
 
-
-/*
- * The first line of a blockquote becomes
- * visually stronger when it is a paragraph.
- */
 
 .content blockquote p:first-child {
 
@@ -1641,21 +1685,20 @@ main {
 
   font-weight:
     600;
-
 }
 
 
 body.dark-theme .content blockquote {
 
   border-color:
-    #4e416b;
+    #51436b;
 
   background:
     linear-gradient(
       135deg,
-      #2e2744 0%,
-      #30263b 52%,
-      #202f40 100%
+      #302746 0%,
+      #30263d 50%,
+      #203143 100%
     );
 
   color:
@@ -1663,28 +1706,25 @@ body.dark-theme .content blockquote {
 
   box-shadow:
     0 8px 25px rgba(0, 0, 0, 0.20);
-
 }
 
 
 body.dark-theme .content blockquote p {
 
   color:
-    #c8c0d3;
-
+    #c9c1d4;
 }
 
 
 body.dark-theme .content blockquote p:first-child {
 
   color:
-    #eee7f4;
-
+    #f0e9f5;
 }
 
 
 /* =========================================================
-   CODE
+   INLINE CODE
    ========================================================= */
 
 .content code {
@@ -1709,17 +1749,30 @@ body.dark-theme .content blockquote p:first-child {
 
   line-height:
     1.4;
-
 }
 
 
-body:not(.dark-theme) .content code {
+/*
+ * Explicitly force inline code to black.
+ */
+
+.content code {
 
   color:
-    #51408a;
-
+    #18151d !important;
 }
 
+
+/* =========================================================
+   CODE BLOCKS
+   ========================================================= */
+
+/*
+ * User requested text/code to be black.
+ *
+ * Code blocks therefore use a very light Gen-Z neutral
+ * background and BLACK text instead of purple text.
+ */
 
 .content pre {
 
@@ -1730,23 +1783,23 @@ body:not(.dark-theme) .content code {
     27px 0;
 
   padding:
-    19px 20px;
+    20px 21px;
 
   overflow-x:
     auto;
 
   border:
-    1px solid #292431;
+    1px solid #d8d0df;
 
   border-radius:
     10px;
 
   background:
-    var(--bg-code);
+    #f4f1f7;
 
   box-shadow:
-    var(--shadow-small);
-
+    inset 0 1px 0 rgba(255, 255, 255, 0.75),
+    0 4px 14px rgba(70, 54, 90, 0.06);
 }
 
 
@@ -1762,7 +1815,10 @@ body:not(.dark-theme) .content code {
     transparent;
 
   color:
-    var(--code-text);
+    #18151d !important;
+
+  font-family:
+    var(--font-mono);
 
   font-size:
     12.5px;
@@ -1772,9 +1828,29 @@ body:not(.dark-theme) .content code {
 
   white-space:
     pre;
-
 }
 
+
+body.dark-theme .content pre {
+
+  background:
+    #f0edf4;
+
+  border-color:
+    #cfc7d7;
+}
+
+
+body.dark-theme .content pre code {
+
+  color:
+    #18151d !important;
+}
+
+
+/* =========================================================
+   COPY BUTTON
+   ========================================================= */
 
 .copy-button {
 
@@ -1791,16 +1867,16 @@ body:not(.dark-theme) .content code {
     4px 8px;
 
   border:
-    1px solid rgba(255, 255, 255, 0.12);
+    1px solid #cfc6d8;
 
   border-radius:
     5px;
 
   background:
-    rgba(255, 255, 255, 0.06);
+    rgba(255, 255, 255, 0.72);
 
   color:
-    #aaa1b5;
+    #5c5365;
 
   cursor:
     pointer;
@@ -1815,7 +1891,6 @@ body:not(.dark-theme) .content code {
     opacity var(--transition),
     background-color var(--transition),
     color var(--transition);
-
 }
 
 
@@ -1824,26 +1899,23 @@ body:not(.dark-theme) .content code {
 
   opacity:
     1;
-
 }
 
 
 .copy-button:hover {
 
   background:
-    rgba(255, 255, 255, 0.12);
-
-  color:
     #ffffff;
 
+  color:
+    #2e2636;
 }
 
 
 .copy-button.copied {
 
   color:
-    #9effc4;
-
+    #227449;
 }
 
 
@@ -1876,7 +1948,6 @@ body:not(.dark-theme) .content code {
 
   font-size:
     13px;
-
 }
 
 
@@ -1900,7 +1971,6 @@ body:not(.dark-theme) .content code {
 
   line-height:
     1.55;
-
 }
 
 
@@ -1909,7 +1979,6 @@ body:not(.dark-theme) .content code {
 
   border-right:
     0;
-
 }
 
 
@@ -1917,7 +1986,6 @@ body:not(.dark-theme) .content code {
 
   border-bottom:
     0;
-
 }
 
 
@@ -1931,7 +1999,6 @@ body:not(.dark-theme) .content code {
 
   font-weight:
     600;
-
 }
 
 
@@ -1949,7 +2016,6 @@ body:not(.dark-theme) .content code {
 
   border-top:
     1px solid var(--border);
-
 }
 
 
@@ -1973,7 +2039,6 @@ body:not(.dark-theme) .content code {
 
   border-radius:
     9px;
-
 }
 
 
@@ -1981,7 +2046,6 @@ body:not(.dark-theme) .content code {
 
   margin:
     30px 0;
-
 }
 
 
@@ -1998,7 +2062,6 @@ body:not(.dark-theme) .content code {
 
   font-size:
     12px;
-
 }
 
 
@@ -2019,7 +2082,6 @@ body:not(.dark-theme) .content code {
 
   color:
     #342e1a;
-
 }
 
 
@@ -2030,12 +2092,11 @@ body.dark-theme .content mark {
 
   color:
     #fff4bc;
-
 }
 
 
 /* =========================================================
-   CHECKBOXES
+   CHECKBOX
    ========================================================= */
 
 .content input[type="checkbox"] {
@@ -2045,7 +2106,6 @@ body.dark-theme .content mark {
 
   accent-color:
     var(--accent);
-
 }
 
 
@@ -2057,7 +2117,6 @@ body.dark-theme .content mark {
 
   margin-top:
     0;
-
 }
 
 
@@ -2069,7 +2128,6 @@ body.dark-theme .content mark {
 
   padding-top:
     8px;
-
 }
 
 
@@ -2100,7 +2158,6 @@ body.dark-theme .content mark {
 
   animation:
     loading-shimmer 1.4s infinite;
-
 }
 
 
@@ -2108,7 +2165,6 @@ body.dark-theme .content mark {
 
   width:
     62%;
-
 }
 
 
@@ -2118,16 +2174,13 @@ body.dark-theme .content mark {
 
     background-position:
       200% 0;
-
   }
 
   100% {
 
     background-position:
       -200% 0;
-
   }
-
 }
 
 
@@ -2140,7 +2193,6 @@ body.dark-theme .content mark {
 
   padding:
     50px 0;
-
 }
 
 
@@ -2152,7 +2204,6 @@ body.dark-theme .content mark {
 
   font-size:
     28px;
-
 }
 
 
@@ -2161,44 +2212,6 @@ body.dark-theme .content mark {
 
   color:
     var(--text-soft);
-
-}
-
-
-/* =========================================================
-   NOTE ENTRY
-   ========================================================= */
-
-.content.note-loaded {
-
-  animation:
-    note-enter 180ms ease-out;
-
-}
-
-
-@keyframes note-enter {
-
-  from {
-
-    opacity:
-      0;
-
-    transform:
-      translateY(4px);
-
-  }
-
-  to {
-
-    opacity:
-      1;
-
-    transform:
-      translateY(0);
-
-  }
-
 }
 
 
@@ -2239,13 +2252,13 @@ body.dark-theme .content mark {
     0;
 
   border:
-    1px solid rgba(255, 255, 255, 0.30);
+    1px solid rgba(255, 255, 255, 0.34);
 
   border-radius:
     50%;
 
   background:
-    #282137;
+    #2d253c;
 
   color:
     #ffffff;
@@ -2260,7 +2273,6 @@ body.dark-theme .content mark {
     transform 160ms ease,
     background-color 160ms ease,
     box-shadow 160ms ease;
-
 }
 
 
@@ -2270,11 +2282,10 @@ body.dark-theme .content mark {
     translateY(-2px);
 
   background:
-    #392d52;
+    #3d3152;
 
   box-shadow:
     0 11px 28px rgba(44, 28, 77, 0.34);
-
 }
 
 
@@ -2282,7 +2293,6 @@ body.dark-theme .content mark {
 
   transform:
     scale(0.94);
-
 }
 
 
@@ -2293,7 +2303,6 @@ body.dark-theme .content mark {
 
   outline-offset:
     3px;
-
 }
 
 
@@ -2314,7 +2323,6 @@ body.dark-theme .content mark {
 
   line-height:
     1;
-
 }
 
 
@@ -2328,7 +2336,6 @@ body.dark-theme .theme-button {
 
   color:
     #332711;
-
 }
 
 
@@ -2336,7 +2343,6 @@ body.dark-theme .theme-button:hover {
 
   background:
     #ffd875;
-
 }
 
 
@@ -2370,7 +2376,6 @@ body.dark-theme .theme-button:hover {
   transition:
     opacity 200ms ease,
     visibility 200ms ease;
-
 }
 
 
@@ -2384,7 +2389,6 @@ body.dark-theme .theme-button:hover {
 
   pointer-events:
     auto;
-
 }
 
 
@@ -2400,19 +2404,24 @@ body.dark-theme .theme-button:hover {
       250px;
 
     --content-width:
-      720px;
-
+      760px;
   }
 
 
   .content-wrapper {
 
     padding-left:
-      30px;
+      26px;
 
     padding-right:
-      30px;
+      26px;
+  }
 
+
+  .content {
+
+    padding:
+      30px 32px 40px;
   }
 
 
@@ -2423,9 +2432,7 @@ body.dark-theme .theme-button:hover {
 
     padding-right:
       20px;
-
   }
-
 }
 
 
@@ -2442,7 +2449,6 @@ body.dark-theme .theme-button:hover {
 
     --nav-height:
       52px;
-
   }
 
 
@@ -2450,7 +2456,6 @@ body.dark-theme .theme-button:hover {
 
     font-size:
       15px;
-
   }
 
 
@@ -2485,7 +2490,6 @@ body.dark-theme .theme-button:hover {
 
     pointer-events:
       none;
-
   }
 
 
@@ -2493,7 +2497,6 @@ body.dark-theme .theme-button:hover {
 
     pointer-events:
       auto;
-
   }
 
 
@@ -2521,7 +2524,7 @@ body.dark-theme .theme-button:hover {
       8px;
 
     background:
-      rgba(38, 31, 55, 0.95);
+      rgba(45, 37, 60, 0.97);
 
     color:
       #ffffff;
@@ -2534,7 +2537,6 @@ body.dark-theme .theme-button:hover {
 
     box-shadow:
       0 4px 14px rgba(30, 20, 50, 0.20);
-
   }
 
 
@@ -2552,7 +2554,6 @@ body.dark-theme .theme-button:hover {
     box-shadow:
       12px 0 35px
       rgba(40, 25, 72, 0.20);
-
   }
 
 
@@ -2560,9 +2561,13 @@ body.dark-theme .theme-button:hover {
 
     transform:
       translateX(0);
-
   }
 
+
+  /*
+   * On mobile the collapsed sidebar should still be
+   * usable: clicking the icon can reopen its contents.
+   */
 
   .sidebar.contents-hidden {
 
@@ -2574,7 +2579,6 @@ body.dark-theme .theme-button:hover {
 
     transform:
       translateX(-100%);
-
   }
 
 
@@ -2582,19 +2586,56 @@ body.dark-theme .theme-button:hover {
 
     transform:
       translateX(0);
+  }
 
+
+  .sidebar.contents-hidden .sidebar-header {
+
+    width:
+      100%;
+
+    padding:
+      14px;
+  }
+
+
+  .sidebar.contents-hidden .contents-search-box {
+
+    width:
+      100%;
+
+    height:
+      38px;
+
+    justify-content:
+      flex-end;
+
+    padding:
+      0 7px;
+
+    background:
+      var(--bg-card);
+
+    border:
+      1px solid var(--border);
+
+    box-shadow:
+      var(--shadow-small);
+  }
+
+
+  .sidebar.contents-hidden .search-input {
+
+    display:
+      none;
   }
 
 
   .sidebar.contents-hidden .topic-navigation,
   .sidebar.contents-hidden .sidebar-footer {
 
-    visibility:
-      visible;
-
-    opacity:
-      1;
-
+    display:
+      none;
   }
 
 
@@ -2603,7 +2644,6 @@ body.dark-theme .theme-button:hover {
 
     margin-left:
       0;
-
   }
 
 
@@ -2615,25 +2655,28 @@ body.dark-theme .theme-button:hover {
 
     padding:
       0 13px 0 57px;
-
   }
 
 
   .content-wrapper {
 
     padding:
-      calc(var(--nav-height) + 34px)
-      20px
+      calc(var(--nav-height) + 25px)
+      14px
       55px;
-
   }
 
 
   .content {
 
-    max-width:
-      none;
+    min-height:
+      calc(100vh - var(--nav-height) - 80px);
 
+    padding:
+      27px 22px 38px;
+
+    border-radius:
+      13px;
   }
 
 
@@ -2641,7 +2684,6 @@ body.dark-theme .theme-button:hover {
 
     font-size:
       29px;
-
   }
 
 
@@ -2652,7 +2694,6 @@ body.dark-theme .theme-button:hover {
 
     font-size:
       21px;
-
   }
 
 
@@ -2663,7 +2704,6 @@ body.dark-theme .theme-button:hover {
 
     font-size:
       18px;
-
   }
 
 
@@ -2672,7 +2712,6 @@ body.dark-theme .theme-button:hover {
 
     font-size:
       14.5px;
-
   }
 
 
@@ -2680,7 +2719,6 @@ body.dark-theme .theme-button:hover {
 
     padding:
       15px 17px 15px 19px;
-
   }
 
 
@@ -2694,7 +2732,6 @@ body.dark-theme .theme-button:hover {
 
     padding:
       15px;
-
   }
 
 
@@ -2702,7 +2739,6 @@ body.dark-theme .theme-button:hover {
 
     font-size:
       11.5px;
-
   }
 
 
@@ -2719,7 +2755,6 @@ body.dark-theme .theme-button:hover {
 
     height:
       44px;
-
   }
 
 
@@ -2727,9 +2762,7 @@ body.dark-theme .theme-button:hover {
 
     max-width:
       145px;
-
   }
-
 }
 
 
@@ -2742,11 +2775,20 @@ body.dark-theme .theme-button:hover {
   .content-wrapper {
 
     padding-left:
-      16px;
+      10px;
 
     padding-right:
-      16px;
+      10px;
+  }
 
+
+  .content {
+
+    padding:
+      24px 18px 34px;
+
+    border-radius:
+      12px;
   }
 
 
@@ -2754,7 +2796,6 @@ body.dark-theme .theme-button:hover {
 
     font-size:
       26px;
-
   }
 
 
@@ -2762,7 +2803,6 @@ body.dark-theme .theme-button:hover {
 
     font-size:
       20px;
-
   }
 
 
@@ -2773,7 +2813,6 @@ body.dark-theme .theme-button:hover {
 
     font-size:
       10px;
-
   }
 
 
@@ -2784,7 +2823,6 @@ body.dark-theme .theme-button:hover {
 
     gap:
       6px;
-
   }
 
 
@@ -2792,7 +2830,6 @@ body.dark-theme .theme-button:hover {
 
     font-size:
       15px;
-
   }
 
 
@@ -2803,9 +2840,7 @@ body.dark-theme .theme-button:hover {
 
     bottom:
       14px;
-
   }
-
 }
 
 
@@ -2819,7 +2854,6 @@ body.dark-theme .theme-button:hover {
 
     scroll-behavior:
       auto;
-
   }
 
 
@@ -2835,7 +2869,5 @@ body.dark-theme .theme-button:hover {
 
     transition-duration:
       0.01ms !important;
-
   }
-
 }
