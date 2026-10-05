@@ -2083,15 +2083,21 @@ function escapeHTML(value) {
   return div.innerHTML;
 
 }
-/* check box logic */
+/* JAGS - checkbox logic */
 /* =========================================================
-   DAILY REVISION CHECKLIST
+   DAILY REVISION TRACKER
+   GitHub-style monthly calendar
    ========================================================= */
 
 const DAILY_REVISION_FILE = "1CheatSheet.md";
 const DAILY_REVISION_TIMEZONE = "Asia/Kolkata";
 const DAILY_REVISION_STORAGE_PREFIX = "xi-notes-daily:";
 
+
+/*
+ * Today's date in IST.
+ * Returns YYYY-MM-DD.
+ */
 function getDailyRevisionDate() {
   return new Intl.DateTimeFormat("en-CA", {
     timeZone: DAILY_REVISION_TIMEZONE,
@@ -2101,68 +2107,160 @@ function getDailyRevisionDate() {
   }).format(new Date());
 }
 
+
+/*
+ * Convert YYYY-MM-DD into a Date-like
+ * calendar representation without timezone bugs.
+ */
+function parseDailyRevisionDate(dateString) {
+
+  const [year, month, day] =
+    dateString.split("-").map(Number);
+
+  return {
+    year,
+    month,
+    day
+  };
+}
+
+
+/*
+ * Create a stable key for each heading.
+ */
 function getDailyRevisionStorageKey(heading) {
+
   return (
     DAILY_REVISION_STORAGE_PREFIX +
     heading.id
   );
+
 }
 
-function getDailyRevisionState(heading) {
-  const key = getDailyRevisionStorageKey(heading);
+
+/*
+ * Save today's state for a heading.
+ *
+ * IMPORTANT:
+ * We keep historical dates.
+ * This is what allows the monthly calendar
+ * to remember previous completed days.
+ */
+function setDailyRevisionState(
+  heading,
+  checked
+) {
+
+  const key =
+    getDailyRevisionStorageKey(
+      heading
+    );
 
   try {
-    const saved = localStorage.getItem(key);
+
+    const saved =
+      localStorage.getItem(key);
+
+    let history = {};
+
+    if (saved) {
+
+      const data =
+        JSON.parse(saved);
+
+      if (
+        data &&
+        data.history
+      ) {
+        history =
+          data.history;
+      }
+    }
+
+
+    history[
+      getDailyRevisionDate()
+    ] = checked;
+
+
+    localStorage.setItem(
+      key,
+      JSON.stringify({
+        history
+      })
+    );
+
+  } catch (error) {
+
+    console.warn(
+      "Could not save daily revision state:",
+      error
+    );
+
+  }
+
+}
+
+
+/*
+ * Check whether a heading was completed
+ * on a particular date.
+ */
+function wasDailyRevisionCompleted(
+  heading,
+  date
+) {
+
+  const key =
+    getDailyRevisionStorageKey(
+      heading
+    );
+
+  try {
+
+    const saved =
+      localStorage.getItem(key);
 
     if (!saved) {
       return false;
     }
 
-    const data = JSON.parse(saved);
+    const data =
+      JSON.parse(saved);
 
-    if (
-      !data ||
-      data.date !== getDailyRevisionDate()
-    ) {
-      localStorage.removeItem(key);
-      return false;
-    }
-
-    return data.checked === true;
+    return (
+      data &&
+      data.history &&
+      data.history[date] === true
+    );
 
   } catch (error) {
-    console.warn(
-      "Could not read daily revision state:",
-      error
-    );
 
     return false;
+
   }
-}
 
-function setDailyRevisionState(heading, checked) {
-  const key = getDailyRevisionStorageKey(heading);
-
-  try {
-    localStorage.setItem(
-      key,
-      JSON.stringify({
-        date: getDailyRevisionDate(),
-        checked: checked
-      })
-    );
-
-  } catch (error) {
-    console.warn(
-      "Could not save daily revision state:",
-      error
-    );
-  }
 }
 
 
 /*
- * Get all checklist headings.
+ * Get today's state.
+ */
+function getDailyRevisionState(
+  heading
+) {
+
+  return wasDailyRevisionCompleted(
+    heading,
+    getDailyRevisionDate()
+  );
+
+}
+
+
+/*
+ * Get all headings belonging to the
+ * daily revision checklist.
  */
 function getDailyRevisionHeadings() {
 
@@ -2177,12 +2275,14 @@ function getDailyRevisionHeadings() {
   ).filter(
     heading => heading.id
   );
+
 }
 
 
 /*
- * Apply/remove strike-through from the
- * heading and everything belonging to it.
+ * Apply/remove strike-through from a
+ * heading and all content underneath it
+ * until the next same/higher-level heading.
  */
 function updateDailyRevisionSection(
   heading,
@@ -2194,18 +2294,19 @@ function updateDailyRevisionSection(
       heading.tagName.substring(1)
     );
 
+
+  heading.classList.toggle(
+    "daily-revision-completed",
+    checked
+  );
+
+
   let current =
     heading.nextElementSibling;
-
-  const elements = [];
 
 
   while (current) {
 
-    /*
-     * Stop when we reach another heading
-     * of the same or higher level.
-     */
     if (
       /^H[1-6]$/.test(
         current.tagName
@@ -2217,117 +2318,31 @@ function updateDailyRevisionSection(
           current.tagName.substring(1)
         );
 
+
       if (
-        currentLevel <= headingLevel
+        currentLevel <=
+        headingLevel
       ) {
         break;
       }
+
     }
 
 
-    elements.push(current);
+    current.classList.toggle(
+      "daily-revision-completed-content",
+      checked
+    );
+
 
     current =
       current.nextElementSibling;
+
   }
-
-
-  /*
-   * Include the heading itself.
-   */
-  heading.classList.toggle(
-    "daily-revision-completed",
-    checked
-  );
-
-
-  /*
-   * Strike the complete section.
-   */
-  elements.forEach(
-    element => {
-
-      element.classList.toggle(
-        "daily-revision-completed-content",
-        checked
-      );
-
-    }
-  );
-}
-
-
-/*
- * Update the calendar/date indicator.
- */
-function updateDailyRevisionCalendar() {
-
-  const calendar =
-    document.querySelector(
-      ".daily-revision-calendar"
-    );
-
-  if (!calendar) {
-    return;
-  }
-
-
-  const headings =
-    getDailyRevisionHeadings();
-
-
-  const completed =
-    headings.filter(
-      heading =>
-        getDailyRevisionState(
-          heading
-        )
-    ).length;
-
-
-  const total =
-    headings.length;
-
-
-  const allCompleted =
-    total > 0 &&
-    completed === total;
-
-
-  const date =
-    getDailyRevisionDate();
-
-
-  /*
-   * Convert YYYY-MM-DD into a compact
-   * readable date.
-   */
-  const parts =
-    date.split("-");
-
-
-  const displayDate =
-    `${parts[2]}/${parts[1]}`;
-
-
-  calendar.textContent =
-    `▣ ${displayDate}`;
-
-
-  calendar.classList.toggle(
-    "daily-revision-day-complete",
-    allCompleted
-  );
-
-
-  calendar.title =
-    allCompleted
-      ? `All topics completed for ${date}`
-      : `${completed}/${total} topics completed today`;
 
 }
 /* =========================================================
-   CREATE DAILY CHECKBOXES
+   CREATE DAILY REVISION CHECKBOXES
    ========================================================= */
 
 function addDailyRevisionCheckboxes(topic) {
@@ -2349,7 +2364,7 @@ function addDailyRevisionCheckboxes(topic) {
     heading => {
 
       /*
-       * Prevent duplicates.
+       * Prevent duplicate checkboxes.
        */
       if (
         heading.querySelector(
@@ -2369,9 +2384,6 @@ function addDailyRevisionCheckboxes(topic) {
       }
 
 
-      /*
-       * Checkbox.
-       */
       const checkbox =
         document.createElement(
           "input"
@@ -2380,6 +2392,7 @@ function addDailyRevisionCheckboxes(topic) {
 
       checkbox.type =
         "checkbox";
+
 
       checkbox.className =
         "daily-revision-checkbox";
@@ -2405,12 +2418,7 @@ function addDailyRevisionCheckboxes(topic) {
 
 
       /*
-       * Insert checkbox BEFORE
-       * the heading text.
-       *
-       * Example:
-       *
-       * ☐ OVERFITTING
+       * Put checkbox BEFORE heading text.
        */
       heading.insertBefore(
         checkbox,
@@ -2419,7 +2427,7 @@ function addDailyRevisionCheckboxes(topic) {
 
 
       /*
-       * Apply initial strike-through.
+       * Apply today's completed state.
        */
       updateDailyRevisionSection(
         heading,
@@ -2428,22 +2436,19 @@ function addDailyRevisionCheckboxes(topic) {
 
 
       /*
-       * Handle clicking.
+       * Prevent heading click behaviour.
        */
       checkbox.addEventListener(
         "click",
         event => {
-
-          /*
-           * Don't let the checkbox click
-           * trigger any heading behavior.
-           */
           event.stopPropagation();
-
         }
       );
 
 
+      /*
+       * Save state.
+       */
       checkbox.addEventListener(
         "change",
         () => {
@@ -2474,33 +2479,35 @@ function addDailyRevisionCheckboxes(topic) {
 
 
   /*
-   * Add the small calendar indicator.
+   * Create the monthly tracker.
    */
   addDailyRevisionCalendar();
 
 
-  /*
-   * Calculate initial state.
-   */
   updateDailyRevisionCalendar();
 
 }
 
 
-/*
- * Create the calendar indicator.
- */
+/* =========================================================
+   MONTHLY CALENDAR
+   ========================================================= */
+
 function addDailyRevisionCalendar() {
 
-  /*
-   * Don't create it twice.
-   */
-  if (
-    document.querySelector(
-      ".daily-revision-calendar"
-    )
-  ) {
+  if (!content) {
     return;
+  }
+
+
+  const existing =
+    content.querySelector(
+      ".daily-revision-calendar"
+    );
+
+
+  if (existing) {
+    existing.remove();
   }
 
 
@@ -2514,34 +2521,355 @@ function addDailyRevisionCalendar() {
     "daily-revision-calendar";
 
 
-  calendar.setAttribute(
-    "aria-label",
-    "Daily revision status"
+  content.style.position =
+    "relative";
+
+
+  content.appendChild(
+    calendar
+  );
+
+}
+
+
+/*
+ * Return all days of the current IST month.
+ */
+function getCurrentMonthDays() {
+
+  const today =
+    parseDailyRevisionDate(
+      getDailyRevisionDate()
+    );
+
+
+  const firstDay =
+    new Date(
+      today.year,
+      today.month - 1,
+      1
+    );
+
+
+  const lastDay =
+    new Date(
+      today.year,
+      today.month,
+      0
+    );
+
+
+  return {
+    year: today.year,
+    month: today.month,
+    days: lastDay.getDate(),
+    firstWeekday: firstDay.getDay()
+  };
+
+}
+
+
+/*
+ * Check whether ALL revision headings
+ * were completed on a particular date.
+ */
+function isRevisionDayComplete(
+  date
+) {
+
+  const headings =
+    getDailyRevisionHeadings();
+
+
+  if (
+    headings.length === 0
+  ) {
+    return false;
+  }
+
+
+  return headings.every(
+    heading =>
+      wasDailyRevisionCompleted(
+        heading,
+        date
+      )
+  );
+
+}
+
+
+/*
+ * Build the GitHub-style monthly calendar.
+ */
+function updateDailyRevisionCalendar() {
+
+  const calendar =
+    document.querySelector(
+      ".daily-revision-calendar"
+    );
+
+
+  if (!calendar) {
+    return;
+  }
+
+
+  calendar.innerHTML = "";
+
+
+  const {
+    year,
+    month,
+    days,
+    firstWeekday
+  } =
+    getCurrentMonthDays();
+
+
+  /*
+   * Calendar header.
+   */
+  const header =
+    document.createElement(
+      "div"
+    );
+
+
+  header.className =
+    "daily-revision-calendar-header";
+
+
+  const monthName =
+    new Intl.DateTimeFormat(
+      "en-IN",
+      {
+        timeZone:
+          DAILY_REVISION_TIMEZONE,
+
+        month: "long",
+
+        year: "numeric"
+      }
+    ).format(
+      new Date(
+        year,
+        month - 1,
+        1
+      )
+    );
+
+
+  header.textContent =
+    monthName;
+
+
+  calendar.appendChild(
+    header
   );
 
 
   /*
-   * Put it at the top-right of the
-   * rendered note.
+   * Weekday labels.
    */
-  if (content) {
+  const weekdays =
+    document.createElement(
+      "div"
+    );
 
-    content.prepend(
-      calendar
+
+  weekdays.className =
+    "daily-revision-weekdays";
+
+
+  [
+    "S",
+    "M",
+    "T",
+    "W",
+    "T",
+    "F",
+    "S"
+  ].forEach(
+    day => {
+
+      const label =
+        document.createElement(
+          "span"
+        );
+
+      label.textContent =
+        day;
+
+      weekdays.appendChild(
+        label
+      );
+
+    }
+  );
+
+
+  calendar.appendChild(
+    weekdays
+  );
+
+
+  /*
+   * Day grid.
+   */
+  const grid =
+    document.createElement(
+      "div"
+    );
+
+
+  grid.className =
+    "daily-revision-calendar-grid";
+
+
+  /*
+   * Empty cells before the first day.
+   */
+  for (
+    let i = 0;
+    i < firstWeekday;
+    i++
+  ) {
+
+    const empty =
+      document.createElement(
+        "span"
+      );
+
+    empty.className =
+      "daily-revision-day empty";
+
+    grid.appendChild(
+      empty
     );
 
   }
 
+
+  const today =
+    getDailyRevisionDate();
+
+
+  /*
+   * Create each day.
+   */
+  for (
+    let day = 1;
+    day <= days;
+    day++
+  ) {
+
+    const date =
+      `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+
+
+    const cell =
+      document.createElement(
+        "span"
+      );
+
+
+    cell.className =
+      "daily-revision-day";
+
+
+    cell.textContent =
+      day;
+
+
+    const completed =
+      isRevisionDayComplete(
+        date
+      );
+
+
+    if (completed) {
+
+      cell.classList.add(
+        "completed"
+      );
+
+    }
+
+
+    if (date === today) {
+
+      cell.classList.add(
+        "today"
+      );
+
+    }
+
+
+    /*
+     * Don't mark future days.
+     */
+    const todayParts =
+      parseDailyRevisionDate(
+        today
+      );
+
+
+    const dateParts =
+      parseDailyRevisionDate(
+        date
+      );
+
+
+    const dateValue =
+      new Date(
+        dateParts.year,
+        dateParts.month - 1,
+        dateParts.day
+      );
+
+
+    const todayValue =
+      new Date(
+        todayParts.year,
+        todayParts.month - 1,
+        todayParts.day
+      );
+
+
+    if (
+      dateValue > todayValue
+    ) {
+
+      cell.classList.add(
+        "future"
+      );
+
+    }
+
+
+    cell.title =
+      completed
+        ? `${date} — Completed`
+        : `${date} — Not completed`;
+
+
+    grid.appendChild(
+      cell
+    );
+
+  }
+
+
+  calendar.appendChild(
+    grid
+  );
+
 }
 /* =========================================================
-   MIDNIGHT RESET + CONNECT TO EXISTING LOADER
+   IST MIDNIGHT RESET
    ========================================================= */
 
-
-/*
- * Reload the current note after the
- * IST calendar date changes.
- */
 function resetDailyRevisionAtMidnight() {
 
   if (
@@ -2582,9 +2910,6 @@ function resetDailyRevisionAtMidnight() {
 }
 
 
-/*
- * Watch for IST midnight.
- */
 function setupDailyRevisionMidnightWatcher() {
 
   let lastDate =
@@ -2606,6 +2931,9 @@ function setupDailyRevisionMidnightWatcher() {
       }
 
 
+      /*
+       * New IST calendar day.
+       */
       lastDate =
         currentDate;
 
@@ -2620,7 +2948,7 @@ function setupDailyRevisionMidnightWatcher() {
 
 
 /*
- * Start the midnight watcher once.
+ * Start the midnight watcher.
  */
 document.addEventListener(
   "DOMContentLoaded",
@@ -2633,28 +2961,22 @@ document.addEventListener(
 
 
 /* =========================================================
-   WRAP EXISTING MARKDOWN LOADER
+   CONNECT TO EXISTING loadMarkdown()
    ========================================================= */
 
-
-/*
- * Keep the original loadMarkdown()
- * completely intact.
- */
 const xiNotesOriginalLoadMarkdown =
   loadMarkdown;
 
 
-/*
- * Run the existing application first,
- * then add our checklist.
- */
 loadMarkdown =
   async function (
     topic,
     scrollToTop = true
   ) {
 
+    /*
+     * Run ALL existing application logic first.
+     */
     await xiNotesOriginalLoadMarkdown(
       topic,
       scrollToTop
@@ -2663,7 +2985,7 @@ loadMarkdown =
 
     /*
      * Only 1CheatSheet.md gets
-     * the daily checklist.
+     * the revision tracker.
      */
     if (
       !topic ||
