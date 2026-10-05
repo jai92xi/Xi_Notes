@@ -2037,91 +2037,131 @@ body.dark-theme .theme-button:hover {
 
 /* JAGS CHECKBOX LOGIC */
 /* =========================================================
-   DAILY REVISION CHECKLIST + MONTHLY CALENDAR
+   DAILY REVISION TRACKER
    ========================================================= */
 
-/* Checkbox before heading */
+/* ---------------------------------------------------------
+   1. FIXED MONTHLY CALENDAR
+   --------------------------------------------------------- */
 
-.daily-revision-checkbox {
-  width: 16px;
-  height: 16px;
+.daily-revision-panel {
+  position: fixed;
 
-  margin: 0 8px 0 0 !important;
+  top: 90px;
+  right: 24px;
 
-  padding: 0;
+  width: 210px;
 
-  vertical-align: middle;
-
-  accent-color: #2da44e;
-
-  cursor: pointer;
-}
-
-
-/* Completed heading */
-
-.daily-revision-completed {
-  text-decoration: line-through;
-  text-decoration-thickness: 1.5px;
-
-  opacity: 0.60;
-}
-
-
-/* Completed section content */
-
-.daily-revision-completed-content {
-  text-decoration: line-through;
-  text-decoration-thickness: 1px;
-
-  opacity: 0.60;
-}
-
-
-/* =========================================================
-   MONTHLY CALENDAR
-   ========================================================= */
-
-.daily-revision-calendar {
-  position: absolute;
-
-  top: 8px;
-  right: 8px;
-
-  width: 190px;
-
-  padding: 10px;
-
-  border: 1px solid var(--border);
-
-  border-radius: 8px;
-
-  background: var(--bg-soft);
+  padding: 14px;
 
   box-sizing: border-box;
 
-  z-index: 10;
+  border: 1px solid rgba(120, 130, 150, 0.18);
+
+  border-radius: 14px;
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(255, 255, 255, 0.96),
+      rgba(244, 247, 255, 0.96)
+    );
+
+  box-shadow:
+    0 12px 35px rgba(40, 50, 90, 0.12);
+
+  backdrop-filter: blur(14px);
+
+  z-index: 999;
 
   user-select: none;
 }
 
 
-/* Month name */
+/* ---------------------------------------------------------
+   MONTH HEADER
+   --------------------------------------------------------- */
 
-.daily-revision-calendar-header {
-  margin-bottom: 8px;
+.daily-revision-panel-header {
+  display: flex;
 
-  color: var(--text);
+  align-items: center;
+  justify-content: center;
 
-  font-size: 13px;
+  margin-bottom: 11px;
 
-  font-weight: 600;
+  color: #20243a;
 
-  text-align: center;
+  font-size: 14px;
+
+  font-weight: 700;
+
+  letter-spacing: 0.2px;
 }
 
 
-/* Weekday row */
+/* ---------------------------------------------------------
+   2 + 3. TODAY COUNT + STREAK
+   --------------------------------------------------------- */
+
+.daily-revision-stats {
+  display: grid;
+
+  grid-template-columns:
+    1fr 1fr;
+
+  gap: 7px;
+
+  margin-bottom: 12px;
+}
+
+
+.daily-stat {
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+  justify-content: center;
+
+  min-height: 48px;
+
+  padding: 7px 5px;
+
+  border-radius: 9px;
+
+  background:
+    rgba(120, 110, 255, 0.08);
+}
+
+
+.daily-stat strong {
+  color: #6157d9;
+
+  font-size: 17px;
+
+  line-height: 1.1;
+}
+
+
+.daily-stat span {
+  margin-top: 3px;
+
+  color: #777b91;
+
+  font-size: 9px;
+
+  font-weight: 600;
+
+  text-transform: uppercase;
+
+  letter-spacing: 0.5px;
+}
+
+
+/* ---------------------------------------------------------
+   WEEKDAYS
+   --------------------------------------------------------- */
 
 .daily-revision-weekdays {
   display: grid;
@@ -2129,24 +2169,26 @@ body.dark-theme .theme-button:hover {
   grid-template-columns:
     repeat(7, 1fr);
 
-  gap: 3px;
+  gap: 4px;
 
-  margin-bottom: 4px;
+  margin-bottom: 5px;
 }
 
 
 .daily-revision-weekdays span {
-  color: var(--text-muted);
+  color: #9296a8;
 
   font-size: 9px;
 
-  font-weight: 600;
+  font-weight: 700;
 
   text-align: center;
 }
 
 
-/* Calendar grid */
+/* ---------------------------------------------------------
+   CALENDAR GRID
+   --------------------------------------------------------- */
 
 .daily-revision-calendar-grid {
   display: grid;
@@ -2154,11 +2196,9 @@ body.dark-theme .theme-button:hover {
   grid-template-columns:
     repeat(7, 1fr);
 
-  gap: 3px;
+  gap: 4px;
 }
 
-
-/* Individual day */
 
 .daily-revision-day {
   display: flex;
@@ -2166,90 +2206,364 @@ body.dark-theme .theme-button:hover {
   align-items: center;
   justify-content: center;
 
-  width: 19px;
-  height: 19px;
+  width: 21px;
+  height: 21px;
 
-  border-radius: 3px;
+  border-radius: 5px;
 
-  background: rgba(128, 128, 128, 0.12);
+  background: #e9ebf2;
 
-  color: var(--text-muted);
+  color: #777b8e;
 
   font-size: 9px;
 
-  line-height: 1;
+  font-weight: 600;
+
+  transition:
+    transform 0.12s ease,
+    background 0.12s ease;
 }
 
-
-/* Empty cells */
 
 .daily-revision-day.empty {
-  background: transparent;
+  visibility: hidden;
 }
 
 
-/* Completed day — GitHub-like green */
+/* ---------------------------------------------------------
+   GITHUB-LIKE GREEN
+   --------------------------------------------------------- */
 
 .daily-revision-day.completed {
-  background: #2da44e;
+  background: #39c463;
 
   color: #ffffff;
+
+  box-shadow:
+    inset 0 0 0 1px rgba(0, 100, 30, 0.08);
 }
 
 
-/* Today */
+.daily-revision-day.completed:hover {
+  background: #2eaf55;
+
+  transform: scale(1.12);
+}
+
+
+/* ---------------------------------------------------------
+   TODAY
+   --------------------------------------------------------- */
 
 .daily-revision-day.today {
-  outline: 2px solid var(--accent);
+  outline: 2px solid #635bff;
 
   outline-offset: 1px;
 }
 
 
-/* Today's completed square */
-
 .daily-revision-day.today.completed {
-  background: #2da44e;
+  background: #39c463;
 
-  outline-color: #16833a;
+  outline-color: #20a94b;
 }
 
 
-/* Future days */
+/* ---------------------------------------------------------
+   FUTURE DAYS
+   --------------------------------------------------------- */
 
 .daily-revision-day.future {
   background: transparent;
 
-  color: var(--text-muted);
+  color: #c3c6d0;
 
-  opacity: 0.35;
+  opacity: 0.45;
 }
 
 
-/* Hover */
+/* ---------------------------------------------------------
+   LEGEND
+   --------------------------------------------------------- */
 
-.daily-revision-day:not(.empty):hover {
-  transform: scale(1.12);
+.daily-revision-legend {
+  display: flex;
 
-  cursor: default;
+  justify-content: center;
+
+  gap: 12px;
+
+  margin-top: 12px;
+
+  color: #85899a;
+
+  font-size: 8px;
 }
 
 
-/* =========================================================
+.daily-revision-legend span {
+  display: flex;
+
+  align-items: center;
+
+  gap: 4px;
+}
+
+
+.legend-box {
+  width: 8px;
+  height: 8px;
+
+  border-radius: 2px;
+
+  background: #39c463;
+}
+
+
+.legend-box.legend-today {
+  background: #e9ebf2;
+
+  outline: 1px solid #635bff;
+
+  outline-offset: 1px;
+}
+
+
+/* ---------------------------------------------------------
+   6. CHECKBOX BEFORE HEADINGS
+   --------------------------------------------------------- */
+
+.daily-revision-checkbox {
+  width: 17px;
+  height: 17px;
+
+  margin: 0 9px 0 0 !important;
+
+  padding: 0;
+
+  vertical-align: middle;
+
+  accent-color: #39c463;
+
+  cursor: pointer;
+}
+
+
+/* ---------------------------------------------------------
+   COMPLETED HEADING
+   Green + strike-through
+   --------------------------------------------------------- */
+
+.daily-revision-completed {
+  color: #249447 !important;
+
+  text-decoration:
+    line-through;
+
+  text-decoration-thickness: 2px;
+
+  text-decoration-color:
+    #39b95b;
+
+  opacity: 0.85;
+
+  transition:
+    color 0.2s ease,
+    opacity 0.2s ease;
+}
+
+
+/* ---------------------------------------------------------
+   COMPLETED CONTENT
+   --------------------------------------------------------- */
+
+.daily-revision-completed-content {
+  color: #319653 !important;
+
+  text-decoration:
+    line-through;
+
+  text-decoration-thickness: 1.3px;
+
+  text-decoration-color:
+    rgba(50, 180, 90, 0.75);
+
+  opacity: 0.72;
+
+  transition:
+    color 0.2s ease,
+    opacity 0.2s ease;
+}
+
+
+/* ---------------------------------------------------------
+   5. GEN-Z CONTENT BACKGROUND
+   --------------------------------------------------------- */
+
+/*
+ * Only the rendered note area gets this subtle
+ * modern lavender / blue gradient.
+ *
+ * It does not change the sidebar.
+ */
+
+#content,
+.content {
+  background:
+    linear-gradient(
+      135deg,
+      rgba(245, 243, 255, 0.92),
+      rgba(239, 248, 255, 0.92) 48%,
+      rgba(247, 241, 255, 0.92)
+    ) !important;
+
+  border-radius: 18px;
+
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.65);
+}
+
+
+/*
+ * Very subtle decorative glow.
+ */
+#content::before,
+.content::before {
+  pointer-events: none;
+}
+
+
+/* ---------------------------------------------------------
+   4. NAVIGATION BUTTONS
+   --------------------------------------------------------- */
+
+button,
+.nav-button,
+#prevBtn,
+#nextBtn,
+.prev-button,
+.next-button {
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease,
+    background 0.15s ease;
+}
+
+
+/*
+ * Previous
+ */
+#prevBtn,
+.prev-button {
+  background:
+    linear-gradient(
+      135deg,
+      #7c6cff,
+      #6255e8
+    ) !important;
+
+  color: #ffffff !important;
+
+  border-color: transparent !important;
+
+  box-shadow:
+    0 5px 14px rgba(98, 85, 232, 0.22);
+}
+
+
+/*
+ * Next
+ */
+#nextBtn,
+.next-button {
+  background:
+    linear-gradient(
+      135deg,
+      #20c997,
+      #18a978
+    ) !important;
+
+  color: #ffffff !important;
+
+  border-color: transparent !important;
+
+  box-shadow:
+    0 5px 14px rgba(24, 169, 120, 0.22);
+}
+
+
+/*
+ * Hover
+ */
+#prevBtn:hover,
+#nextBtn:hover,
+.prev-button:hover,
+.next-button:hover {
+  transform: translateY(-1px);
+
+  box-shadow:
+    0 7px 18px rgba(70, 70, 120, 0.22);
+}
+
+
+/* ---------------------------------------------------------
    DARK THEME
-   ========================================================= */
+   --------------------------------------------------------- */
+
+body.dark-theme
+.daily-revision-panel {
+  background:
+    linear-gradient(
+      145deg,
+      rgba(30, 32, 48, 0.97),
+      rgba(25, 30, 45, 0.97)
+    );
+
+  border-color:
+    rgba(255, 255, 255, 0.10);
+
+  box-shadow:
+    0 15px 40px rgba(0, 0, 0, 0.35);
+}
+
+
+body.dark-theme
+.daily-revision-panel-header {
+  color: #f0f1ff;
+}
+
+
+body.dark-theme
+.daily-stat {
+  background:
+    rgba(120, 110, 255, 0.14);
+}
+
+
+body.dark-theme
+.daily-stat strong {
+  color: #a69fff;
+}
+
+
+body.dark-theme
+.daily-stat span {
+  color: #9699ac;
+}
+
 
 body.dark-theme
 .daily-revision-day {
-  background: rgba(255, 255, 255, 0.10);
+  background:
+    rgba(255, 255, 255, 0.09);
 
-  color: var(--text-muted);
+  color: #a8abba;
 }
 
 
 body.dark-theme
 .daily-revision-day.completed {
-  background: #2da44e;
+  background: #32b957;
 
   color: #ffffff;
 }
@@ -2259,25 +2573,93 @@ body.dark-theme
 .daily-revision-day.future {
   background: transparent;
 
-  opacity: 0.25;
+  color: #666a7b;
 }
 
 
-/* =========================================================
+body.dark-theme
+.daily-revision-completed {
+  color: #68d98a !important;
+
+  text-decoration-color:
+    #45c96d;
+}
+
+
+body.dark-theme
+.daily-revision-completed-content {
+  color: #65c983 !important;
+
+  text-decoration-color:
+    rgba(70, 200, 110, 0.65);
+}
+
+
+/*
+ * Dark mode Gen-Z background
+ */
+body.dark-theme
+#content,
+body.dark-theme
+.content {
+  background:
+    linear-gradient(
+      135deg,
+      rgba(35, 31, 58, 0.96),
+      rgba(27, 42, 57, 0.96) 50%,
+      rgba(44, 31, 58, 0.96)
+    ) !important;
+}
+
+
+/* ---------------------------------------------------------
    MOBILE
-   ========================================================= */
+   --------------------------------------------------------- */
 
-@media (max-width: 760px) {
+@media (max-width: 1100px) {
 
-  .daily-revision-calendar {
+  /*
+   * Move the calendar back into normal flow
+   * when there isn't enough right-side space.
+   */
+  .daily-revision-panel {
     position: relative;
 
     top: auto;
     right: auto;
 
-    width: 190px;
+    width: 210px;
 
-    margin: 0 0 15px auto;
+    margin:
+      0 0 18px auto;
+  }
+
+}
+
+
+@media (max-width: 760px) {
+
+  .daily-revision-panel {
+    width: 200px;
+
+    padding: 12px;
+
+    margin:
+      0 0 15px auto;
+  }
+
+
+  .daily-revision-day {
+    width: 20px;
+    height: 20px;
+  }
+
+
+  .daily-revision-checkbox {
+    width: 15px;
+    height: 15px;
+
+    margin-right: 7px !important;
   }
 
 }
