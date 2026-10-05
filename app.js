@@ -21,7 +21,6 @@ let sidebarOverlay;
 
 let contentsToggle;
 let topicNavigation;
-
 let previousButton;
 let nextButton;
 let previousTitle;
@@ -37,7 +36,6 @@ document.addEventListener("DOMContentLoaded", () => {
   sidebar = document.getElementById("sidebar");
   content = document.getElementById("content");
   searchInput = document.getElementById("search");
-
   themeButton = document.getElementById("theme-button");
   menuButton = document.getElementById("menu-button");
   closeSidebarButton = document.getElementById("close-sidebar");
@@ -48,7 +46,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   previousButton = document.getElementById("previous-button");
   nextButton = document.getElementById("next-button");
-
   previousTitle = document.getElementById("previous-title");
   nextTitle = document.getElementById("next-title");
 
@@ -70,7 +67,6 @@ document.addEventListener("DOMContentLoaded", () => {
    ========================================================= */
 
 function configureMarkdown() {
-
   if (typeof marked === "undefined") {
     console.error("Marked.js was not loaded.");
     return;
@@ -83,7 +79,6 @@ function configureMarkdown() {
   });
 
 }
-
 
 
 /* =========================================================
@@ -384,12 +379,10 @@ async function loadMarkdown(
       );
 
     if (!response.ok) {
-
       throw new Error(
         `Could not load ${topic.file} ` +
         `(HTTP ${response.status})`
       );
-
     }
 
     const markdown =
@@ -1399,7 +1392,6 @@ function showLoading() {
     <div class="loading">
 
       <div class="loading-line"></div>
-
       <div class="loading-line short"></div>
 
       <div class="loading-line"></div>
