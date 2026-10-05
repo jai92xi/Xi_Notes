@@ -2084,6 +2084,7 @@ function escapeHTML(value) {
 
 }
 /* JAGS - checkbox logic */
+
 /* =========================================================
    DAILY REVISION TRACKER
    GitHub-style monthly calendar
