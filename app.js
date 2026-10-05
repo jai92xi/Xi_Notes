@@ -784,9 +784,10 @@ function updateActiveTopic(topic) {
           "page"
         );
 
-        button.scrollIntoView({
-          block: "nearest"
-        });
+        /*
+         * Do not force the selected navigation
+         * item to scroll the entire sidebar.
+         */
 
       } else {
 
@@ -1026,8 +1027,31 @@ function updateTopNavigation() {
 
 
 /* =========================================================
-   COLLAPSE / EXPAND
+   COLLAPSE / EXPAND CONTENTS
    ========================================================= */
+
+/*
+ * Collapsed state:
+ *
+ *   [ > ]
+ *
+ * Expanded state:
+ *
+ *   [ < ]
+ *
+ * Only the icon remains when collapsed.
+ * The search input and its surrounding line disappear.
+ *
+ * The CSS uses:
+ *
+ *   .contents-hidden
+ *
+ * and:
+ *
+ *   .collapsed
+ *
+ * so the state is reversible.
+ */
 
 function setupContentsToggle() {
 
@@ -1041,15 +1065,6 @@ function setupContentsToggle() {
   }
 
 
-  /*
-   * IMPORTANT:
-   *
-   * The sidebar remains in the DOM when collapsed.
-   * Only the visual contents are hidden.
-   *
-   * Clicking the same button again restores it.
-   */
-
   contentsToggle.addEventListener(
     "click",
     event => {
@@ -1060,50 +1075,113 @@ function setupContentsToggle() {
 
 
       const collapsed =
-        sidebar.classList.toggle(
+        !sidebar.classList.contains(
           "contents-hidden"
         );
 
 
-      contentsToggle.setAttribute(
-        "aria-expanded",
-        collapsed
-          ? "false"
-          : "true"
-      );
+      if (collapsed) {
+
+        /*
+         * HIDE CONTENTS
+         */
+
+        sidebar.classList.add(
+          "contents-hidden"
+        );
+
+        contentsToggle.classList.add(
+          "collapsed"
+        );
+
+        contentsToggle.setAttribute(
+          "aria-expanded",
+          "false"
+        );
+
+        contentsToggle.setAttribute(
+          "aria-label",
+          "Show contents"
+        );
+
+        contentsToggle.setAttribute(
+          "title",
+          "Show contents"
+        );
 
 
-      contentsToggle.setAttribute(
-        "aria-label",
-        collapsed
-          ? "Show contents"
-          : "Hide contents"
-      );
+      } else {
 
+        /*
+         * SHOW CONTENTS
+         */
 
-      contentsToggle.setAttribute(
-        "title",
-        collapsed
-          ? "Show contents"
-          : "Hide contents"
-      );
+        sidebar.classList.remove(
+          "contents-hidden"
+        );
 
+        contentsToggle.classList.remove(
+          "collapsed"
+        );
 
-      contentsToggle.classList.toggle(
-        "collapsed",
-        collapsed
-      );
+        contentsToggle.setAttribute(
+          "aria-expanded",
+          "true"
+        );
 
+        contentsToggle.setAttribute(
+          "aria-label",
+          "Hide contents"
+        );
 
-      /*
-       * Make sure the navigation icon
-       * remains visible after collapsing.
-       */
+        contentsToggle.setAttribute(
+          "title",
+          "Hide contents"
+        );
 
-      contentsToggle.style.display =
-        "inline-flex";
+      }
 
     }
+  );
+
+
+  /*
+   * Make sure the initial icon state is correct.
+   */
+
+  const initiallyCollapsed =
+    sidebar.classList.contains(
+      "contents-hidden"
+    );
+
+
+  contentsToggle.classList.toggle(
+    "collapsed",
+    initiallyCollapsed
+  );
+
+
+  contentsToggle.setAttribute(
+    "aria-expanded",
+    initiallyCollapsed
+      ? "false"
+      : "true"
+  );
+
+
+  contentsToggle.setAttribute(
+    "aria-label",
+    initiallyCollapsed
+      ? "Show contents"
+      : "Hide contents"
+  );
+
+
+  contentsToggle.setAttribute(
+    "title",
+    initiallyCollapsed
+      ? "Show contents"
+      : "Hide contents"
   );
 
 }
@@ -1655,6 +1733,48 @@ function setupKeyboardShortcuts() {
 
 
         if (searchInput) {
+
+          /*
+           * If contents are collapsed,
+           * expand them before focusing search.
+           */
+
+          if (
+            sidebar &&
+            sidebar.classList.contains(
+              "contents-hidden"
+            )
+          ) {
+
+            sidebar.classList.remove(
+              "contents-hidden"
+            );
+
+            if (contentsToggle) {
+
+              contentsToggle.classList.remove(
+                "collapsed"
+              );
+
+              contentsToggle.setAttribute(
+                "aria-expanded",
+                "true"
+              );
+
+              contentsToggle.setAttribute(
+                "aria-label",
+                "Hide contents"
+              );
+
+              contentsToggle.setAttribute(
+                "title",
+                "Hide contents"
+              );
+
+            }
+
+          }
+
 
           searchInput.focus();
 
