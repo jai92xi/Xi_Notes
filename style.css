@@ -2034,3 +2034,83 @@ body.dark-theme .theme-button:hover {
     transition-duration: 0.01ms !important;
   }
 }
+/* =========================================================
+   DAILY REVISION CHECKBOXES
+   Used only by 1CheatSheet.md
+   ========================================================= */
+
+.daily-revision-control {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+
+  margin-left: 12px;
+  padding: 4px 8px;
+
+  border: 1px solid var(--border);
+  border-radius: 7px;
+
+  background: var(--bg-soft);
+  color: var(--text-muted);
+
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1;
+
+  vertical-align: middle;
+  white-space: nowrap;
+
+  cursor: default;
+}
+
+.daily-revision-checkbox {
+  width: 14px;
+  height: 14px;
+
+  margin: 0 !important;
+
+  accent-color: var(--accent);
+
+  cursor: pointer;
+}
+
+.daily-revision-label {
+  user-select: none;
+}
+
+.daily-revision-control:has(
+  .daily-revision-checkbox:checked
+) {
+  border-color: rgba(80, 160, 110, 0.35);
+  background: rgba(80, 160, 110, 0.09);
+  color: #378054;
+}
+
+/* Dark theme */
+
+body.dark-theme
+.daily-revision-control:has(
+  .daily-revision-checkbox:checked
+) {
+  border-color: rgba(110, 200, 145, 0.30);
+  background: rgba(110, 200, 145, 0.10);
+  color: #8fd6a8;
+}
+
+/* Mobile */
+
+@media (max-width: 760px) {
+
+  .daily-revision-control {
+    margin-left: 7px;
+    padding: 3px 6px;
+    gap: 5px;
+    font-size: 10px;
+  }
+
+  .daily-revision-checkbox {
+    width: 13px;
+    height: 13px;
+  }
+
+}
