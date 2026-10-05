@@ -10,10 +10,36 @@
 
   <meta
     name="description"
-    content="AI & ML Key Concepts — practical notes and concepts worth sharing."
+    content="A personal collection of AI and machine learning notes."
   >
 
-  <title>AI & ML Key Concepts</title>
+  <meta
+    name="theme-color"
+    content="#ffffff"
+  >
+
+  <title>AI & ML Notes</title>
+
+  <!-- =====================================================
+       FONTS
+       ===================================================== -->
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+
+  <link
+    rel="preconnect"
+    href="https://fonts.gstatic.com"
+    crossorigin
+  >
+
+  <link
+    href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap"
+    rel="stylesheet"
+  >
+
+  <!-- =====================================================
+       STYLES
+       ===================================================== -->
 
   <link
     rel="stylesheet"
@@ -21,33 +47,11 @@
   >
 </head>
 
+
 <body>
 
   <!-- =====================================================
-       MOBILE HEADER
-       ===================================================== -->
-
-  <header class="mobile-header">
-
-    <div class="header-actions">
-
-      <button
-        id="menu-button"
-        class="menu-button"
-        type="button"
-        aria-label="Open contents"
-        title="Open contents"
-      >
-        ☰
-      </button>
-
-    </div>
-
-  </header>
-
-
-  <!-- =====================================================
-       SIDEBAR OVERLAY
+       MOBILE SIDEBAR OVERLAY
        ===================================================== -->
 
   <div
@@ -58,164 +62,184 @@
 
 
   <!-- =====================================================
-       SIDEBAR / CONTENTS
+       HEADER
        ===================================================== -->
 
-  <aside
-    id="sidebar"
-    class="sidebar"
-    aria-label="Contents"
-  >
+  <header class="site-header">
+
+    <div class="header-left">
+
+      <button
+        id="menu-button"
+        class="icon-button mobile-menu-button"
+        type="button"
+        aria-label="Open contents"
+        title="Open contents"
+      >
+        <span aria-hidden="true">☰</span>
+      </button>
+
+      <a
+        href="./"
+        class="site-title"
+        aria-label="AI and ML Notes home"
+      >
+        AI & ML Notes
+      </a>
+
+    </div>
+
+
+    <div class="header-actions">
+
+      <button
+        id="theme-button"
+        class="icon-button"
+        type="button"
+        aria-label="Switch to dark theme"
+        title="Switch to dark theme"
+      >
+        ☾
+      </button>
+
+    </div>
+
+  </header>
+
+
+  <!-- =====================================================
+       PAGE LAYOUT
+       ===================================================== -->
+
+  <div class="page-layout">
+
 
     <!-- ===================================================
-         CONTENTS HEADER
-         Search + Hide/Show in one box
+         SIDEBAR
          =================================================== -->
 
-    <div
-      id="sidebar-header"
-      class="sidebar-header"
+    <aside
+      id="sidebar"
+      class="sidebar"
+      aria-label="Notes navigation"
     >
 
-      <div class="contents-search-box">
+      <div class="sidebar-header">
 
-        <input
-          id="search"
-          class="search-input"
-          type="search"
-          placeholder="⌕  Search concepts..."
-          autocomplete="off"
-          aria-label="Search concepts"
-        >
+        <div class="sidebar-heading">
+
+          <span class="sidebar-heading-mark">
+            ✦
+          </span>
+
+          <span>
+            Contents
+          </span>
+
+        </div>
+
 
         <button
           id="contents-toggle"
-          class="contents-toggle"
+          class="icon-button contents-toggle"
           type="button"
           aria-expanded="true"
           aria-label="Hide contents"
           title="Hide contents"
         >
-          <span></span>
-          <span></span>
-          <span></span>
+          ‹
+        </button>
+
+
+        <button
+          id="close-sidebar"
+          class="icon-button close-sidebar-button"
+          type="button"
+          aria-label="Close contents"
+          title="Close contents"
+        >
+          ×
         </button>
 
       </div>
 
-    </div>
 
+      <!-- =================================================
+           SEARCH
+           ================================================= -->
 
-    <!-- ===================================================
-         TOPICS
-         =================================================== -->
+      <div class="search-wrapper">
 
-    <nav
-      id="topic-navigation"
-      class="topic-navigation"
-      aria-label="AI and ML concepts"
-    >
+        <label
+          class="search-box"
+          for="search"
+        >
 
-      <div class="no-results">
-        Loading concepts...
+          <span
+            class="search-icon"
+            aria-hidden="true"
+          >
+            ⌕
+          </span>
+
+          <input
+            id="search"
+            type="search"
+            placeholder="Search notes..."
+            autocomplete="off"
+            spellcheck="false"
+            aria-label="Search notes"
+          >
+
+          <kbd>
+            Ctrl K
+          </kbd>
+
+        </label>
+
       </div>
 
-    </nav>
+
+      <!-- =================================================
+           TOPIC NAVIGATION
+           ================================================= -->
+
+      <nav
+        id="topic-navigation"
+        class="topic-navigation"
+        aria-label="Notes"
+      >
+
+        <div class="no-results">
+          Loading concepts...
+        </div>
+
+      </nav>
+
+
+      <!-- =================================================
+           SIDEBAR FOOTER
+           ================================================= -->
+
+      <div class="sidebar-footer">
+
+        <span>
+          Personal knowledge base
+        </span>
+
+      </div>
+
+    </aside>
 
 
     <!-- ===================================================
-         SIDEBAR FOOTER
+         MAIN
          =================================================== -->
 
-    <div class="sidebar-footer">
-      <span>Made with</span>
-      <span class="footer-love">♥</span>
-      <span>&amp; curiosity</span>
-    </div>
-
-  </aside>
-
-
-  <!-- =====================================================
-       MAIN
-       ===================================================== -->
-
-  <main id="main">
-
-
-    <!-- ===================================================
-         PREVIOUS / NEXT NAVIGATION
-         =================================================== -->
-
-    <nav
-      id="page-navigation"
-      class="page-navigation"
-      aria-label="Note navigation"
+    <main
+      id="main"
+      class="main"
     >
-
-      <!-- Previous -->
-
-      <button
-        id="previous-button"
-        class="page-nav-button previous-page"
-        type="button"
-        disabled
-        aria-label="Previous note"
-        title="Previous note"
-      >
-
-        <span
-          class="page-nav-arrow"
-          aria-hidden="true"
-        >
-          ←
-        </span>
-
-        <span
-          id="previous-title"
-          class="page-nav-title"
-        >
-          Start
-        </span>
-
-      </button>
-
-
-      <!-- Next -->
-
-      <button
-        id="next-button"
-        class="page-nav-button next-page"
-        type="button"
-        disabled
-        aria-label="Next note"
-        title="Next note"
-      >
-
-        <span
-          id="next-title"
-          class="page-nav-title"
-        >
-          You're caught up ✦
-        </span>
-
-        <span
-          class="page-nav-arrow"
-          aria-hidden="true"
-        >
-          →
-        </span>
-
-      </button>
-
-    </nav>
-
-
-    <!-- ===================================================
-         NOTE CONTENT
-         =================================================== -->
-
-    <div class="content-wrapper">
 
       <article
         id="content"
@@ -234,28 +258,84 @@
 
       </article>
 
-    </div>
 
-  </main>
+      <!-- =================================================
+           PREVIOUS / NEXT
+           ================================================= -->
+
+      <nav
+        class="topic-pagination"
+        aria-label="Note navigation"
+      >
+
+        <button
+          id="previous-button"
+          class="pagination-button pagination-previous"
+          type="button"
+          disabled
+        >
+
+          <span
+            class="pagination-arrow"
+            aria-hidden="true"
+          >
+            ←
+          </span>
+
+          <span class="pagination-copy">
+
+            <span class="pagination-label">
+              Previous
+            </span>
+
+            <span
+              id="previous-title"
+              class="pagination-title"
+            ></span>
+
+          </span>
+
+        </button>
+
+
+        <button
+          id="next-button"
+          class="pagination-button pagination-next"
+          type="button"
+          disabled
+        >
+
+          <span class="pagination-copy">
+
+            <span class="pagination-label">
+              Next
+            </span>
+
+            <span
+              id="next-title"
+              class="pagination-title"
+            ></span>
+
+          </span>
+
+          <span
+            class="pagination-arrow"
+            aria-hidden="true"
+          >
+            →
+          </span>
+
+        </button>
+
+      </nav>
+
+    </main>
+
+  </div>
 
 
   <!-- =====================================================
-       FLOATING THEME BUTTON
-       ===================================================== -->
-
-  <button
-    id="theme-button"
-    class="theme-button"
-    type="button"
-    aria-label="Switch to dark theme"
-    title="Switch to dark theme"
-  >
-    ☾
-  </button>
-
-
-  <!-- =====================================================
-       MARKED.JS
+       MARKDOWN PARSER
        ===================================================== -->
 
   <script
@@ -264,7 +344,7 @@
 
 
   <!-- =====================================================
-       APP
+       APPLICATION
        ===================================================== -->
 
   <script
