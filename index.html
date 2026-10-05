@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
 
@@ -10,21 +11,11 @@
 
   <meta
     name="description"
-    content="AI and ML personal knowledge base"
+    content="AI & ML Key Concepts — practical notes and concepts worth sharing."
   >
 
   <title>🧠 AI & ML Key Concepts</title>
 
-  <!-- Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-
-  <link
-    href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@500;600;700&display=swap"
-    rel="stylesheet"
-  >
-
-  <!-- Styles -->
   <link
     rel="stylesheet"
     href="style.css"
@@ -57,96 +48,7 @@
 
 
   <!-- =====================================================
-       SIDEBAR
-       ===================================================== -->
-
-  <aside
-    id="sidebar"
-    class="sidebar"
-    aria-label="Notes navigation"
-  >
-
-    <!-- Sidebar header / search -->
-    <div class="sidebar-header">
-
-      <div
-        class="contents-search-box"
-        id="contents-search-box"
-      >
-
-        <input
-          id="search"
-          class="search-input"
-          type="search"
-          placeholder="Search concepts..."
-          autocomplete="off"
-          aria-label="Search concepts"
-        >
-
-        <!--
-          Expanded:
-          3 horizontal lines = hide contents
-
-          Collapsed:
-          chevron = show contents
-
-          app.js switches the .collapsed class.
-        -->
-
-        <button
-          id="contents-toggle"
-          class="contents-toggle"
-          type="button"
-          aria-expanded="true"
-          aria-label="Hide contents"
-          title="Hide contents"
-        >
-
-          <span></span>
-          <span></span>
-          <span></span>
-
-        </button>
-
-      </div>
-
-    </div>
-
-
-    <!-- ===================================================
-         TOPIC NAVIGATION
-         =================================================== -->
-
-    <nav
-      id="topic-navigation"
-      class="topic-navigation"
-      aria-label="AI and ML concepts"
-    >
-      <!-- Populated by app.js -->
-    </nav>
-
-
-    <!-- ===================================================
-         SIDEBAR FOOTER
-         =================================================== -->
-
-    <div class="sidebar-footer">
-
-      Personal knowledge base
-
-      <span class="footer-love">
-        ♥
-      </span>
-
-      for learning AI & ML
-
-    </div>
-
-  </aside>
-
-
-  <!-- =====================================================
-       MOBILE SIDEBAR OVERLAY
+       SIDEBAR OVERLAY
        ===================================================== -->
 
   <div
@@ -157,19 +59,105 @@
 
 
   <!-- =====================================================
-       MAIN
+       SIDEBAR / CONTENTS
        ===================================================== -->
 
-  <main>
+  <aside
+    id="sidebar"
+    class="sidebar"
+    aria-label="Contents"
+  >
 
     <!-- ===================================================
-         TOP FIXED NAVIGATION
+         CONTENTS HEADER
+         Search + Hide/Show
+         =================================================== -->
+
+    <div
+      id="sidebar-header"
+      class="sidebar-header"
+    >
+
+      <div class="contents-search-box">
+
+        <input
+          id="search"
+          class="search-input"
+          type="search"
+          placeholder="⌕ Search concepts..."
+          autocomplete="off"
+          aria-label="Search concepts"
+        >
+
+        <button
+          id="contents-toggle"
+          class="contents-toggle"
+          type="button"
+          aria-expanded="true"
+          aria-label="Hide contents"
+          title="Hide contents"
+        >
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+
+      </div>
+
+    </div>
+
+
+    <!-- ===================================================
+         TOPICS / CONCEPTS INDEX
          =================================================== -->
 
     <nav
+      id="topic-navigation"
+      class="topic-navigation"
+      aria-label="AI and ML concepts"
+    >
+
+      <div class="no-results">
+        Loading concepts...
+      </div>
+
+    </nav>
+
+
+    <!-- ===================================================
+         SIDEBAR FOOTER
+         =================================================== -->
+
+    <div class="sidebar-footer">
+
+      <span>Made with</span>
+
+      <span class="footer-love">♥</span>
+
+      <span>&amp; curiosity</span>
+
+    </div>
+
+  </aside>
+
+
+  <!-- =====================================================
+       MAIN
+       ===================================================== -->
+
+  <main id="main">
+
+    <!-- ===================================================
+         PREVIOUS / NEXT NAVIGATION
+         =================================================== -->
+
+    <nav
+      id="page-navigation"
       class="page-navigation"
       aria-label="Note navigation"
     >
+
+      <!-- Previous -->
 
       <button
         id="previous-button"
@@ -177,6 +165,7 @@
         type="button"
         disabled
         aria-label="Previous note"
+        title="Previous note"
       >
 
         <span
@@ -196,19 +185,22 @@
       </button>
 
 
+      <!-- Next -->
+
       <button
         id="next-button"
         class="page-nav-button next-page"
         type="button"
         disabled
         aria-label="Next note"
+        title="Next note"
       >
 
         <span
           id="next-title"
           class="page-nav-title"
         >
-          Next
+          You're caught up ✦
         </span>
 
         <span
@@ -224,16 +216,10 @@
 
 
     <!-- ===================================================
-         CONTENT WRAPPER
+         NOTE CONTENT
          =================================================== -->
 
     <div class="content-wrapper">
-
-      <!--
-        Curved bordered content container.
-        Markdown from the selected note is injected here
-        by app.js.
-      -->
 
       <article
         id="content"
@@ -258,7 +244,7 @@
 
 
   <!-- =====================================================
-       FLOATING THEME SWITCH
+       FLOATING THEME BUTTON
        ===================================================== -->
 
   <button
@@ -268,14 +254,12 @@
     aria-label="Switch to dark theme"
     title="Switch to dark theme"
   >
-
     <span
       class="theme-icon"
       aria-hidden="true"
     >
       ☾
     </span>
-
   </button>
 
 
@@ -289,7 +273,7 @@
 
 
   <!-- =====================================================
-       APPLICATION
+       APP
        ===================================================== -->
 
   <script
@@ -297,4 +281,5 @@
   ></script>
 
 </body>
+
 </html>
