@@ -2034,144 +2034,250 @@ body.dark-theme .theme-button:hover {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* JAGS CHECKBOX LOGIC */
 /* =========================================================
-   DAILY REVISION CHECKLIST
+   DAILY REVISION CHECKLIST + MONTHLY CALENDAR
    ========================================================= */
 
-/*
- * Checkbox before each heading
- */
+/* Checkbox before heading */
+
 .daily-revision-checkbox {
   width: 16px;
   height: 16px;
 
   margin: 0 8px 0 0 !important;
 
+  padding: 0;
+
   vertical-align: middle;
 
-  accent-color: var(--accent);
+  accent-color: #2da44e;
 
   cursor: pointer;
 }
 
 
-/*
- * Completed heading
- */
+/* Completed heading */
+
 .daily-revision-completed {
   text-decoration: line-through;
   text-decoration-thickness: 1.5px;
-  opacity: 0.65;
+
+  opacity: 0.60;
 }
 
 
-/*
- * Completed heading's content
- */
+/* Completed section content */
+
 .daily-revision-completed-content {
   text-decoration: line-through;
   text-decoration-thickness: 1px;
-  opacity: 0.65;
+
+  opacity: 0.60;
 }
 
 
-/*
- * Small calendar on the right
- */
+/* =========================================================
+   MONTHLY CALENDAR
+   ========================================================= */
+
 .daily-revision-calendar {
-  display: block;
+  position: absolute;
 
-  width: fit-content;
+  top: 8px;
+  right: 8px;
 
-  margin-left: auto;
-  margin-bottom: 12px;
+  width: 190px;
 
-  padding: 4px 8px;
+  padding: 10px;
 
   border: 1px solid var(--border);
-  border-radius: 6px;
+
+  border-radius: 8px;
 
   background: var(--bg-soft);
 
-  color: var(--text-muted);
+  box-sizing: border-box;
 
-  font-size: 11px;
-  font-weight: 500;
-
-  line-height: 1;
-
-  cursor: default;
+  z-index: 10;
 
   user-select: none;
-
-  transition:
-    color 0.2s ease,
-    background 0.2s ease,
-    border-color 0.2s ease;
 }
 
 
-/*
- * Calendar becomes green when ALL
- * headings have been completed.
- */
-.daily-revision-calendar.daily-revision-day-complete {
-  color: #218739;
+/* Month name */
 
-  background: rgba(40, 167, 69, 0.10);
+.daily-revision-calendar-header {
+  margin-bottom: 8px;
 
-  border-color: rgba(40, 167, 69, 0.35);
+  color: var(--text);
+
+  font-size: 13px;
 
   font-weight: 600;
+
+  text-align: center;
 }
 
 
-/*
- * Dark theme
- */
+/* Weekday row */
+
+.daily-revision-weekdays {
+  display: grid;
+
+  grid-template-columns:
+    repeat(7, 1fr);
+
+  gap: 3px;
+
+  margin-bottom: 4px;
+}
+
+
+.daily-revision-weekdays span {
+  color: var(--text-muted);
+
+  font-size: 9px;
+
+  font-weight: 600;
+
+  text-align: center;
+}
+
+
+/* Calendar grid */
+
+.daily-revision-calendar-grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(7, 1fr);
+
+  gap: 3px;
+}
+
+
+/* Individual day */
+
+.daily-revision-day {
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  width: 19px;
+  height: 19px;
+
+  border-radius: 3px;
+
+  background: rgba(128, 128, 128, 0.12);
+
+  color: var(--text-muted);
+
+  font-size: 9px;
+
+  line-height: 1;
+}
+
+
+/* Empty cells */
+
+.daily-revision-day.empty {
+  background: transparent;
+}
+
+
+/* Completed day — GitHub-like green */
+
+.daily-revision-day.completed {
+  background: #2da44e;
+
+  color: #ffffff;
+}
+
+
+/* Today */
+
+.daily-revision-day.today {
+  outline: 2px solid var(--accent);
+
+  outline-offset: 1px;
+}
+
+
+/* Today's completed square */
+
+.daily-revision-day.today.completed {
+  background: #2da44e;
+
+  outline-color: #16833a;
+}
+
+
+/* Future days */
+
+.daily-revision-day.future {
+  background: transparent;
+
+  color: var(--text-muted);
+
+  opacity: 0.35;
+}
+
+
+/* Hover */
+
+.daily-revision-day:not(.empty):hover {
+  transform: scale(1.12);
+
+  cursor: default;
+}
+
+
+/* =========================================================
+   DARK THEME
+   ========================================================= */
+
 body.dark-theme
-.daily-revision-calendar.daily-revision-day-complete {
-  color: #7ddc91;
+.daily-revision-day {
+  background: rgba(255, 255, 255, 0.10);
 
-  background: rgba(80, 200, 100, 0.12);
-
-  border-color: rgba(100, 220, 120, 0.30);
+  color: var(--text-muted);
 }
 
 
-/*
- * Keep checkbox aligned nicely with
- * different heading sizes.
- */
-h1 .daily-revision-checkbox,
-h2 .daily-revision-checkbox,
-h3 .daily-revision-checkbox,
-h4 .daily-revision-checkbox,
-h5 .daily-revision-checkbox,
-h6 .daily-revision-checkbox {
-  position: relative;
-  top: -1px;
+body.dark-theme
+.daily-revision-day.completed {
+  background: #2da44e;
+
+  color: #ffffff;
 }
 
 
-/*
- * Mobile
- */
+body.dark-theme
+.daily-revision-day.future {
+  background: transparent;
+
+  opacity: 0.25;
+}
+
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
 @media (max-width: 760px) {
 
-  .daily-revision-checkbox {
-    width: 14px;
-    height: 14px;
-
-    margin-right: 6px !important;
-  }
-
   .daily-revision-calendar {
-    font-size: 10px;
+    position: relative;
 
-    padding: 3px 7px;
+    top: auto;
+    right: auto;
 
-    margin-bottom: 10px;
+    width: 190px;
+
+    margin: 0 0 15px auto;
   }
 
 }
