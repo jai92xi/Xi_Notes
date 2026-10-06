@@ -79,3 +79,5 @@ Hallucination happens when the **retrieved context doesn't contain enough releva
 > 8. **Local/Window Attention** 🪟            — Tokens attend only to nearby tokens.
 > 9. **Global Attention** 🌐                  — Selected tokens attend across the entire sequence.
 ---
+#### <mark>**🥷 Batch Normalization**</mark>
+> BatchNorm is a **technique used to <mark>normalize the activations</mark>** of a neural network layer **during training**, making training faster and more stable.
