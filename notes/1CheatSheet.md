@@ -82,26 +82,24 @@ Hallucination happens when the **retrieved context doesn't contain enough releva
 > BatchNorm is a **technique used to <mark>normalize the activations</mark>** of a neural network layer **during training**, making training faster and more stable.
 ---
 #### <mark>**🔥Handling Class Imbalance**</mark>
-
+```
 ├── 1. Fix the DATA
 │   ├── Undersampling
 │   ├── Oversampling
 │   ├── SMOTE
 │   └── Data Augmentation
-│
 ├── 2. Fix the ALGORITHM / DECISION
 │   ├── Class Weighting
 │   ├── Threshold Tuning
 │   ├── Imbalance-Aware Ensembles
 │   └── Outlier / Anomaly Detection
-│
 └── 3. Fix the EVALUATION
     ├── Recall
     ├── Precision
     ├── F1-Score
     ├── PR-AUC
     └── Stratified K-Fold CV
-    
+```
 ---
 ### <mark>**🐉 SMOTE — Synthetic Minority Over-sampling Technique**</mark>
 > SMOTE is an **oversampling technique** used to **handle class imbalance** 
