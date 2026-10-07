@@ -1,7 +1,6 @@
 #### <mark>**OVERFITTING**</mark>
 * Model **memorizes the training data excessively** - including **noise** - it **performs well on training data** but **poorly on new/unseen data**.
 * solution: More training data, Data Augmentation; reduce model complexity (reduce layers/neurons); Early Stopping; Dropout, L1/L2 regularization, Batch Normalization; cross validation.
-
 ----
 #### <mark>**EARLY STOPPING:**</mark>
 * A **regularization** technique - that prevents **overfitting** - by **stopping training** when **validation performance stops improving**.
@@ -81,3 +80,33 @@ Hallucination happens when the **retrieved context doesn't contain enough releva
 ---
 #### <mark>**🥷 Batch Normalization**</mark>
 > BatchNorm is a **technique used to <mark>normalize the activations</mark>** of a neural network layer **during training**, making training faster and more stable.
+---
+#### <mark>**🔥Handling Class Imbalance**</mark>
+
+├── 1. Fix the DATA
+│   ├── Undersampling
+│   ├── Oversampling
+│   ├── SMOTE
+│   └── Data Augmentation
+│
+├── 2. Fix the ALGORITHM / DECISION
+│   ├── Class Weighting
+│   ├── Threshold Tuning
+│   ├── Imbalance-Aware Ensembles
+│   └── Outlier / Anomaly Detection
+│
+└── 3. Fix the EVALUATION
+    ├── Recall
+    ├── Precision
+    ├── F1-Score
+    ├── PR-AUC
+    └── Stratified K-Fold CV
+    
+---
+### <mark>**🐉 SMOTE — Synthetic Minority Over-sampling Technique**</mark>
+> SMOTE is an **oversampling technique** used to **handle class imbalance** 
+> by **creating new synthetic minority-class samples** instead of **simply duplicating existing ones**.
+
+Minority sample → Find K nearest minority neighbors → Select one neighbor → Generate a synthetic sample between them
+
+---
