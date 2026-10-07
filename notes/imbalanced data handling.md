@@ -1,18 +1,52 @@
-fix the data (resampling/augmentation)
-or
-fix the algorithm (weighting/loss/thresholds)
-or 
-fix the evaluation (right metrics)
-
-**Methods for handling imbalanced data:**
-
-1. **Class weighting** (`scale_pos_weight`, `class_weight='balanced'`) — penalize misclassifying the minority class more heavily.
-2. **Oversampling (SMOTE, random oversampling)** — synthetically create more minority-class samples.
-3. **Undersampling** — randomly remove majority-class samples to balance ratios.
-4. **Threshold tuning** — adjust the decision boundary instead of using default 0.5.
-5. **Ensemble methods (Balanced Random Forest, EasyEnsemble)** — combine multiple resampled models.
-6. **Anomaly/outlier detection framing** — treat rare class as an anomaly detection problem instead of classification.
-7. **Focal loss** — down-weight easy majority-class examples during training (common in deep learning).
-8. **Stratified k-fold cross-validation** — ensures each fold preserves class ratio during evaluation.
-9. **Use PR-AUC/F1/recall instead of accuracy** — evaluate with metrics sensitive to minority class performance.
-10. **Data augmentation** (CNNs, NLP) — generate variations of minority-class samples to increase representation.
+```
+Handling Class Imbalance
+│
+├── 1. Fix the DATA
+│   │
+│   ├── Undersampling
+│   │   └── Reduce samples from the majority class
+│   │
+│   ├── Oversampling
+│   │   └── Increase samples from the minority class
+│   │
+│   ├── SMOTE
+│   │   └── Generate synthetic minority-class samples
+│   │
+│   └── Data Augmentation
+│       └── Create variations of minority-class data
+│           (e.g., CNN/images: flip, rotate, crop)
+│
+├── 2. Fix the ALGORITHM / DECISION
+│   │
+│   ├── Class Weighting
+│   │   └── Penalize minority-class mistakes more heavily
+│   │
+│   ├── Threshold Tuning
+│   │   └── Increase/decrease the default threshold (0.5)
+│   │       to control precision vs. recall
+│   │
+│   ├── Imbalance-Aware Ensembles
+│   │   └── Use resampling + multiple models
+│   │       (Balanced Random Forest, EasyEnsemble)
+│   │
+│   └── Outlier / Anomaly Detection
+│       └── Treat the rare class as an unusual/anomalous event
+│
+└── 3. Fix the EVALUATION
+    │
+    ├── Recall
+    │   └── How many actual minority cases were detected?
+    │
+    ├── Precision
+    │   └── How many predicted minority cases were actually positive?
+    │
+    ├── F1-Score
+    │   └── Balance between precision and recall
+    │
+    ├── PR-AUC
+    │   └── Evaluate precision-recall performance across thresholds
+    │
+    └── Stratified K-Fold CV
+        └── Keep class proportions similar in every fold
+            for more reliable evaluation
+```
