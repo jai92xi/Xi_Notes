@@ -17,14 +17,45 @@
   <title>Xi Notes — AI & ML</title>
 
   <link rel="stylesheet" href="style.css">
+
+  <!-- MathJax for LaTeX formulas -->
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [
+          ["\\(", "\\)"]
+        ],
+        displayMath: [
+          ["\\[", "\\]"],
+          ["$$", "$$"]
+        ]
+      },
+      options: {
+        skipHtmlTags: [
+          "script",
+          "noscript",
+          "style",
+          "textarea",
+          "pre",
+          "code"
+        ]
+      }
+    };
+  </script>
+
+  <script
+    src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"
+    async
+  ></script>
+
 </head>
 
 
 <body>
 
-  <!-- ================================
-       LEFT SIDEBAR
-  ================================== -->
+  <!-- =====================================
+       SIDEBAR
+  ====================================== -->
 
   <aside class="sidebar">
 
@@ -46,6 +77,9 @@
     </div>
 
 
+    <!-- Search box is inserted here by app.js -->
+
+
     <div class="contents-title">
       CONTENTS
     </div>
@@ -56,22 +90,22 @@
       class="contents-list"
       aria-label="Notes"
     >
-      <!-- Topics are loaded by app.js -->
+      <!-- Topics loaded by app.js -->
     </nav>
 
   </aside>
 
 
-  <!-- ================================
-       MAIN CONTENT
-  ================================= -->
+  <!-- =====================================
+       MAIN
+  ====================================== -->
 
   <main class="main">
 
 
-    <!-- ==============================
-         FIXED TOP NAVIGATION
-    =============================== -->
+    <!-- ===================================
+         FIXED TOP BAR
+    ==================================== -->
 
     <header class="topbar">
 
@@ -79,13 +113,14 @@
         id="previousBtn"
         class="topic-button previous"
         type="button"
+        title="Previous topic"
       >
         ← Previous
       </button>
 
 
       <div class="topbar-title">
-        AI & ML Notes
+        Xi Notes
       </div>
 
 
@@ -95,6 +130,7 @@
           id="nextBtn"
           class="topic-button next"
           type="button"
+          title="Next topic"
         >
           Next →
         </button>
@@ -105,6 +141,7 @@
           class="theme-button"
           type="button"
           aria-label="Switch theme"
+          title="Switch theme"
         >
           ☾
         </button>
@@ -114,14 +151,12 @@
     </header>
 
 
-    <!-- ==============================
+    <!-- ===================================
          NOTE
-    =============================== -->
+    ==================================== -->
 
     <article class="note">
 
-
-      <!-- Loading -->
 
       <div
         id="loading"
@@ -131,8 +166,6 @@
       </div>
 
 
-      <!-- Error -->
-
       <div
         id="errorMessage"
         class="error-message"
@@ -140,13 +173,8 @@
       ></div>
 
 
-      <!-- Note Header -->
-
+      <!-- Note title only -->
       <header class="note-header">
-
-        <div class="note-label">
-          AI / ML REVISION
-        </div>
 
         <h1 id="noteTitle">
           Select a topic
@@ -155,22 +183,22 @@
       </header>
 
 
-      <!-- Markdown Content -->
+      <!-- Actual notebook content -->
 
       <section
         id="noteContent"
         class="note-content"
       >
-        <!-- Selected Markdown notebook appears here -->
+        <!-- Markdown rendered here -->
       </section>
 
 
     </article>
 
 
-    <!-- ==============================
+    <!-- ===================================
          FOOTER
-    =============================== -->
+    ==================================== -->
 
     <footer class="footer">
 
@@ -192,9 +220,9 @@
   </main>
 
 
-  <!-- ================================
-       JAVASCRIPT
-  ================================= -->
+  <!-- =====================================
+       APP JS
+  ====================================== -->
 
   <script src="app.js"></script>
 
