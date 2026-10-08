@@ -2,6 +2,7 @@
 <html lang="en">
 
 <head>
+
   <meta charset="UTF-8">
 
   <meta
@@ -20,12 +21,15 @@
     rel="stylesheet"
     href="style.css"
   >
+
 </head>
+
 
 <body>
 
+
   <!-- =====================================================
-       MOBILE HEADER
+       MOBILE / TOP HEADER
        ===================================================== -->
 
   <header class="mobile-header">
@@ -43,6 +47,38 @@
       </button>
 
     </div>
+
+
+    <!-- ===================================================
+         DAILY REVISION PROGRESS
+         
+         This is intentionally OUTSIDE the Contents sidebar.
+         
+         It is visible only when 1CheatSheet.md is open.
+         
+         JavaScript controls:
+           0/0 completed
+           1/8 completed
+           2/8 completed
+           etc.
+         =================================================== -->
+
+    <div
+      id="revision-progress"
+      class="revision-progress"
+      aria-live="polite"
+      aria-hidden="true"
+    ></div>
+
+
+    <!-- ===================================================
+         MOBILE HEADER SPACER
+         =================================================== -->
+
+    <div
+      class="header-spacer"
+      aria-hidden="true"
+    ></div>
 
   </header>
 
@@ -68,9 +104,13 @@
     aria-label="Contents"
   >
 
+
     <!-- ===================================================
          CONTENTS HEADER
-         Search + Completion + Hide/Show
+         Search + Hide/Show
+         
+         IMPORTANT:
+         No completion counter here.
          =================================================== -->
 
     <div
@@ -89,6 +129,7 @@
           aria-label="Search concepts"
         >
 
+
         <button
           id="contents-toggle"
           class="contents-toggle"
@@ -97,38 +138,13 @@
           aria-label="Hide contents"
           title="Hide contents"
         >
+
           <span></span>
           <span></span>
           <span></span>
+
         </button>
 
-      </div>
-
-
-      <!-- =================================================
-           COMPLETION INDICATOR
-           ================================================= -->
-
-      <div
-        id="completion-status"
-        class="completion-status"
-        aria-live="polite"
-        aria-label="Completion progress"
-      >
-        <span
-          id="completion-emoji"
-          class="completion-emoji"
-          aria-hidden="true"
-        >
-          😡
-        </span>
-
-        <span
-          id="completion-count"
-          class="completion-count"
-        >
-          0/0 completed
-        </span>
       </div>
 
     </div>
@@ -174,6 +190,7 @@
 
   <main id="main">
 
+
     <!-- ===================================================
          PREVIOUS / NEXT NAVIGATION
          =================================================== -->
@@ -184,7 +201,10 @@
       aria-label="Note navigation"
     >
 
-      <!-- Previous -->
+
+      <!-- =================================================
+           PREVIOUS
+           ================================================= -->
 
       <button
         id="previous-button"
@@ -202,6 +222,7 @@
           ←
         </span>
 
+
         <span
           id="previous-title"
           class="page-nav-title"
@@ -212,7 +233,9 @@
       </button>
 
 
-      <!-- Next -->
+      <!-- =================================================
+           NEXT
+           ================================================= -->
 
       <button
         id="next-button"
@@ -229,6 +252,7 @@
         >
           You're caught up ✦
         </span>
+
 
         <span
           class="page-nav-arrow"
@@ -281,12 +305,14 @@
     aria-label="Switch to dark theme"
     title="Switch to dark theme"
   >
+
     <span
       class="theme-icon"
       aria-hidden="true"
     >
       ☾
     </span>
+
   </button>
 
 
@@ -300,12 +326,13 @@
 
 
   <!-- =====================================================
-       APP
+       APP.JS
        ===================================================== -->
 
   <script
     src="app.js"
   ></script>
+
 
 </body>
 
