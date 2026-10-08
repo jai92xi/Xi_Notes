@@ -126,6 +126,7 @@ Ensemble learning means **combining multiple ML models** to get a better and mor
 
 ### <mark>🫜 L1 L2 Regularization </mark>
 > **L1 and L2** are **regularization techniques** used to **reduce overfitting**
+> 
 > by **adding a penalty** on the **model's weights** to the **loss function**.
 
 - **L1 (Lasso):** Adds **absolute values of weights** to the loss.
