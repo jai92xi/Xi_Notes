@@ -235,12 +235,23 @@ async function loadTopics() {
       await response.json();
 
 
+    if (!Array.isArray(files)) {
+
+      throw new Error(
+        "GitHub API returned an unexpected response."
+      );
+
+    }
+
+
     topics =
       files
 
         .filter(
           file =>
+            file &&
             file.type === "file" &&
+            typeof file.name === "string" &&
             file.name
               .toLowerCase()
               .endsWith(".md")
@@ -722,8 +733,6 @@ async function loadMarkdown(
 
 
     /*
-     * IMPORTANT:
-     *
      * Revision checkboxes are added ONLY
      * for 1CheatSheet.md.
      */
@@ -1211,1056 +1220,1213 @@ function updateTopNavigation() {
   }
 
 }
+/* ========================================================= LOAD TOPICS ========================================================= */
 
+async function loadTopics() {
 
-/* =========================================================
-   CONTENTS TOGGLE
-   ========================================================= */
+try {
+
+showLoadingSidebar();
+
+const apiURL = https://api.github.com/repos/ + ${GITHUB_USER}/${GITHUB_REPO}/contents/ + ${NOTES_FOLDER}?ref=${GITHUB_BRANCH};
+
+const response = await fetch( apiURL, { cache: "no-cache" } );
+
+if (!response.ok) {
+
+throw new Error( GitHub API error: ${response.status} );
+
+}
+
+const files = await response.json();
+
+if (!Array.isArray(files)) {
+
+throw new Error( "GitHub API returned an unexpected response." );
+
+}
+
+topics = files
+
+.filter( file => file && file.type === "file" && typeof file.name === "string" && file.name .toLowerCase() .endsWith(".md") )
+
+.map( file => ({
+
+file: file.name,
+
+name: formatTopicName( file.name ),
+
+/* * Use the GitHub API download URL when * available. The actual Markdown loader * below also has a deterministic raw URL * fallback. */
+
+url: file.download_url || getMarkdownURL({ file: file.name })
+
+}) )
+
+.sort( (a, b) => a.name.localeCompare( b.name, undefined, { numeric: true, sensitivity: "base" } ) );
+
+createSidebar(topics);
+
+if (topics.length > 0) {
+
+const requestedTopic = getTopicFromURL();
+
+const initialTopic = requestedTopic || topics[0];
+
+await loadMarkdown( initialTopic, false );
+
+} else {
+
+showMessage( "No notes yet", "Add Markdown files to the notes folder." );
+
+}
+
+} catch (error) {
+
+console.error( "Could not load topics:", error );
+
+showError( "Couldn't load your notes.", "Please check your GitHub repository and notes folder." );
+
+}
+
+}
+
+/* ========================================================= FORMAT TOPIC NAME ========================================================= */
+
+function formatTopicName(filename) {
+
+let name = filename
+
+.replace( /.md$/i, "" )
+
+.replace( /[_-]+/g, " " )
+
+.replace( /([a-z0-9])([A-Z])/g, "$1 $2" )
+
+.replace( /([A-Z]+)([A-Z][a-z])/g, "$1 $2" )
+
+.replace( /\s+/g, " " )
+
+.trim();
+
+name = name .toLowerCase() .split(" ") .filter(Boolean) .map( word => word.charAt(0).toUpperCase() + word.slice(1) ) .join(" ");
+
+const replacements = {
+
+"Ai": "AI", "Ml": "ML",
+
+"Llm": "LLM", "Llms": "LLMs",
+
+"Nlp": "NLP",
+
+"Cv": "CV",
+
+"Rag": "RAG",
+
+"Vllm": "vLLM",
+
+"Gpu": "GPU", "Gpus": "GPUs",
+
+"Cpu": "CPU", "Cpus": "CPUs",
+
+"Api": "API", "Apis": "APIs",
+
+"Mlp": "MLP",
+
+"Cnn": "CNN", "Cnns": "CNNs",
+
+"Rnn": "RNN", "Rnns": "RNNs",
+
+"Lstm": "LSTM",
+
+"Lora": "LoRA",
+
+"Sql": "SQL",
+
+"Json": "JSON",
+
+"Pytorch": "PyTorch",
+
+"Tensorflow": "TensorFlow",
+
+"Keras": "Keras",
+
+"Knn": "KNN",
+
+"Svm": "SVM",
+
+"Xgboost": "XGBoost"
+
+};
+
+return name .split(" ") .map( word => replacements[word] || word ) .join(" ");
+
+}
+
+/* ========================================================= URL TOPIC SUPPORT ========================================================= */
+
+function getTopicFromURL() {
+
+const params = new URLSearchParams( window.location.search );
+
+const file = params.get("note");
+
+if (!file) { return null; }
+
+return ( topics.find( topic => topic.file === file ) || null );
+
+}
+
+function updateURL(topic) {
+
+if (!topic) { return; }
+
+const url = new URL( window.location.href );
+
+url.searchParams.set( "note", topic.file );
+
+window.history.replaceState( {}, "", url );
+
+}
+
+/* ========================================================= SIDEBAR ========================================================= */
+
+function createSidebar(items) {
+
+if (!topicNavigation) { return; }
+
+topicNavigation.innerHTML = "";
+
+if (items.length === 0) {
+
+topicNavigation.innerHTML = <div class="no-results"> No concepts found ✦ </div> ;
+
+return;
+
+}
+
+items.forEach( topic => {
+
+const button = document.createElement( "button" );
+
+button.type = "button";
+
+button.className = "topic-button";
+
+button.dataset.file = topic.file;
+
+button.innerHTML = `
+
+<span class="topic-dot" aria-hidden="true" > ✦ </span>
+
+<span class="topic-name"> ${escapeHTML( topic.name.toUpperCase() )} </span>
+
+`;
+
+button.addEventListener( "click", () => {
+
+loadMarkdown( topic, true );
+
+closeMobileSidebar();
+
+} );
+
+topicNavigation.appendChild( button );
+
+} );
+
+if ( currentTopicIndex >= 0 && topics[currentTopicIndex] ) {
+
+updateActiveTopic( topics[currentTopicIndex] );
+
+}
+
+}
+
+/* ========================================================= LOAD MARKDOWN ========================================================= */
+
+async function loadMarkdown( topic, scrollToTop = true ) {
+
+if ( !topic || !content ) {
+
+return;
+
+}
+
+try {
+
+showLoading();
+
+const index = topics.findIndex( item => item.file === topic.file );
+
+if (index === -1) { return; }
+
+currentTopicIndex = index;
+
+updateURL(topic);
+
+updateTopNavigation();
+
+/* * Hide revision progress immediately when * navigating away from 1CheatSheet. */
+
+updateRevisionProgressVisibility( topic );
+
+const markdownURL = getMarkdownURL(topic);
+
+const response = await fetch( markdownURL, { cache: "no-cache" } );
+
+if (!response.ok) {
+
+throw new Error( Could not load ${topic.file} + (HTTP ${response.status}) );
+
+}
+
+const markdown = await response.text();
+
+if ( typeof marked === "undefined" ) {
+
+throw new Error( "Marked.js is unavailable." );
+
+}
+
+content.innerHTML = marked.parse(markdown);
+
+content.classList.add( "note-loaded" );
+
+fixMarkdownImages();
+
+addHeadingIds();
+
+addCopyButtons();
+
+setupExternalLinks();
+
+updateActiveTopic(topic);
+
+updateTopNavigation();
+
+replaceConceptHeading();
+
+normalizeCodeBlocks();
+
+typesetMath();
+
+/* * Revision checkboxes are added ONLY * for 1CheatSheet.md. */
+
+if ( topic.file === DAILYREVISIONFILE ) {
+
+setupDailyRevisionCheckboxes();
+
+} else {
+
+hideRevisionProgress();
+
+}
+
+if (scrollToTop) {
+
+window.scrollTo({
+
+top: 0,
+
+behavior: "smooth"
+
+});
+
+}
+
+} catch (error) {
+
+console.error( "Markdown loading error:", error );
+
+hideRevisionProgress();
+
+showError( "Couldn't open this note.", topic.file );
+
+}
+
+}
+
+/* ========================================================= MARKDOWN URL ========================================================= */
+
+function getMarkdownURL(topic) {
+
+if ( topic && topic.url && /^https?:///i.test( topic.url ) ) {
+
+return topic.url;
+
+}
+
+return ( https://raw.githubusercontent.com/ + ${GITHUB_USER}/ + ${GITHUB_REPO}/ + ${GITHUB_BRANCH}/ + ${NOTES_FOLDER}/ + ${encodeURIComponent(topic.file)} );
+
+}
+
+/* ========================================================= MATH RENDERING ========================================================= */
+
+function typesetMath() {
+
+if (!content) { return; }
+
+if ( typeof window.MathJax === "undefined" ) {
+
+return;
+
+}
+
+const typeset = window.MathJax.typesetPromise;
+
+if ( typeof typeset !== "function" ) {
+
+return;
+
+}
+
+typeset.call( window.MathJax, [content] ).catch( error => {
+
+console.warn( "MathJax rendering failed:", error );
+
+} );
+
+}
+
+/* ========================================================= IMAGE HANDLING ========================================================= */
+
+function fixMarkdownImages() {
+
+if (!content) { return; }
+
+const images = content.querySelectorAll( "img" );
+
+images.forEach( image => {
+
+const source = image.getAttribute( "src" );
+
+if (!source) { return; }
+
+if ( source.startsWith("http://") || source.startsWith("https://") || source.startsWith("//") || source.startsWith("data:") || source.startsWith("blob:") ) {
+
+image.loading = "lazy";
+
+image.decoding = "async";
+
+return;
+
+}
+
+try {
+
+const notesBaseURL = https://raw.githubusercontent.com/ + ${GITHUB_USER}/ + ${GITHUB_REPO}/ + ${GITHUB_BRANCH}/ + ${NOTES_FOLDER}/;
+
+const imageURL = new URL( source, notesBaseURL );
+
+image.src = imageURL.href;
+
+} catch (error) {
+
+console.warn( "Could not resolve image:", source, error );
+
+}
+
+image.loading = "lazy";
+
+image.decoding = "async";
+
+} );
+
+}
+
+/* ========================================================= ACTIVE TOPIC ========================================================= */
+
+function updateActiveTopic(topic) {
+
+if (!topicNavigation) { return; }
+
+const buttons = topicNavigation.querySelectorAll( ".topic-button" );
+
+buttons.forEach( button => {
+
+const active = button.dataset.file === topic.file;
+
+button.classList.toggle( "active", active );
+
+if (active) {
+
+button.setAttribute( "aria-current", "page" );
+
+} else {
+
+button.removeAttribute( "aria-current" );
+
+}
+
+} );
+
+}
+
+/* ========================================================= SEARCH ========================================================= */
+
+function setupSearch() {
+
+if (!searchInput) { return; }
+
+searchInput.addEventListener( "input", event => {
+
+const query = event.target.value .toLowerCase() .trim();
+
+if (!query) {
+
+createSidebar( topics );
+
+return;
+
+}
+
+const filtered = topics.filter( topic => {
+
+const name = topic.name.toLowerCase();
+
+const filename = topic.file.toLowerCase();
+
+return ( name.includes(query) || filename.includes(query) );
+
+} );
+
+createSidebar( filtered );
+
+} );
+
+}
+
+/* ========================================================= PREVIOUS / NEXT ========================================================= */
+
+function setupTopNavigation() {
+
+if (previousButton) {
+
+previousButton.addEventListener( "click", event => {
+
+event.preventDefault();
+
+goToPrevious();
+
+} );
+
+}
+
+if (nextButton) {
+
+nextButton.addEventListener( "click", event => {
+
+event.preventDefault();
+
+goToNext();
+
+} );
+
+}
+
+updateTopNavigation();
+
+}
+
+function goToPrevious() {
+
+if ( currentTopicIndex <= 0 ) {
+
+return;
+
+}
+
+const previous = topics[ currentTopicIndex - 1 ];
+
+if (!previous) { return; }
+
+loadMarkdown( previous, true );
+
+}
+
+function goToNext() {
+
+if ( currentTopicIndex < 0 || currentTopicIndex >= topics.length - 1 ) {
+
+return;
+
+}
+
+const next = topics[ currentTopicIndex + 1 ];
+
+if (!next) { return; }
+
+loadMarkdown( next, true );
+
+}
+
+function updateTopNavigation() {
+
+if ( !previousButton || !nextButton ) {
+
+return;
+
+}
+
+const hasPrevious = currentTopicIndex > 0;
+
+previousButton.disabled = !hasPrevious;
+
+if (previousTitle) {
+
+previousTitle.textContent = hasPrevious ? topics[ currentTopicIndex - 1 ].name : "Start";
+
+}
+
+const hasNext = currentTopicIndex >= 0 && currentTopicIndex < topics.length - 1;
+
+nextButton.disabled = !hasNext;
+
+if (nextTitle) {
+
+nextTitle.textContent = hasNext ? topics[ currentTopicIndex + 1 ].name : "You're caught up ✦";
+
+}
+
+}
+/* ========================================================= CONTENTS TOGGLE ========================================================= */
 
 function setupContentsToggle() {
 
-  if (
-    !contentsToggle ||
-    !sidebar
-  ) {
+if ( !contentsToggle || !sidebar ) {
 
-    return;
-
-  }
-
-
-  const initiallyHidden =
-    sidebar.classList.contains(
-      "contents-hidden"
-    );
-
-
-  contentsToggle.classList.toggle(
-    "collapsed",
-    initiallyHidden
-  );
-
-
-  contentsToggle.setAttribute(
-    "aria-expanded",
-    initiallyHidden
-      ? "false"
-      : "true"
-  );
-
-
-  contentsToggle.setAttribute(
-    "aria-label",
-    initiallyHidden
-      ? "Show contents"
-      : "Hide contents"
-  );
-
-
-  contentsToggle.setAttribute(
-    "title",
-    initiallyHidden
-      ? "Show contents"
-      : "Hide contents"
-  );
-
-
-  contentsToggle.addEventListener(
-    "click",
-    event => {
-
-      event.preventDefault();
-
-
-      const hidden =
-        sidebar.classList.toggle(
-          "contents-hidden"
-        );
-
-
-      contentsToggle.classList.toggle(
-        "collapsed",
-        hidden
-      );
-
-
-      contentsToggle.setAttribute(
-        "aria-expanded",
-        hidden
-          ? "false"
-          : "true"
-      );
-
-
-      contentsToggle.setAttribute(
-        "aria-label",
-        hidden
-          ? "Show contents"
-          : "Hide contents"
-      );
-
-
-      contentsToggle.setAttribute(
-        "title",
-        hidden
-          ? "Show contents"
-          : "Hide contents"
-      );
-
-    }
-  );
+return;
 
 }
 
+const initiallyHidden = sidebar.classList.contains( "contents-hidden" );
 
-/* =========================================================
-   MOBILE MENU
-   ========================================================= */
+contentsToggle.classList.toggle( "collapsed", initiallyHidden );
 
-let sidebarWasCollapsedBeforeMobile =
-  false;
+contentsToggle.setAttribute( "aria-expanded", initiallyHidden ? "false" : "true" );
 
+contentsToggle.setAttribute( "aria-label", initiallyHidden ? "Show contents" : "Hide contents" );
+
+contentsToggle.setAttribute( "title", initiallyHidden ? "Show contents" : "Hide contents" );
+
+contentsToggle.addEventListener( "click", event => {
+
+event.preventDefault();
+
+const hidden = sidebar.classList.toggle( "contents-hidden" );
+
+contentsToggle.classList.toggle( "collapsed", hidden );
+
+contentsToggle.setAttribute( "aria-expanded", hidden ? "false" : "true" );
+
+contentsToggle.setAttribute( "aria-label", hidden ? "Show contents" : "Hide contents" );
+
+contentsToggle.setAttribute( "title", hidden ? "Show contents" : "Hide contents" );
+
+} );
+
+}
+
+/* ========================================================= MOBILE MENU ========================================================= */
+
+let sidebarWasCollapsedBeforeMobile = false;
 
 function setupMobileMenu() {
 
-  if (menuButton) {
+if (menuButton) {
 
-    menuButton.addEventListener(
-      "click",
-      event => {
+menuButton.addEventListener( "click", event => {
 
-        event.preventDefault();
+event.preventDefault();
 
-        openMobileSidebar();
+openMobileSidebar();
 
-      }
-    );
-
-  }
-
-
-  if (sidebarOverlay) {
-
-    sidebarOverlay.addEventListener(
-      "click",
-      closeMobileSidebar
-    );
-
-  }
+} );
 
 }
 
+if (sidebarOverlay) {
+
+sidebarOverlay.addEventListener( "click", closeMobileSidebar );
+
+}
+
+}
 
 function openMobileSidebar() {
 
-  if (sidebar) {
+if (sidebar) {
 
-    sidebarWasCollapsedBeforeMobile =
-      sidebar.classList.contains(
-        "contents-hidden"
-      );
+sidebarWasCollapsedBeforeMobile = sidebar.classList.contains( "contents-hidden" );
 
+sidebar.classList.remove( "contents-hidden" );
 
-    sidebar.classList.remove(
-      "contents-hidden"
-    );
-
-
-    sidebar.classList.add(
-      "mobile-open"
-    );
-
-  }
-
-
-  if (sidebarOverlay) {
-
-    sidebarOverlay.classList.add(
-      "active"
-    );
-
-  }
-
-
-  document.body.classList.add(
-    "sidebar-open"
-  );
+sidebar.classList.add( "mobile-open" );
 
 }
 
+if (sidebarOverlay) {
+
+sidebarOverlay.classList.add( "active" );
+
+}
+
+document.body.classList.add( "sidebar-open" );
+
+}
 
 function closeMobileSidebar() {
 
-  if (sidebar) {
+if (sidebar) {
 
-    sidebar.classList.remove(
-      "mobile-open"
-    );
+sidebar.classList.remove( "mobile-open" );
 
+if ( sidebarWasCollapsedBeforeMobile ) {
 
-    if (
-      sidebarWasCollapsedBeforeMobile
-    ) {
-
-      sidebar.classList.add(
-        "contents-hidden"
-      );
-
-    }
-
-  }
-
-
-  if (sidebarOverlay) {
-
-    sidebarOverlay.classList.remove(
-      "active"
-    );
-
-  }
-
-
-  document.body.classList.remove(
-    "sidebar-open"
-  );
+sidebar.classList.add( "contents-hidden" );
 
 }
 
+}
 
-/* =========================================================
-   THEME
-   ========================================================= */
+if (sidebarOverlay) {
+
+sidebarOverlay.classList.remove( "active" );
+
+}
+
+document.body.classList.remove( "sidebar-open" );
+
+}
+
+/* ========================================================= THEME ========================================================= */
 
 function setupTheme() {
 
-  if (!themeButton) {
-    return;
-  }
+if (!themeButton) { return; }
 
+const saved = localStorage.getItem( "shared-ai-notes-theme" );
 
-  const saved =
-    localStorage.getItem(
-      "shared-ai-notes-theme"
-    );
+if (saved === "dark") {
 
+document.body.classList.add( "dark-theme" );
 
-  if (saved === "dark") {
+} else {
 
-    document.body.classList.add(
-      "dark-theme"
-    );
-
-  } else {
-
-    document.body.classList.remove(
-      "dark-theme"
-    );
-
-  }
-
-
-  updateThemeButton();
-
-
-  themeButton.addEventListener(
-    "click",
-    event => {
-
-      event.preventDefault();
-
-
-      document.body.classList.toggle(
-        "dark-theme"
-      );
-
-
-      const dark =
-        document.body.classList.contains(
-          "dark-theme"
-        );
-
-
-      localStorage.setItem(
-        "shared-ai-notes-theme",
-        dark
-          ? "dark"
-          : "light"
-      );
-
-
-      updateThemeButton();
-
-    }
-  );
+document.body.classList.remove( "dark-theme" );
 
 }
 
+updateThemeButton();
+
+themeButton.addEventListener( "click", event => {
+
+event.preventDefault();
+
+document.body.classList.toggle( "dark-theme" );
+
+const dark = document.body.classList.contains( "dark-theme" );
+
+localStorage.setItem( "shared-ai-notes-theme", dark ? "dark" : "light" );
+
+updateThemeButton();
+
+} );
+
+}
 
 function updateThemeButton() {
 
-  if (!themeButton) {
-    return;
-  }
+if (!themeButton) { return; }
 
+const dark = document.body.classList.contains( "dark-theme" );
 
-  const dark =
-    document.body.classList.contains(
-      "dark-theme"
-    );
+const icon = themeButton.querySelector( ".theme-icon" );
 
+if (icon) {
 
-  const icon =
-    themeButton.querySelector(
-      ".theme-icon"
-    );
+icon.textContent = dark ? "☀" : "☾";
 
+} else {
 
-  if (icon) {
-
-    icon.textContent =
-      dark
-        ? "☀"
-        : "☾";
-
-  } else {
-
-    themeButton.textContent =
-      dark
-        ? "☀"
-        : "☾";
-
-  }
-
-
-  themeButton.setAttribute(
-    "aria-label",
-    dark
-      ? "Switch to light theme"
-      : "Switch to dark theme"
-  );
-
-
-  themeButton.setAttribute(
-    "title",
-    dark
-      ? "Switch to light theme"
-      : "Switch to dark theme"
-  );
+themeButton.textContent = dark ? "☀" : "☾";
 
 }
 
+themeButton.setAttribute( "aria-label", dark ? "Switch to light theme" : "Switch to dark theme" );
 
-/* =========================================================
-   COPY BUTTONS
-   ========================================================= */
+themeButton.setAttribute( "title", dark ? "Switch to light theme" : "Switch to dark theme" );
+
+}
+
+/* ========================================================= COPY BUTTONS ========================================================= */
 
 function addCopyButtons() {
 
-  if (!content) {
-    return;
-  }
+if (!content) { return; }
 
+const codeBlocks = content.querySelectorAll( "pre > code" );
 
-  const codeBlocks =
-    content.querySelectorAll(
-      "pre > code"
-    );
+codeBlocks.forEach( code => {
 
+const pre = code.parentElement;
 
-  codeBlocks.forEach(
-    code => {
+if ( pre.querySelector( ".copy-button" ) ) {
 
-      const pre =
-        code.parentElement;
-
-
-      if (
-        pre.querySelector(
-          ".copy-button"
-        )
-      ) {
-
-        return;
-
-      }
-
-
-      const button =
-        document.createElement(
-          "button"
-        );
-
-
-      button.type =
-        "button";
-
-
-      button.className =
-        "copy-button";
-
-
-      button.textContent =
-        "Copy";
-
-
-      button.addEventListener(
-        "click",
-        async event => {
-
-          event.preventDefault();
-
-          event.stopPropagation();
-
-
-          try {
-
-            await navigator.clipboard.writeText(
-              code.innerText
-            );
-
-
-            showCopiedState(
-              button
-            );
-
-
-          } catch (error) {
-
-            fallbackCopy(
-              code.innerText,
-              button
-            );
-
-          }
-
-        }
-      );
-
-
-      pre.appendChild(
-        button
-      );
-
-    }
-  );
+return;
 
 }
 
+const button = document.createElement( "button" );
+
+button.type = "button";
+
+button.className = "copy-button";
+
+button.textContent = "Copy";
+
+button.addEventListener( "click", async event => {
+
+event.preventDefault();
+
+event.stopPropagation();
+
+try {
+
+if ( navigator.clipboard && typeof navigator.clipboard.writeText === "function" ) {
+
+await navigator.clipboard.writeText( code.innerText );
+
+showCopiedState( button );
+
+} else {
+
+fallbackCopy( code.innerText, button );
+
+}
+
+} catch (error) {
+
+fallbackCopy( code.innerText, button );
+
+}
+
+} );
+
+pre.appendChild( button );
+
+} );
+
+}
 
 function showCopiedState(button) {
 
-  button.textContent =
-    "Copied ✦";
+button.textContent = "Copied ✦";
 
+button.classList.add( "copied" );
 
-  button.classList.add(
-    "copied"
-  );
+setTimeout( () => {
 
+button.textContent = "Copy";
 
-  setTimeout(
-    () => {
+button.classList.remove( "copied" );
 
-      button.textContent =
-        "Copy";
-
-
-      button.classList.remove(
-        "copied"
-      );
-
-    },
-    1400
-  );
+}, 1400 );
 
 }
 
+/* ========================================================= FALLBACK COPY ========================================================= */
 
-/* =========================================================
-   FALLBACK COPY
-   ========================================================= */
+function fallbackCopy( text, button ) {
 
-function fallbackCopy(
-  text,
-  button
-) {
+const textarea = document.createElement( "textarea" );
 
-  const textarea =
-    document.createElement(
-      "textarea"
-    );
+textarea.value = text;
 
+textarea.style.position = "fixed";
 
-  textarea.value =
-    text;
+textarea.style.left = "-9999px";
 
+textarea.style.top = "0";
 
-  textarea.style.position =
-    "fixed";
+textarea.style.opacity = "0";
 
+document.body.appendChild( textarea );
 
-  textarea.style.left =
-    "-9999px";
+textarea.focus();
 
+textarea.select();
 
-  document.body.appendChild(
-    textarea
-  );
+try {
 
+const copied = document.execCommand( "copy" );
 
-  textarea.select();
+if (copied) {
 
+showCopiedState( button );
 
-  try {
+} else {
 
-    document.execCommand(
-      "copy"
-    );
-
-
-    showCopiedState(
-      button
-    );
-
-
-  } catch (error) {
-
-    console.error(
-      "Copy failed:",
-      error
-    );
-
-  }
-
-
-  textarea.remove();
+console.warn( "Fallback copy command was unsuccessful." );
 
 }
 
+} catch (error) {
 
-/* =========================================================
-   HEADING IDS
-   ========================================================= */
+console.error( "Copy failed:", error );
+
+}
+
+textarea.remove();
+
+}
+
+/* ========================================================= HEADING IDS ========================================================= */
 
 function addHeadingIds() {
 
-  if (!content) {
-    return;
-  }
+if (!content) { return; }
 
+const headings = content.querySelectorAll( "h1, h2, h3, h4, h5, h6" );
 
-  const headings =
-    content.querySelectorAll(
-      "h1, h2, h3, h4, h5, h6"
-    );
+const used = new Set();
 
+headings.forEach( heading => {
 
-  const used =
-    new Set();
+const text = heading.textContent .toLowerCase() .trim();
 
+let id = text .replace( /[^\w\s-]/g, "" ) .replace( /\s+/g, "-" );
 
-  headings.forEach(
-    heading => {
+if (!id) { return; }
 
-      const text =
-        heading.textContent
-          .toLowerCase()
-          .trim();
+const original = id;
 
+let counter = 2;
 
-      let id =
-        text
-          .replace(
-            /[^\w\s-]/g,
-            ""
-          )
-          .replace(
-            /\s+/g,
-            "-"
-          );
+while ( used.has(id) ) {
 
+id = ${original}-${counter};
 
-      if (!id) {
-        return;
-      }
-
-
-      const original =
-        id;
-
-
-      let counter = 2;
-
-
-      while (
-        used.has(id)
-      ) {
-
-        id =
-          `${original}-${counter}`;
-
-
-        counter++;
-
-      }
-
-
-      used.add(id);
-
-
-      heading.id =
-        id;
-
-    }
-  );
+counter++;
 
 }
 
+used.add(id);
 
-/* =========================================================
-   CONCEPT HEADING
-   ========================================================= */
+heading.id = id;
+
+} );
+
+}
+
+/* ========================================================= CONCEPT HEADING ========================================================= */
 
 function replaceConceptHeading() {
 
-  if (!content) {
-    return;
-  }
+if (!content) { return; }
 
+const headings = content.querySelectorAll( "h1, h2" );
 
-  const headings =
-    content.querySelectorAll(
-      "h1, h2"
-    );
+headings.forEach( heading => {
 
+const text = heading.textContent.trim();
 
-  headings.forEach(
-    heading => {
+if ( text === "AI & ML Key Concepts" || text === "AI & ML Notes" ) {
 
-      const text =
-        heading.textContent.trim();
-
-
-      if (
-        text === "AI & ML Key Concepts" ||
-        text === "AI & ML Notes"
-      ) {
-
-        heading.textContent =
-          "🧠 AI & ML Key Concepts";
-
-      }
-
-    }
-  );
+heading.textContent = "🧠 AI & ML Key Concepts";
 
 }
 
+} );
 
-/* =========================================================
-   CODE BLOCKS
-   ========================================================= */
+}
+
+/* ========================================================= CODE BLOCKS ========================================================= */
 
 function normalizeCodeBlocks() {
 
-  if (!content) {
-    return;
-  }
+if (!content) { return; }
 
+const codeBlocks = content.querySelectorAll( "pre code" );
 
-  const codeBlocks =
-    content.querySelectorAll(
-      "pre code"
-    );
+codeBlocks.forEach( code => {
 
+code.style.color = "inherit";
 
-  codeBlocks.forEach(
-    code => {
-
-      code.style.color =
-        "inherit";
-
-    }
-  );
+} );
 
 }
 
-
-/* =========================================================
-   EXTERNAL LINKS
-   ========================================================= */
+/* ========================================================= EXTERNAL LINKS ========================================================= */
 
 function setupExternalLinks() {
 
-  if (!content) {
-    return;
-  }
+if (!content) { return; }
 
+const links = content.querySelectorAll( "a" );
 
-  const links =
-    content.querySelectorAll(
-      "a"
-    );
+links.forEach( link => {
 
+const href = link.getAttribute( "href" );
 
-  links.forEach(
-    link => {
+if ( href && ( href.startsWith( "http://" ) || href.startsWith( "https://" ) ) ) {
 
-      const href =
-        link.getAttribute(
-          "href"
-        );
+link.target = "_blank";
 
-
-      if (
-        href &&
-        (
-          href.startsWith(
-            "http://"
-          ) ||
-          href.startsWith(
-            "https://"
-          )
-        )
-      ) {
-
-        link.target =
-          "_blank";
-
-
-        link.rel =
-          "noopener noreferrer";
-
-      }
-
-    }
-  );
+link.rel = "noopener noreferrer";
 
 }
 
+} );
 
-/* =========================================================
-   KEYBOARD SHORTCUTS
-   ========================================================= */
+}
+
+/* ========================================================= KEYBOARD SHORTCUTS ========================================================= */
 
 function setupKeyboardShortcuts() {
 
-  document.addEventListener(
-    "keydown",
-    event => {
+document.addEventListener( "keydown", event => {
 
-      if (
-        (event.ctrlKey ||
-          event.metaKey) &&
-        event.key.toLowerCase() ===
-          "k"
-      ) {
+if ( (event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "k" ) {
 
-        event.preventDefault();
+event.preventDefault();
 
+if (searchInput) {
 
-        if (searchInput) {
+if ( sidebar && sidebar.classList.contains( "contents-hidden" ) ) {
 
-          if (
-            sidebar &&
-            sidebar.classList.contains(
-              "contents-hidden"
-            )
-          ) {
+sidebar.classList.remove( "contents-hidden" );
 
-            sidebar.classList.remove(
-              "contents-hidden"
-            );
+if (contentsToggle) {
 
+contentsToggle.classList.remove( "collapsed" );
 
-            if (contentsToggle) {
+contentsToggle.setAttribute( "aria-expanded", "true" );
 
-              contentsToggle.classList.remove(
-                "collapsed"
-              );
+contentsToggle.setAttribute( "aria-label", "Hide contents" );
 
-
-              contentsToggle.setAttribute(
-                "aria-expanded",
-                "true"
-              );
-
-
-              contentsToggle.setAttribute(
-                "aria-label",
-                "Hide contents"
-              );
-
-
-              contentsToggle.setAttribute(
-                "title",
-                "Hide contents"
-              );
-
-            }
-
-          }
-
-
-          searchInput.focus();
-
-          searchInput.select();
-
-        }
-
-      }
-
-
-      if (
-        event.key === "Escape"
-      ) {
-
-        if (searchInput) {
-
-          searchInput.value = "";
-
-          searchInput.blur();
-
-
-          createSidebar(
-            topics
-          );
-
-        }
-
-
-        closeMobileSidebar();
-
-      }
-
-
-      if (
-        event.key === "ArrowLeft" &&
-        !isTyping(event)
-      ) {
-
-        if (
-          currentTopicIndex > 0
-        ) {
-
-          event.preventDefault();
-
-          goToPrevious();
-
-        }
-
-      }
-
-
-      if (
-        event.key === "ArrowRight" &&
-        !isTyping(event)
-      ) {
-
-        if (
-          currentTopicIndex >= 0 &&
-          currentTopicIndex <
-            topics.length - 1
-        ) {
-
-          event.preventDefault();
-
-          goToNext();
-
-        }
-
-      }
-
-    }
-  );
+contentsToggle.setAttribute( "title", "Hide contents" );
 
 }
 
+}
 
-/* =========================================================
-   TYPING CHECK
-   ========================================================= */
+searchInput.focus();
+
+searchInput.select();
+
+}
+
+}
+
+if ( event.key === "Escape" ) {
+
+if (searchInput) {
+
+searchInput.value = "";
+
+searchInput.blur();
+
+createSidebar( topics );
+
+}
+
+closeMobileSidebar();
+
+}
+
+if ( event.key === "ArrowLeft" && !isTyping(event) ) {
+
+if ( currentTopicIndex > 0 ) {
+
+event.preventDefault();
+
+goToPrevious();
+
+}
+
+}
+
+if ( event.key === "ArrowRight" && !isTyping(event) ) {
+
+if ( currentTopicIndex >= 0 && currentTopicIndex < topics.length - 1 ) {
+
+event.preventDefault();
+
+goToNext();
+
+}
+
+}
+
+} );
+
+}
+
+/* ========================================================= TYPING CHECK ========================================================= */
 
 function isTyping(event) {
 
-  const element =
-    event.target;
+const element = event.target;
 
+if (!element) { return false; }
 
-  if (!element) {
-    return false;
-  }
+const tag = element.tagName ? element.tagName.toLowerCase() : "";
 
-
-  const tag =
-    element.tagName
-      ? element.tagName.toLowerCase()
-      : "";
-
-
-  return (
-    tag === "input" ||
-    tag === "textarea" ||
-    element.isContentEditable
-  );
+return ( tag === "input" || tag === "textarea" || element.isContentEditable );
 
 }
 
-
-/* =========================================================
-   LOADING
-   ========================================================= */
+/* ========================================================= LOADING ========================================================= */
 
 function showLoading() {
 
-  if (!content) {
-    return;
-  }
+if (!content) { return; }
 
+content.innerHTML = `
 
-  content.innerHTML = `
+<div class="loading">
 
-    <div class="loading">
+<div class="loading-line"></div>
 
-      <div class="loading-line"></div>
+<div class="loading-line short"></div>
 
-      <div class="loading-line short"></div>
+<div class="loading-line"></div>
 
-      <div class="loading-line"></div>
+</div>
 
-    </div>
+`;
 
-  `;
-
-
-  content.classList.remove(
-    "note-loaded"
-  );
+content.classList.remove( "note-loaded" );
 
 }
-
 
 function showLoadingSidebar() {
 
-  if (!topicNavigation) {
-    return;
-  }
+if (!topicNavigation) { return; }
 
+topicNavigation.innerHTML = `
 
-  topicNavigation.innerHTML = `
+<div class="no-results"> Loading concepts... </div>
 
-    <div class="no-results">
-      Loading concepts...
-    </div>
-
-  `;
+`;
 
 }
 
+/* ========================================================= EMPTY STATE ========================================================= */
 
-/* =========================================================
-   EMPTY STATE
-   ========================================================= */
+function showMessage( title, message ) {
 
-function showMessage(
-  title,
-  message
-) {
+if (!content) { return; }
 
-  if (!content) {
-    return;
-  }
+content.innerHTML = `
 
+<div class="empty-state">
 
-  content.innerHTML = `
+<h1> ${escapeHTML(title)} </h1>
 
-    <div class="empty-state">
+<p> ${escapeHTML(message)} </p>
 
-      <h1>
-        ${escapeHTML(title)}
-      </h1>
+</div>
 
-      <p>
-        ${escapeHTML(message)}
-      </p>
-
-    </div>
-
-  `;
+`;
 
 }
 
+/* ========================================================= ERROR ========================================================= */
 
-/* =========================================================
-   ERROR
-   ========================================================= */
+function showError( title, message ) {
 
-function showError(
-  title,
-  message
-) {
+if (!content) { return; }
 
-  if (!content) {
-    return;
-  }
+content.innerHTML = `
 
+<div class="error">
 
-  content.innerHTML = `
+<h1> ${escapeHTML(title)} </h1>
 
-    <div class="error">
+<p> ${escapeHTML(message)} </p>
 
-      <h1>
-        ${escapeHTML(title)}
-      </h1>
+</div>
 
-      <p>
-        ${escapeHTML(message)}
-      </p>
-
-    </div>
-
-  `;
+`;
 
 }
 
-
-/* =========================================================
-   ESCAPE HTML
-   ========================================================= */
+/* ========================================================= ESCAPE HTML ========================================================= */
 
 function escapeHTML(value) {
 
-  const div =
-    document.createElement(
-      "div"
-    );
+const div = document.createElement( "div" );
 
+div.textContent = String(value);
 
-  div.textContent =
-    String(value);
+return div.innerHTML;
 
+}
 
-  return div.innerHTML;
+/* ========================================================= REVISION PROGRESS VISIBILITY ========================================================= */
+
+function updateRevisionProgressVisibility( topic ) {
+
+const indicator = document.getElementById( "revision-progress" );
+
+if (!indicator) { return; }
+
+const visible = !!topic && topic.file === DAILYREVISIONFILE;
+
+indicator.style.display = visible ? "flex" : "none";
+
+indicator.setAttribute( "aria-hidden", visible ? "false" : "true" );
+
+if (!visible) {
+
+indicator.textContent = "";
+
+indicator.classList.remove( "complete" );
+
+}
+
+}
+
+/* ========================================================= HIDE REVISION PROGRESS ========================================================= */
+
+function hideRevisionProgress() {
+
+const indicator = document.getElementById( "revision-progress" );
+
+if (!indicator) { return; }
+
+indicator.textContent = "";
+
+indicator.style.display = "none";
+
+indicator.setAttribute( "aria-hidden", "true" );
+
+indicator.classList.remove( "complete" );
 
 }
 /* =========================================================
    DAILY REVISION TRACKER
-   PART 2
    ========================================================= */
 
 /*
- * IMPORTANT
- * ----------
- * This section works ONLY for:
+ * The revision tracker works ONLY for:
  *
  *     1CheatSheet.md
  *
- * Do not add checkboxes to any other note.
+ * Every heading in that file becomes a revision item.
+ *
+ * Progress is stored locally in the browser and is
+ * tracked separately for each day using IST.
  */
 
 const DAILY_REVISION_FILE = "1CheatSheet.md";
+
 const DAILY_REVISION_TIMEZONE = "Asia/Kolkata";
-const DAILY_REVISION_STORAGE_PREFIX = "xi-notes-daily:";
+
+const DAILY_REVISION_STORAGE_PREFIX =
+  "xi-notes-daily:";
 
 
 /* =========================================================
@@ -2269,29 +2435,60 @@ const DAILY_REVISION_STORAGE_PREFIX = "xi-notes-daily:";
 
 function getDailyRevisionDate() {
 
-  return new Intl.DateTimeFormat(
-    "en-CA",
-    {
-      timeZone: DAILY_REVISION_TIMEZONE,
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit"
-    }
-  ).format(new Date());
+  try {
+
+    return new Intl.DateTimeFormat(
+      "en-CA",
+      {
+        timeZone:
+          DAILY_REVISION_TIMEZONE,
+
+        year:
+          "numeric",
+
+        month:
+          "2-digit",
+
+        day:
+          "2-digit"
+      }
+    ).format(
+      new Date()
+    );
+
+  } catch (error) {
+
+    console.warn(
+      "Could not determine IST date:",
+      error
+    );
+
+    /*
+     * Fallback to browser date.
+     */
+
+    return new Date()
+      .toISOString()
+      .slice(0, 10);
+
+  }
 
 }
 
 
 /* =========================================================
-   CHECK WHETHER CURRENT NOTE IS 1CheatSheet
+   CHECK CURRENT NOTE
    ========================================================= */
 
-function isDailyRevisionNote(topic = null) {
+function isDailyRevisionNote(
+  topic = null
+) {
 
   if (topic) {
 
     return (
-      topic.file === DAILY_REVISION_FILE
+      topic.file ===
+      DAILY_REVISION_FILE
     );
 
   }
@@ -2319,21 +2516,6 @@ function isDailyRevisionNote(topic = null) {
    GET REVISION HEADINGS
    ========================================================= */
 
-/*
- * Every heading in 1CheatSheet is treated as one
- * revision item.
- *
- * Example:
- *
- * # Topic A
- *     related content
- *
- * ## Topic B
- *     related content
- *
- * Each heading gets its own checkbox.
- */
-
 function getDailyRevisionHeadings() {
 
   if (!content) {
@@ -2353,9 +2535,6 @@ function getDailyRevisionHeadings() {
   ).filter(
     heading => {
 
-      /*
-       * Ignore the main document title.
-       */
       const text =
         heading.textContent
           .replace(
@@ -2364,6 +2543,11 @@ function getDailyRevisionHeadings() {
           )
           .trim();
 
+
+      /*
+       * Do not turn the main document title
+       * into a revision checkbox.
+       */
 
       return (
         text &&
@@ -2390,9 +2574,10 @@ function getDailyRevisionStorageKey(
 ) {
 
   /*
-   * Heading IDs are generated by addHeadingIds().
+   * Use the generated heading ID.
    *
-   * This keeps each section's history separate.
+   * This means each heading keeps its own
+   * revision history.
    */
 
   return (
@@ -2422,7 +2607,9 @@ function getDailyRevisionHistory(
   try {
 
     const saved =
-      localStorage.getItem(key);
+      localStorage.getItem(
+        key
+      );
 
 
     if (!saved) {
@@ -2431,12 +2618,18 @@ function getDailyRevisionHistory(
 
 
     const data =
-      JSON.parse(saved);
+      JSON.parse(
+        saved
+      );
 
 
     if (
       !data ||
-      typeof data.history !== "object"
+      typeof data.history !==
+        "object" ||
+      Array.isArray(
+        data.history
+      )
     ) {
 
       return {};
@@ -2500,7 +2693,7 @@ function saveDailyRevisionHistory(
 
 
 /* =========================================================
-   CHECK CURRENT DAY
+   CURRENT DAY STATE
    ========================================================= */
 
 function getDailyRevisionState(
@@ -2525,7 +2718,7 @@ function getDailyRevisionState(
 
 
 /* =========================================================
-   SAVE CURRENT DAY
+   SAVE CURRENT DAY STATE
    ========================================================= */
 
 function setDailyRevisionState(
@@ -2560,7 +2753,7 @@ function setDailyRevisionState(
    ========================================================= */
 
 /*
- * Find everything belonging to a heading.
+ * Finds all elements belonging to a heading.
  *
  * Example:
  *
@@ -2570,11 +2763,9 @@ function setDailyRevisionState(
  * code
  * paragraph
  *
- * All of that becomes green/struck-through
- * when Topic is checked.
- *
- * It stops when another heading of the same
- * or higher level is reached.
+ * Everything above is considered part of Topic
+ * until another heading of the same or higher
+ * level appears.
  */
 
 function getDailyRevisionSectionElements(
@@ -2595,6 +2786,11 @@ function getDailyRevisionSectionElements(
 
 
   while (current) {
+
+    /*
+     * Stop when we reach a heading of the
+     * same or higher level.
+     */
 
     if (
       /^H[1-6]$/.test(
@@ -2637,7 +2833,7 @@ function getDailyRevisionSectionElements(
 
 
 /* =========================================================
-   APPLY GREEN + STRIKE
+   UPDATE SECTION VISUAL STATE
    ========================================================= */
 
 function updateDailyRevisionSection(
@@ -2645,8 +2841,13 @@ function updateDailyRevisionSection(
   checked
 ) {
 
+  if (!heading) {
+    return;
+  }
+
+
   /*
-   * Apply state to heading itself.
+   * Apply completed state to heading.
    */
 
   heading.classList.toggle(
@@ -2656,7 +2857,8 @@ function updateDailyRevisionSection(
 
 
   /*
-   * Apply state to all related content.
+   * Apply completed state to all content
+   * belonging to this heading.
    */
 
   const elements =
@@ -2680,14 +2882,10 @@ function updateDailyRevisionSection(
 
 
 /* =========================================================
-   COMPLETION COUNT
+   TODAY'S REVISION STATS
    ========================================================= */
 
 function getTodayRevisionStats() {
-
-  /*
-   * Only 1CheatSheet.
-   */
 
   if (
     !isDailyRevisionNote()
@@ -2727,34 +2925,23 @@ function getTodayRevisionStats() {
 
   return {
     completed,
-    total: headings.length
+    total:
+      headings.length
   };
 
 }
 
 
 /* =========================================================
-   TOP BAR COMPLETION INDICATOR
+   GET PROGRESS ELEMENT
    ========================================================= */
 
-/*
- * IMPORTANT:
- *
- * This is deliberately NOT placed inside
- * the Contents/sidebar.
- *
- * It looks for an existing element first.
- *
- * If your HTML has:
- *
- *     <div id="revision-progress"></div>
- *
- * it will use that.
- *
- * Otherwise it creates one in the top bar.
- */
-
 function getRevisionProgressElement() {
+
+  /*
+   * Prefer the element already supplied
+   * by the HTML.
+   */
 
   let indicator =
     document.getElementById(
@@ -2768,7 +2955,8 @@ function getRevisionProgressElement() {
 
 
   /*
-   * Try common top-bar containers.
+   * If HTML does not contain the element,
+   * attempt to create it in the top bar.
    */
 
   const topBar =
@@ -2796,10 +2984,6 @@ function getRevisionProgressElement() {
     "revision-progress";
 
 
-  /*
-   * Put it in the middle of the top bar.
-   */
-
   topBar.appendChild(
     indicator
   );
@@ -2811,7 +2995,7 @@ function getRevisionProgressElement() {
 
 
 /* =========================================================
-   UPDATE TOP BAR
+   UPDATE PROGRESS INDICATOR
    ========================================================= */
 
 function updateProgressIndicator() {
@@ -2826,8 +3010,8 @@ function updateProgressIndicator() {
 
 
   /*
-   * Hide completely for every note except
-   * 1CheatSheet.md.
+   * The progress indicator must not appear
+   * on normal notes.
    */
 
   if (
@@ -2843,6 +3027,10 @@ function updateProgressIndicator() {
     indicator.setAttribute(
       "aria-hidden",
       "true"
+    );
+
+    indicator.classList.remove(
+      "complete"
     );
 
     return;
@@ -2883,7 +3071,7 @@ function updateProgressIndicator() {
 
 
 /* =========================================================
-   ADD CHECKBOXES
+   ADD DAILY REVISION CHECKBOXES
    ========================================================= */
 
 function addDailyRevisionCheckboxes(
@@ -2892,13 +3080,16 @@ function addDailyRevisionCheckboxes(
 
   /*
    * HARD RESTRICTION:
-   * only 1CheatSheet.md.
+   *
+   * Never add checkboxes to any note except
+   * 1CheatSheet.md.
    */
 
   if (
     !content ||
     !topic ||
-    topic.file !== DAILY_REVISION_FILE
+    topic.file !==
+      DAILY_REVISION_FILE
   ) {
 
     updateProgressIndicator();
@@ -2916,7 +3107,7 @@ function addDailyRevisionCheckboxes(
     heading => {
 
       /*
-       * Prevent duplicate checkbox.
+       * Prevent duplicate checkboxes.
        */
 
       if (
@@ -2961,7 +3152,8 @@ function addDailyRevisionCheckboxes(
 
 
       /*
-       * Insert checkbox before heading text.
+       * Put checkbox at the beginning
+       * of the heading.
        */
 
       heading.insertBefore(
@@ -2971,7 +3163,7 @@ function addDailyRevisionCheckboxes(
 
 
       /*
-       * Restore today's state.
+       * Restore today's saved state.
        */
 
       updateDailyRevisionSection(
@@ -2981,8 +3173,8 @@ function addDailyRevisionCheckboxes(
 
 
       /*
-       * Do not let clicking the checkbox
-       * interfere with other heading behavior.
+       * Prevent checkbox click from
+       * propagating to heading handlers.
        */
 
       checkbox.addEventListener(
@@ -2996,7 +3188,7 @@ function addDailyRevisionCheckboxes(
 
 
       /*
-       * Save + update UI.
+       * Save state whenever checkbox changes.
        */
 
       checkbox.addEventListener(
@@ -3019,15 +3211,6 @@ function addDailyRevisionCheckboxes(
           );
 
 
-          /*
-           * THIS updates:
-           *
-           * 0/0 completed
-           * 1/8 completed
-           * 2/8 completed
-           * ...
-           */
-
           updateProgressIndicator();
 
         }
@@ -3038,7 +3221,7 @@ function addDailyRevisionCheckboxes(
 
 
   /*
-   * Initial count.
+   * Initial progress count.
    */
 
   updateProgressIndicator();
@@ -3047,13 +3230,8 @@ function addDailyRevisionCheckboxes(
 
 
 /* =========================================================
-   REMOVE DAILY CHECKBOXES
+   REMOVE DAILY REVISION CHECKBOXES
    ========================================================= */
-
-/*
- * This protects against a checkbox accidentally
- * remaining when navigating away from 1CheatSheet.
- */
 
 function removeDailyRevisionCheckboxes() {
 
@@ -3061,6 +3239,10 @@ function removeDailyRevisionCheckboxes() {
     return;
   }
 
+
+  /*
+   * Remove all checkboxes.
+   */
 
   const checkboxes =
     content.querySelectorAll(
@@ -3076,6 +3258,10 @@ function removeDailyRevisionCheckboxes() {
     }
   );
 
+
+  /*
+   * Remove completed state from headings.
+   */
 
   const completedHeadings =
     content.querySelectorAll(
@@ -3093,6 +3279,11 @@ function removeDailyRevisionCheckboxes() {
     }
   );
 
+
+  /*
+   * Remove completed state from
+   * section content.
+   */
 
   const completedContent =
     content.querySelectorAll(
@@ -3114,82 +3305,15 @@ function removeDailyRevisionCheckboxes() {
 
 
 /* =========================================================
-   LOAD HOOK
+   MIDNIGHT WATCHER
    ========================================================= */
 
 /*
- * We hook into the existing loadMarkdown().
+ * Previous days remain stored.
  *
- * DO NOT create another loadMarkdown function.
- *
- * This wrapper runs AFTER the original markdown
- * rendering is complete.
- */
-
-const xiNotesLoadMarkdown =
-  loadMarkdown;
-
-
-loadMarkdown =
-  async function (
-    topic,
-    scrollToTop = true
-  ) {
-
-    await xiNotesLoadMarkdown(
-      topic,
-      scrollToTop
-    );
-
-
-    /*
-     * Remove tracker UI first.
-     *
-     * This guarantees that moving from
-     * 1CheatSheet -> another note cleans it up.
-     */
-
-    removeDailyRevisionCheckboxes();
-
-
-    /*
-     * Only activate tracker for 1CheatSheet.
-     */
-
-    if (
-      topic &&
-      topic.file === DAILY_REVISION_FILE
-    ) {
-
-      addDailyRevisionCheckboxes(
-        topic
-      );
-
-    }
-
-
-    /*
-     * Always update the top bar.
-     *
-     * It hides itself for other notes.
-     */
-
-    updateProgressIndicator();
-
-  };
-
-
-/* =========================================================
-   MIDNIGHT RESET
-   ========================================================= */
-
-/*
- * We do NOT delete yesterday's history.
- *
- * At midnight, the current checkbox state is
- * simply read using the new IST date.
- *
- * Therefore the new day starts unchecked.
+ * At midnight the date changes, so today's
+ * state automatically becomes unchecked unless
+ * the new date has already been marked complete.
  */
 
 function setupDailyRevisionMidnightWatcher() {
@@ -3206,7 +3330,8 @@ function setupDailyRevisionMidnightWatcher() {
 
 
       if (
-        currentDate === lastDate
+        currentDate ===
+        lastDate
       ) {
 
         return;
@@ -3219,8 +3344,8 @@ function setupDailyRevisionMidnightWatcher() {
 
 
       /*
-       * Only refresh the currently visible
-       * 1CheatSheet.
+       * Only refresh if 1CheatSheet is
+       * currently visible.
        */
 
       if (
@@ -3252,25 +3377,722 @@ function setupDailyRevisionMidnightWatcher() {
 
 
 /* =========================================================
-   START TRACKER
+   START DAILY REVISION WATCHER
    ========================================================= */
 
 document.addEventListener(
   "DOMContentLoaded",
   () => {
 
-    /*
-     * Start midnight watcher.
-     */
-
     setupDailyRevisionMidnightWatcher();
 
-
-    /*
-     * Initial top-bar state.
-     */
 
     updateProgressIndicator();
 
   }
 );
+/* =========================================================
+   FINAL GITHUB / INITIALIZATION SAFEGUARDS
+   ========================================================= */
+
+/*
+ * GitHub's API can occasionally return:
+ *
+ *   403
+ *   404
+ *   rate-limit errors
+ *   repository visibility errors
+ *
+ * This section provides a clearer diagnosis instead
+ * of always showing the generic notes error.
+ */
+
+
+/* =========================================================
+   GITHUB API ERROR MESSAGE
+   ========================================================= */
+
+async function getGitHubErrorMessage(
+  response
+) {
+
+  let message =
+    `GitHub API error: ${response.status}`;
+
+
+  try {
+
+    const data =
+      await response.json();
+
+
+    if (
+      data &&
+      data.message
+    ) {
+
+      message +=
+        ` — ${data.message}`;
+
+    }
+
+  } catch (error) {
+
+    /*
+     * Response may not contain JSON.
+     */
+
+  }
+
+
+  return message;
+
+}
+
+
+/* =========================================================
+   VALIDATE GITHUB CONFIGURATION
+   ========================================================= */
+
+function validateGitHubConfiguration() {
+
+  const validUser =
+    typeof GITHUB_USER ===
+      "string" &&
+    GITHUB_USER.trim() !== "";
+
+
+  const validRepo =
+    typeof GITHUB_REPO ===
+      "string" &&
+    GITHUB_REPO.trim() !== "";
+
+
+  const validBranch =
+    typeof GITHUB_BRANCH ===
+      "string" &&
+    GITHUB_BRANCH.trim() !== "";
+
+
+  const validFolder =
+    typeof NOTES_FOLDER ===
+      "string" &&
+    NOTES_FOLDER.trim() !== "";
+
+
+  if (
+    !validUser ||
+    !validRepo ||
+    !validBranch ||
+    !validFolder
+  ) {
+
+    console.error(
+      "Invalid GitHub configuration:",
+      {
+        GITHUB_USER,
+        GITHUB_REPO,
+        GITHUB_BRANCH,
+        NOTES_FOLDER
+      }
+    );
+
+
+    return false;
+
+  }
+
+
+  return true;
+
+}
+
+
+/* =========================================================
+   SAFE FETCH
+   ========================================================= */
+
+/*
+ * Adds a small timeout so the UI does not remain stuck
+ * indefinitely if GitHub does not respond.
+ */
+
+async function fetchWithTimeout(
+  url,
+  options = {},
+  timeout = 15000
+) {
+
+  const controller =
+    new AbortController();
+
+
+  const timeoutId =
+    window.setTimeout(
+      () => {
+
+        controller.abort();
+
+      },
+      timeout
+    );
+
+
+  try {
+
+    const response =
+      await fetch(
+        url,
+        {
+          ...options,
+          signal:
+            controller.signal
+        }
+      );
+
+
+    return response;
+
+  } finally {
+
+    window.clearTimeout(
+      timeoutId
+    );
+
+  }
+
+}
+
+
+/* =========================================================
+   BETTER ERROR DISPLAY
+   ========================================================= */
+
+function showGitHubLoadError(
+  error
+) {
+
+  if (!content) {
+    return;
+  }
+
+
+  const message =
+    error &&
+    error.message
+      ? error.message
+      : "Unknown GitHub error";
+
+
+  content.innerHTML = `
+
+    <div class="error">
+
+      <h1>
+        Couldn't load your notes.
+      </h1>
+
+      <p>
+        Please check your GitHub repository and notes folder.
+      </p>
+
+      <p class="error-details">
+        ${escapeHTML(message)}
+      </p>
+
+      <button
+        type="button"
+        class="retry-button"
+        id="retry-notes-button"
+      >
+        Try Again
+      </button>
+
+    </div>
+
+  `;
+
+
+  const retryButton =
+    document.getElementById(
+      "retry-notes-button"
+    );
+
+
+  if (retryButton) {
+
+    retryButton.addEventListener(
+      "click",
+      () => {
+
+        loadTopics();
+
+      }
+    );
+
+  }
+
+}
+
+
+/* =========================================================
+   REPLACE LOAD TOPICS WITH SAFER VERSION
+   ========================================================= */
+
+/*
+ * Keep the original implementation available.
+ *
+ * The original function is replaced with a version that:
+ *
+ * 1. Validates the GitHub configuration.
+ * 2. Uses the GitHub Contents API.
+ * 3. Handles rate limits and 404 errors.
+ * 4. Ignores directories and non-Markdown files.
+ * 5. Keeps the existing topic ordering.
+ */
+
+const xiNotesOriginalLoadTopics =
+  loadTopics;
+
+
+loadTopics =
+  async function () {
+
+    try {
+
+      showLoadingSidebar();
+
+
+      if (
+        !validateGitHubConfiguration()
+      ) {
+
+        throw new Error(
+          "GitHub repository configuration is invalid."
+        );
+
+      }
+
+
+      const apiURL =
+        `https://api.github.com/repos/` +
+        `${encodeURIComponent(GITHUB_USER)}/` +
+        `${encodeURIComponent(GITHUB_REPO)}/contents/` +
+        `${NOTES_FOLDER}?ref=${encodeURIComponent(GITHUB_BRANCH)}`;
+
+
+      console.log(
+        "Loading notes from:",
+        apiURL
+      );
+
+
+      const response =
+        await fetchWithTimeout(
+          apiURL,
+          {
+            cache: "no-store",
+
+            headers: {
+              Accept:
+                "application/vnd.github+json"
+            }
+          },
+          15000
+        );
+
+
+      if (!response.ok) {
+
+        const githubMessage =
+          await getGitHubErrorMessage(
+            response
+          );
+
+
+        throw new Error(
+          githubMessage
+        );
+
+      }
+
+
+      const files =
+        await response.json();
+
+
+      if (
+        !Array.isArray(files)
+      ) {
+
+        throw new Error(
+          "GitHub returned an unexpected response for the notes folder."
+        );
+
+      }
+
+
+      topics =
+        files
+
+          .filter(
+            file =>
+              file &&
+              file.type === "file" &&
+              typeof file.name === "string" &&
+              file.name
+                .toLowerCase()
+                .endsWith(".md")
+          )
+
+          .map(
+            file => ({
+
+              file:
+                file.name,
+
+              name:
+                formatTopicName(
+                  file.name
+                ),
+
+              /*
+               * Do not depend on download_url.
+               *
+               * raw.githubusercontent.com is more
+               * predictable for Markdown loading.
+               */
+
+              url:
+                getRawGitHubURL(
+                  file.name
+                )
+
+            })
+          )
+
+          .sort(
+            (a, b) =>
+              a.name.localeCompare(
+                b.name,
+                undefined,
+                {
+                  numeric: true,
+                  sensitivity:
+                    "base"
+                }
+              )
+          );
+
+
+      console.log(
+        `Loaded ${topics.length} Markdown note(s).`
+      );
+
+
+      createSidebar(
+        topics
+      );
+
+
+      if (
+        topics.length === 0
+      ) {
+
+        currentTopicIndex =
+          -1;
+
+
+        updateTopNavigation();
+
+
+        showMessage(
+          "No notes yet",
+          `No Markdown files were found in the "${NOTES_FOLDER}" folder.`
+        );
+
+
+        return;
+
+      }
+
+
+      const requestedTopic =
+        getTopicFromURL();
+
+
+      const initialTopic =
+        requestedTopic ||
+        topics[0];
+
+
+      await loadMarkdown(
+        initialTopic,
+        false
+      );
+
+
+    } catch (error) {
+
+      console.error(
+        "Could not load topics:",
+        error
+      );
+
+
+      topics = [];
+
+
+      currentTopicIndex =
+        -1;
+
+
+      updateTopNavigation();
+
+
+      if (
+        error &&
+        error.name ===
+          "AbortError"
+      ) {
+
+        showGitHubLoadError(
+          new Error(
+            "GitHub took too long to respond. Please try again."
+          )
+        );
+
+        return;
+
+      }
+
+
+      showGitHubLoadError(
+        error
+      );
+
+    }
+
+  };
+
+
+/* =========================================================
+   RAW GITHUB URL
+   ========================================================= */
+
+function getRawGitHubURL(
+  filename
+) {
+
+  return (
+    `https://raw.githubusercontent.com/` +
+    `${encodeURIComponent(GITHUB_USER)}/` +
+    `${encodeURIComponent(GITHUB_REPO)}/` +
+    `${encodeURIComponent(GITHUB_BRANCH)}/` +
+    `${encodeURIComponent(NOTES_FOLDER)}/` +
+    `${encodeURIComponent(filename)}`
+  );
+
+}
+
+
+/* =========================================================
+   REPLACE MARKDOWN URL BUILDER
+   ========================================================= */
+
+/*
+ * Override the previous URL function so filenames
+ * containing spaces, &, #, %, etc. are encoded correctly.
+ */
+
+function getMarkdownURL(topic) {
+
+  if (
+    !topic ||
+    !topic.file
+  ) {
+
+    return "";
+
+  }
+
+
+  return getRawGitHubURL(
+    topic.file
+  );
+
+}
+
+
+/* =========================================================
+   SAFER MARKDOWN FETCH
+   ========================================================= */
+
+/*
+ * Keep a reference to the current implementation.
+ *
+ * This wrapper specifically improves the Markdown fetch
+ * error reporting while preserving all existing rendering
+ * behavior.
+ */
+
+const xiNotesOriginalLoadMarkdown =
+  loadMarkdown;
+
+
+loadMarkdown =
+  async function (
+    topic,
+    scrollToTop = true
+  ) {
+
+    /*
+     * The existing loadMarkdown already handles rendering.
+     *
+     * We only validate the topic before allowing it
+     * to proceed.
+     */
+
+    if (
+      !topic ||
+      !topic.file
+    ) {
+
+      console.error(
+        "Invalid topic:",
+        topic
+      );
+
+
+      return;
+
+    }
+
+
+    await xiNotesOriginalLoadMarkdown(
+      topic,
+      scrollToTop
+    );
+
+  };
+
+
+/* =========================================================
+   GITHUB CONNECTION DIAGNOSTICS
+   ========================================================= */
+
+function logGitHubConfiguration() {
+
+  console.info(
+    "Xi Notes GitHub configuration:",
+    {
+      repository:
+        `${GITHUB_USER}/${GITHUB_REPO}`,
+
+      branch:
+        GITHUB_BRANCH,
+
+      notesFolder:
+        NOTES_FOLDER
+    }
+  );
+
+}
+
+
+/* =========================================================
+   FINAL DOM READY
+   ========================================================= */
+
+document.addEventListener(
+  "DOMContentLoaded",
+  () => {
+
+    logGitHubConfiguration();
+
+
+    /*
+     * The original DOMContentLoaded handler already
+     * starts loadTopics().
+     *
+     * We intentionally do NOT call loadTopics()
+     * again here.
+     *
+     * This prevents duplicate GitHub requests.
+     */
+
+  }
+);
+
+
+/* =========================================================
+   BROWSER BACK / FORWARD
+   ========================================================= */
+
+window.addEventListener(
+  "popstate",
+  () => {
+
+    const topic =
+      getTopicFromURL();
+
+
+    if (!topic) {
+      return;
+    }
+
+
+    loadMarkdown(
+      topic,
+      true
+    );
+
+  }
+);
+
+
+/* =========================================================
+   FINAL SAFETY CHECK
+   ========================================================= */
+
+window.addEventListener(
+  "error",
+  event => {
+
+    /*
+     * Do not replace the entire page for unrelated
+     * browser errors.
+     *
+     * Just log useful diagnostics.
+     */
+
+    console.warn(
+      "Xi Notes runtime error:",
+      event.error ||
+      event.message
+    );
+
+  }
+);
+
+
+/* =========================================================
+   UNHANDLED PROMISE ERRORS
+   ========================================================= */
+
+window.addEventListener(
+  "unhandledrejection",
+  event => {
+
+    console.warn(
+      "Xi Notes promise error:",
+      event.reason
+    );
+
+  }
+);
+
+
+/* =========================================================
+   END OF app.js
+   ========================================================= */
