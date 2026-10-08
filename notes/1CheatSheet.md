@@ -123,3 +123,23 @@ Ensemble learning means **combining multiple ML models** to get a better and mor
 **Boosting:**
 - **Trains models sequentially**, where **each new model focuses more on the errors made by previous models**.
 ---
+
+### <mark>🫜 L1 L2 Regularization </mark>
+> **L1 and L2** are **regularization techniques** used to **reduce overfitting**
+> by **adding a penalty** on the **model's weights** to the **loss function**.
+
+- **L1 (Lasso):** Adds **absolute values of weights** to the loss.
+  - Can make weights **exactly zero**.
+  - Performs **feature selection**.
+
+- **L2 (Ridge):** Adds **squared weights** to the loss.
+  - Makes weights **small**, but usually not zero.
+  - Produces **smoother and more stable models**
+
+**When to use which?**
+- **L1:** High-dimensional data with many irrelevant features → **eliminates features**
+- **L2:** Most features are useful but model is overfitting → **shrinks weights**
+- **Elastic Net:** Need **both L1 and L2** behavior
+
+---
+
