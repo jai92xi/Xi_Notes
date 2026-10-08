@@ -101,10 +101,25 @@ Hallucination happens when the **retrieved context doesn't contain enough releva
     └── Stratified K-Fold CV
 ```
 ---
+
 ### <mark>**🐉 SMOTE — Synthetic Minority Over-sampling Technique**</mark>
 > SMOTE is an **oversampling technique** used to **handle class imbalance** 
 > by **creating new synthetic minority-class samples** instead of **simply duplicating existing ones**.
 
 Minority sample → Find K nearest minority neighbors → Select one neighbor → Generate a synthetic sample between them
 
+---
+
+### <mark>🍉 Bagging vs Boosting </mark>
+Bagging and boosting are **both ensemble learning techniques**, but they build models differently.
+
+**What is Ensemble Method in ML?**
+Ensemble learning means **combining multiple ML models** to get a better and more accurate prediction.
+
+**Bagging:**
+- Trains **multiple models independently and in parallel** on **different samples of the data**.
+- **Combines their predictions**, usually by **majority voting for classification** or **averaging for regression**.
+  
+**Boosting:**
+- **Trains models sequentially**, where **each new model focuses more on the errors made by previous models**.
 ---
