@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <meta
+    name="description"
+    content="Xi Notes — AI & ML revision notebook"
+  >
+
+  <title>Xi Notes — AI & ML Revision</title>
+
+  <link
+    rel="stylesheet"
+    href="style.css"
+  >
+</head>
+
+<body>
+
+  <!-- =====================================================
+       PAGE LOADER
+  ====================================================== -->
+
+  <div id="pageLoader" class="page-loader">
+    <div class="loader-orbit">
+      <span></span>
+    </div>
+    <p>Loading your notes...</p>
+  </div>
+
+
+  <!-- =====================================================
+       MOBILE OVERLAY
+  ====================================================== -->
+
+  <div
+    id="sidebarOverlay"
+    class="sidebar-overlay"
+  ></div>
+
+
+  <!-- =====================================================
+       SIDEBAR
+  ====================================================== -->
+
+  <aside class="sidebar" id="sidebar">
+
+    <div class="sidebar-inner">
+
+      <!-- Brand -->
+
+      <a
+        href="#"
+        class="brand"
+        aria-label="Xi Notes home"
+      >
+
+        <div class="brand-mark">
+          <span>Xi</span>
+        </div>
+
+        <div class="brand-text">
+          <strong>Xi Notes</strong>
+          <span>AI / ML Revision</span>
+        </div>
+
+      </a>
+
+
+      <!-- Navigation -->
+
+      <nav class="main-nav">
+
+        <div class="nav-label">
+          LIBRARY
+        </div>
+
+        <button
+          class="nav-item active"
+          data-topic="all"
+        >
+          <span class="nav-icon">⌂</span>
+          <span>All Notes</span>
+          <span
+            class="nav-count"
+            id="totalNotes"
+          >
+            0
+          </span>
+        </button>
+
+        <button
+          class="nav-item"
+          id="favoritesNav"
+        >
+          <span class="nav-icon">☆</span>
+          <span>Favorites</span>
+        </button>
+
+        <button
+          class="nav-item"
+          id="progressNav"
+        >
+          <span class="nav-icon">◔</span>
+          <span>In Progress</span>
+        </button>
+
+      </nav>
+
+
+      <!-- Topics -->
+
+      <div class="sidebar-section">
+
+        <div class="section-heading">
+          <span>TOPICS</span>
+        </div>
+
+        <div
+          id="topicList"
+          class="topic-list"
+        >
+          <!-- Populated by app.js -->
+        </div>
+
+      </div>
+
+
+      <!-- Progress -->
+
+      <div class="sidebar-progress">
+
+        <div class="sidebar-progress-header">
+          <span>Your Progress</span>
+
+          <strong id="overallProgress">
+            0%
+          </strong>
+        </div>
+
+        <div class="progress-track">
+          <div
+            id="overallProgressBar"
+            class="progress-fill"
+            style="width: 0%"
+          ></div>
+        </div>
+
+        <div class="progress-meta">
+          <span>
+            <strong id="completedNotes">0</strong>
+            completed
+          </span>
+
+          <span>
+            <strong id="progressNotes">0</strong>
+            in progress
+          </span>
+        </div>
+
+      </div>
+
+
+      <!-- Sidebar Footer -->
+
+      <div class="sidebar-footer">
+
+        <a
+          href="https://github.com/jai92xi/Xi_Notes"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="github-link"
+        >
+          <span>↗</span>
+          <span>View repository</span>
+        </a>
+
+        <button
+          id="themeToggle"
+          class="theme-toggle"
+          aria-label="Switch theme"
+        >
+          ☀
+        </button>
+
+      </div>
+
+    </div>
+
+  </aside>
+
+
+  <!-- =====================================================
+       MAIN
+  ====================================================== -->
+
+  <main class="main">
+
+    <!-- Top Bar -->
+
+    <header class="topbar">
+
+      <button
+        id="menuToggle"
+        class="menu-toggle"
+        aria-label="Open menu"
+      >
+        ☰
+      </button>
+
+
+      <!-- Search -->
+
+      <div class="search-box">
+
+        <span class="search-icon">
+          ⌕
+        </span>
+
+        <input
+          id="searchInput"
+          class="search-input"
+          type="search"
+          placeholder="Search AI & ML notes..."
+          autocomplete="off"
+          spellcheck="false"
+        >
+
+        <button
+          id="clearSearch"
+          class="clear-search"
+          aria-label="Clear search"
+        >
+          ×
+        </button>
+
+        <kbd>/</kbd>
+
+      </div>
+
+
+      <div class="topbar-actions">
+
+        <button
+          id="themeToggle"
+          class="theme-toggle mobile-theme"
+          aria-label="Toggle theme"
+        >
+          ☀
+        </button>
+
+      </div>
+
+    </header>
+
+
+    <!-- ===================================================
+         CONTENT
+    ==================================================== -->
+
+    <div class="content">
+
+
+      <!-- Hero -->
+
+      <section class="hero">
+
+        <div class="hero-copy">
+
+          <div class="eyebrow">
+            <span class="pulse"></span>
+            PERSONAL KNOWLEDGE BASE
+          </div>
+
+          <h1>
+            AI & ML
+            <span>Revision Hub</span>
+          </h1>
+
+          <p>
+            Your personal collection of notes,
+            concepts, algorithms and ideas —
+            organized for fast revision.
+          </p>
+
+          <div class="hero-shortcuts">
+
+            <span>
+              <kbd>⌘</kbd>
+              <kbd>K</kbd>
+              Search
+            </span>
+
+            <span>
+              <kbd>/</kbd>
+              Quick search
+            </span>
+
+          </div>
+
+        </div>
+
+
+        <!-- Decorative graphic -->
+
+        <div class="hero-visual">
+
+          <div class="neural-network">
+
+            <div class="node node-1"></div>
+            <div class="node node-2"></div>
+            <div class="node node-3"></div>
+            <div class="node node-4"></div>
+            <div class="node node-5"></div>
+            <div class="node node-6"></div>
+            <div class="node node-7"></div>
+            <div class="node node-8"></div>
+
+            <div class="connection connection-1"></div>
+            <div class="connection connection-2"></div>
+            <div class="connection connection-3"></div>
+            <div class="connection connection-4"></div>
+            <div class="connection connection-5"></div>
+            <div class="connection connection-6"></div>
+            <div class="connection connection-7"></div>
+            <div class="connection connection-8"></div>
+
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- =================================================
+           QUICK STATS
+      ================================================== -->
+
+      <section class="stats-grid">
+
+        <div class="stat-card">
+
+          <div class="stat-icon purple">
+            ◫
+          </div>
+
+          <div class="stat-content">
+
+            <span>Total Notes</span>
+
+            <strong id="notesCount">
+              0
+            </strong>
+
+          </div>
+
+        </div>
+
+
+        <div class="stat-card">
+
+          <div class="stat-icon blue">
+            ◔
+          </div>
+
+          <div class="stat-content">
+
+            <span>In Progress</span>
+
+            <strong id="progressStat">
+              0
+            </strong>
+
+          </div>
+
+        </div>
+
+
+        <div class="stat-card">
+
+          <div class="stat-icon green">
+            ✓
+          </div>
+
+          <div class="stat-content">
+
+            <span>Completed</span>
+
+            <strong id="completedStat">
+              0
+            </strong>
+
+          </div>
+
+        </div>
+
+
+        <div class="stat-card">
+
+          <div class="stat-icon orange">
+            %
+          </div>
+
+          <div class="stat-content">
+
+            <span>Overall Progress</span>
+
+            <strong id="progressStatPercent">
+              0%
+            </strong>
+
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- =================================================
+           CONTINUE READING
+      ================================================== -->
+
+      <section class="continue-section">
+
+        <div class="section-header">
+
+          <div>
+            <span class="section-kicker">
+              PICK UP WHERE YOU LEFT OFF
+            </span>
+
+            <h2>
+              Continue Reading
+            </h2>
+          </div>
+
+        </div>
+
+        <div
+          id="continueReading"
+          class="continue-grid"
+        >
+          <!-- Populated by app.js -->
+        </div>
+
+      </section>
+
+
+      <!-- =================================================
+           NOTES HEADER
+      ================================================== -->
+
+      <section class="notes-section">
+
+        <div class="notes-header">
+
+          <div class="notes-heading">
+
+            <span class="section-kicker">
+              KNOWLEDGE LIBRARY
+            </span>
+
+            <h2>
+              All Notes
+            </h2>
+
+            <span
+              id="resultCount"
+              class="result-count"
+            >
+              0 notes
+            </span>
+
+          </div>
+
+
+          <div class="notes-controls">
+
+            <select
+              id="sortSelect"
+              class="sort-select"
+              aria-label="Sort notes"
+            >
+              <option value="name">
+                Sort: A–Z
+              </option>
+
+              <option value="recent">
+                Recently Read
+              </option>
+
+              <option value="progress">
+                Progress
+              </option>
+
+              <option value="favorites">
+                Favorites
+              </option>
+            </select>
+
+          </div>
+
+        </div>
+
+
+        <!-- Notes -->
+
+        <div
+          id="notesGrid"
+          class="notes-grid"
+        >
+          <!-- Populated by app.js -->
+        </div>
+
+      </section>
+
+
+      <!-- =================================================
+           FAVORITES
+      ================================================== -->
+
+      <section
+        id="favoritesSection"
+        class="favorites-section"
+      >
+
+        <div class="section-header">
+
+          <div>
+
+            <span class="section-kicker">
+              SAVED FOR LATER
+            </span>
+
+            <h2>
+              Favorites
+            </h2>
+
+          </div>
+
+        </div>
+
+        <div
+          id="favoritesList"
+          class="favorites-list"
+        >
+          <!-- Populated by app.js -->
+        </div>
+
+      </section>
+
+
+      <!-- Footer -->
+
+      <footer class="footer">
+
+        <div>
+          <strong>Xi Notes</strong>
+          <span>
+            Built for learning, revision & curiosity.
+          </span>
+        </div>
+
+        <a
+          href="https://github.com/jai92xi/Xi_Notes"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          GitHub ↗
+        </a>
+
+      </footer>
+
+    </div>
+
+  </main>
+
+
+  <!-- =====================================================
+       NOTE READER MODAL
+  ====================================================== -->
+
+  <div
+    id="noteModal"
+    class="reader-modal"
+    aria-hidden="true"
+  >
+
+    <div class="reader-window">
+
+
+      <!-- Reader Header -->
+
+      <header class="reader-header">
+
+        <div class="reader-header-left">
+
+          <button
+            id="closeReader"
+            class="modal-close"
+            aria-label="Close reader"
+          >
+            ←
+          </button>
+
+          <div class="reader-title-wrapper">
+
+            <span class="reader-label">
+              NOTEBOOK
+            </span>
+
+            <h2 id="readerTitle">
+              Note
+            </h2>
+
+          </div>
+
+        </div>
+
+
+        <div class="reader-actions">
+
+          <div class="reader-progress">
+
+            <div
+              class="reader-progress-track"
+            >
+              <div
+                id="readerProgressBar"
+                class="reader-progress-fill"
+                style="width:0%"
+              ></div>
+            </div>
+
+            <span id="readerProgressText">
+              0% read
+            </span>
+
+          </div>
+
+
+          <button
+            id="markComplete"
+            class="reader-action"
+          >
+            ✓ Complete
+          </button>
+
+
+          <button
+            id="openGithub"
+            class="reader-action"
+          >
+            GitHub ↗
+          </button>
+
+        </div>
+
+      </header>
+
+
+      <!-- Reader Body -->
+
+      <div class="reader-layout">
+
+
+        <!-- Table of contents -->
+
+        <aside class="reader-sidebar">
+
+          <div class="reader-sidebar-title">
+            ON THIS PAGE
+          </div>
+
+          <nav
+            id="readerToc"
+            class="reader-toc"
+          >
+            <span>
+              Scroll through the note
+            </span>
+          </nav>
+
+        </aside>
+
+
+        <!-- Markdown content -->
+
+        <article
+          id="noteContent"
+          class="reader-content"
+        >
+          <!-- Markdown inserted by app.js -->
+        </article>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- =====================================================
+       JAVASCRIPT
+  ====================================================== -->
+
+  <script src="app.js"></script>
+
+</body>
+</html>
