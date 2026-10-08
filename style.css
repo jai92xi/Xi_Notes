@@ -1,38 +1,65 @@
 :root {
   --bg: #ffffff;
-  --sidebar-bg: #f7f7f8;
+  --sidebar-bg: #f8f8fa;
   --surface: #ffffff;
+
   --text: #18181b;
-  --text-secondary: #5f5f67;
-  --text-muted: #92929a;
-  --border: #e5e5e7;
-  --hover: #eeeeef;
-  --accent: #5b45d9;
-  --accent-bg: #efecff;
-  --code-bg: #f4f4f5;
+  --text-secondary: #5f6068;
+  --text-muted: #92939b;
+
+  --border: #e6e6ea;
+  --hover: #eeeeF2;
+
+  --accent: #6c4ff6;
+  --accent-bg: #f0ecff;
+
+  --search-bg: #ffffff;
+
+  --code-bg: #f4f4f6;
+
+  --mark-bg: #fff0a8;
+  --mark-text: #332b00;
+
+  --callout-pink: #ffe5f0;
+  --callout-purple: #eee7ff;
+  --callout-blue: #e2f3ff;
 
   --sidebar-width: 270px;
   --topbar-height: 58px;
 }
 
+
 [data-theme="dark"] {
   --bg: #111113;
   --sidebar-bg: #18181b;
-  --surface: #111113;
-  --text: #f4f4f5;
-  --text-secondary: #b5b5bc;
-  --text-muted: #77777f;
-  --border: #2b2b30;
-  --hover: #242428;
-  --accent: #a898ff;
-  --accent-bg: #27223d;
-  --code-bg: #1d1d21;
+  --surface: #151518;
+
+  --text: #f5f5f6;
+  --text-secondary: #b8b8c0;
+  --text-muted: #777780;
+
+  --border: #2b2b31;
+  --hover: #242429;
+
+  --accent: #a996ff;
+  --accent-bg: #292341;
+
+  --search-bg: #202024;
+
+  --code-bg: #1d1d22;
+
+  --mark-bg: #594f18;
+  --mark-text: #fff3a6;
+
+  --callout-pink: #3b2531;
+  --callout-purple: #2d2742;
+  --callout-blue: #202f3b;
 }
 
 
-/* ================================
+/* =====================================================
    RESET
-================================ */
+===================================================== */
 
 * {
   box-sizing: border-box;
@@ -44,6 +71,7 @@ html {
 
 body {
   margin: 0;
+
   min-height: 100vh;
 
   background: var(--bg);
@@ -55,6 +83,8 @@ body {
     BlinkMacSystemFont,
     "Segoe UI",
     Roboto,
+    Helvetica,
+    Arial,
     sans-serif;
 
   transition:
@@ -63,8 +93,7 @@ body {
 }
 
 button,
-input,
-textarea {
+input {
   font: inherit;
 }
 
@@ -83,9 +112,9 @@ a {
 }
 
 
-/* ================================
+/* =====================================================
    SIDEBAR
-================================ */
+===================================================== */
 
 .sidebar {
   position: fixed;
@@ -107,9 +136,11 @@ a {
   z-index: 200;
 }
 
+
 .sidebar-header {
-  padding: 4px 10px 25px;
+  padding: 4px 10px 20px;
 }
+
 
 .logo {
   display: block;
@@ -117,10 +148,11 @@ a {
   color: var(--text);
 
   font-size: 19px;
-  font-weight: 700;
+  font-weight: 750;
 
   letter-spacing: -0.04em;
 }
+
 
 .subtitle {
   display: block;
@@ -129,35 +161,101 @@ a {
 
   color: var(--text-muted);
 
-  font-size: 11px;
+  font-size: 10px;
 }
 
+
+/* =====================================================
+   SEARCH
+===================================================== */
+
+.search-box {
+  display: block;
+
+  width: calc(100% - 14px);
+
+  height: 34px;
+
+  margin:
+    0 7px
+    18px;
+
+  padding:
+    0 11px;
+
+  border:
+    1px solid var(--border);
+
+  border-radius: 8px;
+
+  outline: none;
+
+  background: var(--search-bg);
+
+  color: var(--text);
+
+  font-size: 11px;
+
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease,
+    background 0.15s ease;
+}
+
+
+.search-box::placeholder {
+  color: var(--text-muted);
+}
+
+
+.search-box:focus {
+  border-color: var(--accent);
+
+  box-shadow:
+    0 0 0 3px
+    color-mix(
+      in srgb,
+      var(--accent) 12%,
+      transparent
+    );
+}
+
+
+/* =====================================================
+   CONTENTS
+===================================================== */
+
 .contents-title {
-  padding: 0 10px;
+  padding:
+    0 10px;
 
   margin-bottom: 7px;
 
   color: var(--text-muted);
 
   font-size: 9px;
-  font-weight: 700;
+  font-weight: 750;
 
-  letter-spacing: 0.12em;
+  letter-spacing: 0.13em;
 }
+
 
 .contents-list {
   display: flex;
+
   flex-direction: column;
 
-  gap: 1px;
+  gap: 2px;
 }
+
 
 .content-item {
   width: 100%;
 
-  padding: 8px 10px;
+  padding:
+    8px 10px;
 
-  border-radius: 6px;
+  border-radius: 7px;
 
   background: transparent;
 
@@ -176,22 +274,26 @@ a {
     color 0.15s ease;
 }
 
+
 .content-item:hover {
   background: var(--hover);
+
   color: var(--text);
 }
 
+
 .content-item.active {
   background: var(--accent-bg);
+
   color: var(--accent);
 
-  font-weight: 600;
+  font-weight: 650;
 }
 
 
-/* ================================
+/* =====================================================
    MAIN
-================================ */
+===================================================== */
 
 .main {
   min-height: 100vh;
@@ -200,9 +302,9 @@ a {
 }
 
 
-/* ================================
+/* =====================================================
    TOP BAR
-================================ */
+===================================================== */
 
 .topbar {
   position: fixed;
@@ -214,39 +316,56 @@ a {
   height: var(--topbar-height);
 
   display: flex;
+
   align-items: center;
 
-  padding: 0 24px;
+  padding:
+    0 24px;
 
-  background: var(--bg);
+  background:
+    color-mix(
+      in srgb,
+      var(--bg) 94%,
+      transparent
+    );
 
-  border-bottom: 1px solid var(--border);
+  border-bottom:
+    1px solid var(--border);
+
+  backdrop-filter:
+    blur(12px);
+
+  -webkit-backdrop-filter:
+    blur(12px);
 
   z-index: 100;
-
-  opacity: 0.97;
 }
+
 
 .topbar-title {
   position: absolute;
 
   left: 50%;
 
-  transform: translateX(-50%);
+  transform:
+    translateX(-50%);
 
   color: var(--text-muted);
 
-  font-size: 10px;
-  font-weight: 600;
+  font-size: 9px;
+  font-weight: 650;
 
-  letter-spacing: 0.08em;
+  letter-spacing: 0.1em;
+
   text-transform: uppercase;
 
   pointer-events: none;
 }
 
+
 .topbar-right {
   display: flex;
+
   align-items: center;
 
   gap: 7px;
@@ -255,25 +374,33 @@ a {
 }
 
 
-/* ================================
-   TOPIC BUTTONS
-================================ */
+/* =====================================================
+   PREVIOUS / NEXT
+===================================================== */
 
 .topic-button {
-  max-width: 240px;
+  max-width: 230px;
 
-  padding: 7px 10px;
+  height: 31px;
 
-  border: 1px solid var(--border);
-  border-radius: 6px;
+  padding:
+    0 10px;
+
+  border:
+    1px solid var(--border);
+
+  border-radius: 7px;
 
   background: var(--surface);
+
   color: var(--text-secondary);
 
   font-size: 10px;
 
   white-space: nowrap;
+
   overflow: hidden;
+
   text-overflow: ellipsis;
 
   cursor: pointer;
@@ -284,6 +411,7 @@ a {
     border-color 0.15s ease;
 }
 
+
 .topic-button:hover:not(:disabled) {
   color: var(--accent);
 
@@ -292,6 +420,7 @@ a {
   border-color: var(--accent);
 }
 
+
 .topic-button:disabled {
   opacity: 0.35;
 
@@ -299,21 +428,25 @@ a {
 }
 
 
-/* ================================
-   THEME BUTTON
-================================ */
+/* =====================================================
+   THEME
+===================================================== */
 
 .theme-button {
-  width: 30px;
-  height: 30px;
+  width: 31px;
+  height: 31px;
 
   display: grid;
+
   place-items: center;
 
-  border: 1px solid var(--border);
-  border-radius: 6px;
+  border:
+    1px solid var(--border);
+
+  border-radius: 7px;
 
   background: var(--surface);
+
   color: var(--text-secondary);
 
   font-size: 14px;
@@ -326,6 +459,7 @@ a {
     border-color 0.15s ease;
 }
 
+
 .theme-button:hover {
   color: var(--accent);
 
@@ -335,15 +469,17 @@ a {
 }
 
 
-/* ================================
-   NOTE AREA
-================================ */
+/* =====================================================
+   NOTE
+===================================================== */
 
 .note {
   width: 100%;
-  max-width: 900px;
 
-  margin: 0 auto;
+  max-width: 920px;
+
+  margin:
+    0 auto;
 
   padding:
     calc(var(--topbar-height) + 55px)
@@ -352,28 +488,19 @@ a {
 }
 
 
-/* ================================
+/* =====================================================
    NOTE HEADER
-================================ */
+===================================================== */
 
 .note-header {
-  padding-bottom: 28px;
+  padding-bottom: 27px;
 
-  margin-bottom: 32px;
+  margin-bottom: 34px;
 
-  border-bottom: 1px solid var(--border);
+  border-bottom:
+    1px solid var(--border);
 }
 
-.note-label {
-  margin-bottom: 8px;
-
-  color: var(--accent);
-
-  font-size: 9px;
-  font-weight: 700;
-
-  letter-spacing: 0.12em;
-}
 
 .note-header h1 {
   margin: 0;
@@ -381,25 +508,27 @@ a {
   color: var(--text);
 
   font-size: 34px;
-  font-weight: 700;
+
+  font-weight: 720;
 
   line-height: 1.2;
 
-  letter-spacing: -0.04em;
+  letter-spacing: -0.045em;
 }
 
 
-/* ================================
+/* =====================================================
    NOTE CONTENT
-================================ */
+===================================================== */
 
 .note-content {
   color: var(--text-secondary);
 
   font-size: 14px;
 
-  line-height: 1.8;
+  line-height: 1.85;
 }
+
 
 .note-content h1,
 .note-content h2,
@@ -414,96 +543,156 @@ a {
   letter-spacing: -0.025em;
 }
 
+
 .note-content h1 {
-  margin-top: 45px;
+  margin:
+    45px 0 18px;
 
   font-size: 29px;
 }
 
+
 .note-content h2 {
-  margin-top: 42px;
-  margin-bottom: 18px;
+  margin:
+    42px 0 18px;
 
-  padding-bottom: 7px;
+  padding-bottom: 8px;
 
-  border-bottom: 1px solid var(--border);
+  border-bottom:
+    1px solid var(--border);
 
   font-size: 23px;
 }
 
+
 .note-content h3 {
-  margin-top: 32px;
-  margin-bottom: 12px;
+  margin:
+    32px 0 12px;
 
   font-size: 18px;
 }
 
+
 .note-content h4 {
-  margin-top: 25px;
-  margin-bottom: 10px;
+  margin:
+    25px 0 10px;
 
   font-size: 15px;
 }
 
+
 .note-content h5,
 .note-content h6 {
-  margin-top: 22px;
-  margin-bottom: 8px;
+  margin:
+    22px 0 9px;
 }
 
+
 .note-content p {
-  margin: 0 0 18px;
+  margin:
+    0 0 18px;
 }
+
 
 .note-content strong {
   color: var(--text);
 
-  font-weight: 650;
+  font-weight: 680;
 }
+
 
 .note-content em {
   color: var(--text);
 }
 
-.note-content a {
-  color: var(--accent);
 
-  text-decoration: underline;
+/* =====================================================
+   HIGHLIGHT
+===================================================== */
 
-  text-underline-offset: 3px;
+.note-content mark {
+  display: inline;
+
+  padding:
+    2px 7px;
+
+  border-radius: 5px;
+
+  background:
+    linear-gradient(
+      120deg,
+      var(--mark-bg),
+      color-mix(
+        in srgb,
+        var(--mark-bg) 65%,
+        #ffffff
+      )
+    );
+
+  color: var(--mark-text);
+
+  font-weight: 650;
+
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
 }
 
 
-/* ================================
+/* =====================================================
+   LINKS
+===================================================== */
+
+.note-content a {
+  color: var(--accent);
+
+  text-decoration:
+    underline;
+
+  text-decoration-thickness:
+    1px;
+
+  text-underline-offset:
+    3px;
+}
+
+
+/* =====================================================
    LISTS
-================================ */
+===================================================== */
 
 .note-content ul,
 .note-content ol {
   margin:
-    10px 0
-    22px;
+    10px 0 22px;
 
-  padding-left: 26px;
+  padding-left:
+    27px;
 }
+
 
 .note-content li {
-  margin-bottom: 6px;
+  margin-bottom: 7px;
+
+  padding-left: 3px;
 }
 
 
-/* ================================
-   CODE
-================================ */
+/* =====================================================
+   INLINE CODE
+===================================================== */
 
 .note-content code {
-  padding: 2px 5px;
+  padding:
+    2px 6px;
 
-  background: var(--code-bg);
+  background:
+    var(--code-bg);
 
-  color: var(--accent);
+  color:
+    var(--accent);
 
-  border-radius: 4px;
+  border-radius:
+    5px;
 
   font-family:
     "SFMono-Regular",
@@ -511,194 +700,369 @@ a {
     "Liberation Mono",
     monospace;
 
-  font-size: 0.88em;
+  font-size:
+    0.87em;
 }
+
+
+/* =====================================================
+   CODE BLOCK
+===================================================== */
 
 .note-content pre {
-  margin: 22px 0;
+  margin:
+    24px 0;
 
-  padding: 17px;
+  padding:
+    18px;
 
-  overflow-x: auto;
+  overflow-x:
+    auto;
 
-  background: #18181b;
+  background:
+    #18181b;
 
-  border-radius: 7px;
+  border:
+    1px solid
+    rgba(255, 255, 255, 0.05);
 
-  line-height: 1.6;
+  border-radius:
+    12px;
+
+  box-shadow:
+    0 8px 25px
+    rgba(0, 0, 0, 0.08);
+
+  line-height:
+    1.65;
 }
+
 
 .note-content pre code {
   padding: 0;
 
-  background: transparent;
+  background:
+    transparent;
 
-  color: #e4e4e7;
+  color:
+    #e4e4e7;
 
-  font-size: 12px;
+  font-size:
+    12px;
 }
 
 
-/* ================================
-   BLOCKQUOTE
-================================ */
+/* =====================================================
+   FORMULA BOX
+===================================================== */
 
-.note-content blockquote {
+.note-content .formula-box {
+  position: relative;
+
   margin:
-    22px 0;
+    26px 0;
 
   padding:
-    10px 17px;
+    22px 24px;
 
-  background: var(--accent-bg);
+  overflow-x:
+    auto;
+
+  background:
+    linear-gradient(
+      135deg,
+      var(--callout-purple),
+      var(--callout-blue)
+    );
+
+  border:
+    1px solid
+    color-mix(
+      in srgb,
+      var(--accent) 14%,
+      var(--border)
+    );
+
+  border-radius:
+    14px;
+
+  color:
+    var(--text);
+
+  text-align:
+    center;
+
+  box-shadow:
+    0 8px 25px
+    rgba(108, 79, 246, 0.07);
+}
+
+
+/* =====================================================
+   MATHJAX
+===================================================== */
+
+.note-content mjx-container {
+  color: var(--text) !important;
+}
+
+
+.note-content .formula-box mjx-container {
+  margin:
+    4px 0 !important;
+}
+
+
+/* =====================================================
+   BLOCKQUOTE / CALLOUT
+===================================================== */
+
+.note-content blockquote {
+  position: relative;
+
+  margin:
+    25px 0;
+
+  padding:
+    16px 19px;
+
+  background:
+    linear-gradient(
+      135deg,
+      var(--callout-pink),
+      var(--callout-purple)
+    );
+
+  border:
+    1px solid
+    color-mix(
+      in srgb,
+      var(--accent) 12%,
+      var(--border)
+    );
 
   border-left:
-    3px solid var(--accent);
+    4px solid
+    var(--accent);
 
-  color: var(--text-secondary);
+  border-radius:
+    12px;
+
+  color:
+    var(--text-secondary);
+
+  box-shadow:
+    0 8px 24px
+    rgba(108, 79, 246, 0.06);
 }
 
 
-/* ================================
+.note-content blockquote p:last-child {
+  margin-bottom: 0;
+}
+
+
+/* =====================================================
    HORIZONTAL LINE
-================================ */
+===================================================== */
 
 .note-content hr {
-  margin: 35px 0;
+  margin:
+    38px 0;
 
-  border: 0;
+  border:
+    0;
 
   border-top:
-    1px solid var(--border);
+    1px solid
+    var(--border);
 }
 
 
-/* ================================
+/* =====================================================
    IMAGES
-================================ */
+===================================================== */
 
 .note-content img {
-  display: block;
+  display:
+    block;
 
-  max-width: 100%;
-  height: auto;
+  max-width:
+    100%;
 
-  margin: 25px auto;
+  height:
+    auto;
 
-  border-radius: 6px;
+  margin:
+    28px auto;
+
+  border:
+    1px solid
+    var(--border);
+
+  border-radius:
+    10px;
+
+  box-shadow:
+    0 5px 20px
+    rgba(0, 0, 0, 0.05);
 }
 
 
-/* ================================
+/* =====================================================
    LOADING
-================================ */
+===================================================== */
 
 .loading {
   position: fixed;
 
   top: 50%;
-  left: calc(
-    var(--sidebar-width) +
-    (100vw - var(--sidebar-width)) / 2
-  );
 
-  transform: translate(-50%, -50%);
+  left:
+    calc(
+      var(--sidebar-width) +
+      (100vw - var(--sidebar-width)) / 2
+    );
 
-  color: var(--text-muted);
+  transform:
+    translate(-50%, -50%);
 
-  font-size: 12px;
+  color:
+    var(--text-muted);
 
-  z-index: 300;
+  font-size:
+    12px;
+
+  z-index:
+    300;
 }
+
 
 .note-loading {
-  padding: 50px 0;
+  padding:
+    50px 0;
 
-  color: var(--text-muted);
+  color:
+    var(--text-muted);
 
-  text-align: center;
+  text-align:
+    center;
 }
 
 
-/* ================================
+/* =====================================================
    ERROR
-================================ */
+===================================================== */
 
 .error-message {
-  display: none;
+  display:
+    none;
 
-  margin-bottom: 20px;
+  margin-bottom:
+    20px;
 
-  padding: 12px;
+  padding:
+    12px 14px;
 
-  background: #fff1f3;
+  background:
+    #fff1f3;
 
-  border: 1px solid #ffd2d9;
+  border:
+    1px solid
+    #ffd2d9;
 
-  border-radius: 6px;
+  border-radius:
+    9px;
 
-  color: #b4233b;
+  color:
+    #b4233b;
 
-  font-size: 12px;
+  font-size:
+    12px;
 }
+
 
 [data-theme="dark"] .error-message {
-  background: #2b171c;
+  background:
+    #2b171c;
 
-  border-color: #4a242c;
+  border-color:
+    #4a242c;
 
-  color: #ff8da0;
+  color:
+    #ff8da0;
 }
+
 
 .note-error {
-  padding: 30px 0;
+  padding:
+    30px 0;
 
-  color: var(--text-muted);
+  color:
+    var(--text-muted);
 }
+
 
 .note-error h3 {
-  color: var(--text);
+  color:
+    var(--text);
 }
 
 
-/* ================================
+/* =====================================================
    FOOTER
-================================ */
+===================================================== */
 
 .footer {
-  max-width: 900px;
+  max-width:
+    920px;
 
-  margin: 0 auto;
+  margin:
+    0 auto;
 
   padding:
     20px 50px
     30px;
 
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+  display:
+    flex;
 
-  border-top: 1px solid var(--border);
+  align-items:
+    center;
 
-  color: var(--text-muted);
+  justify-content:
+    space-between;
 
-  font-size: 10px;
+  border-top:
+    1px solid
+    var(--border);
+
+  color:
+    var(--text-muted);
+
+  font-size:
+    10px;
 }
+
 
 .footer a {
-  color: var(--text-muted);
+  color:
+    var(--text-muted);
 
-  transition: color 0.15s ease;
+  transition:
+    color 0.15s ease;
 }
+
 
 .footer a:hover {
-  color: var(--accent);
+  color:
+    var(--accent);
 }
 
 
-/* ================================
+/* =====================================================
    SCROLLBAR
-================================ */
+===================================================== */
 
 ::-webkit-scrollbar {
   width: 7px;
@@ -706,23 +1070,27 @@ a {
 }
 
 ::-webkit-scrollbar-track {
-  background: transparent;
+  background:
+    transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--border);
+  background:
+    var(--border);
 
-  border-radius: 10px;
+  border-radius:
+    10px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--text-muted);
+  background:
+    var(--text-muted);
 }
 
 
-/* ================================
+/* =====================================================
    RESPONSIVE
-================================ */
+===================================================== */
 
 @media (max-width: 800px) {
 
@@ -741,16 +1109,20 @@ a {
   }
 
   .topbar-title {
-    display: none;
+    display:
+      none;
   }
 
   .topic-button {
-    max-width: 170px;
+    max-width:
+      165px;
   }
 
   .note {
     padding:
-      calc(var(--topbar-height) + 40px)
+      calc(
+        var(--topbar-height) + 40px
+      )
       32px
       60px;
   }
@@ -767,6 +1139,7 @@ a {
 
   :root {
     --sidebar-width: 175px;
+
     --topbar-height: 54px;
   }
 
@@ -778,15 +1151,32 @@ a {
   .sidebar-header {
     padding:
       4px 7px
-      20px;
+      18px;
   }
 
   .logo {
-    font-size: 16px;
+    font-size:
+      16px;
   }
 
   .subtitle {
-    font-size: 9px;
+    font-size:
+      9px;
+  }
+
+  .search-box {
+    width:
+      calc(100% - 10px);
+
+    margin:
+      0 5px
+      15px;
+
+    height:
+      32px;
+
+    font-size:
+      10px;
   }
 
   .contents-title {
@@ -798,7 +1188,8 @@ a {
     padding:
       7px 8px;
 
-    font-size: 10px;
+    font-size:
+      10px;
   }
 
   .topbar {
@@ -807,54 +1198,89 @@ a {
   }
 
   .topic-button {
-    max-width: 105px;
+    max-width:
+      105px;
+
+    height:
+      29px;
 
     padding:
-      6px 7px;
+      0 7px;
 
-    font-size: 8px;
+    font-size:
+      8px;
   }
 
   .theme-button {
-    width: 28px;
-    height: 28px;
+    width:
+      28px;
 
-    font-size: 13px;
+    height:
+      28px;
+
+    font-size:
+      13px;
   }
 
   .topbar-right {
-    gap: 5px;
+    gap:
+      5px;
   }
 
   .note {
     padding:
-      calc(var(--topbar-height) + 32px)
+      calc(
+        var(--topbar-height) + 32px
+      )
       20px
       50px;
   }
 
   .note-header {
-    padding-bottom: 22px;
+    padding-bottom:
+      21px;
 
-    margin-bottom: 25px;
+    margin-bottom:
+      25px;
   }
 
   .note-header h1 {
-    font-size: 27px;
+    font-size:
+      27px;
   }
 
   .note-content {
-    font-size: 13px;
+    font-size:
+      13px;
 
-    line-height: 1.75;
+    line-height:
+      1.78;
   }
 
   .note-content h2 {
-    font-size: 21px;
+    font-size:
+      21px;
   }
 
   .note-content h3 {
-    font-size: 17px;
+    font-size:
+      17px;
+  }
+
+  .note-content .formula-box {
+    padding:
+      17px 12px;
+
+    border-radius:
+      11px;
+  }
+
+  .note-content blockquote {
+    padding:
+      13px 14px;
+
+    border-radius:
+      10px;
   }
 
   .footer {
