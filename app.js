@@ -1,7 +1,3 @@
-/* =========================================================
-   Xi Notes — Simple AI / ML Revision Reader
-   ========================================================= */
-
 const REPO_OWNER = "jai92xi";
 const REPO_NAME = "Xi_Notes";
 const NOTES_PATH = "notes";
@@ -12,9 +8,10 @@ const API_URL =
 let notebooks = [];
 let currentIndex = 0;
 
-/* ---------------------------------------------------------
+
+/* =========================================
    DOM
---------------------------------------------------------- */
+========================================= */
 
 const contentsList = document.getElementById("contentsList");
 const noteTitle = document.getElementById("noteTitle");
@@ -28,61 +25,148 @@ const loading = document.getElementById("loading");
 const errorMessage = document.getElementById("errorMessage");
 
 
-/* ---------------------------------------------------------
-   INITIALIZE
---------------------------------------------------------- */
+/* =========================================
+   SEARCH BOX
+========================================= */
+
+let searchBox = null;
 
 document.addEventListener("DOMContentLoaded", () => {
+
   initializeTheme();
+
+  createSearchBox();
+
   loadNotebooks();
 
   previousBtn.addEventListener("click", showPrevious);
   nextBtn.addEventListener("click", showNext);
   themeToggle.addEventListener("click", toggleTheme);
+
 });
 
 
-/* ---------------------------------------------------------
-   LOAD NOTEBOOKS FROM GITHUB
---------------------------------------------------------- */
+/* =========================================
+   CREATE SEARCH BOX
+========================================= */
+
+function createSearchBox() {
+
+  const sidebarHeader =
+    document.querySelector(".sidebar-header");
+
+  if (!sidebarHeader) return;
+
+  searchBox = document.createElement("input");
+
+  searchBox.type = "search";
+  searchBox.placeholder = "Search topics...";
+  searchBox.className = "search-box";
+  searchBox.setAttribute(
+    "aria-label",
+    "Search notes"
+  );
+
+  sidebarHeader.insertAdjacentElement(
+    "afterend",
+    searchBox
+  );
+
+  searchBox.addEventListener(
+    "input",
+    filterTopics
+  );
+}
+
+
+/* =========================================
+   SEARCH TOPICS
+========================================= */
+
+function filterTopics() {
+
+  const query =
+    searchBox.value
+      .trim()
+      .toLowerCase();
+
+  const items =
+    document.querySelectorAll(".content-item");
+
+  items.forEach((item, index) => {
+
+    const notebook = notebooks[index];
+
+    if (!notebook) return;
+
+    const title =
+      cleanTitle(notebook.name)
+        .toLowerCase();
+
+    const matches =
+      title.includes(query);
+
+    item.style.display =
+      matches ? "block" : "none";
+  });
+}
+
+
+/* =========================================
+   LOAD NOTEBOOKS
+========================================= */
 
 async function loadNotebooks() {
+
   showLoading(true);
 
   try {
-    const response = await fetch(API_URL);
+
+    const response =
+      await fetch(API_URL);
 
     if (!response.ok) {
-      throw new Error("Could not load notes from GitHub.");
+      throw new Error(
+        "Could not load notes from GitHub."
+      );
     }
 
-    const files = await response.json();
+    const files =
+      await response.json();
 
-    notebooks = files
-      .filter(file =>
-        file.type === "file" &&
-        /\.(md|markdown)$/i.test(file.name)
-      )
-      .sort((a, b) =>
-        a.name.localeCompare(b.name, undefined, {
-          numeric: true,
-          sensitivity: "base"
-        })
-      );
+    notebooks =
+      files
+        .filter(file =>
+          file.type === "file" &&
+          /\.(md|markdown)$/i.test(file.name)
+        )
+        .sort((a, b) =>
+          a.name.localeCompare(
+            b.name,
+            undefined,
+            {
+              numeric: true,
+              sensitivity: "base"
+            }
+          )
+        );
 
     renderContents();
 
     if (notebooks.length > 0) {
       loadNotebook(0);
     } else {
-      showError("No Markdown notebooks were found.");
+      showError(
+        "No Markdown notebooks were found."
+      );
     }
 
   } catch (error) {
+
     console.error(error);
 
     showError(
-      "Unable to load your notebooks. Please check the GitHub repository."
+      "Unable to load your notebooks from GitHub."
     );
   }
 
@@ -90,34 +174,45 @@ async function loadNotebooks() {
 }
 
 
-/* ---------------------------------------------------------
-   CONTENTS / LEFT SIDEBAR
---------------------------------------------------------- */
+/* =========================================
+   RENDER CONTENTS
+========================================= */
 
 function renderContents() {
+
   contentsList.innerHTML = "";
 
-  notebooks.forEach((notebook, index) => {
-    const button = document.createElement("button");
+  notebooks.forEach(
+    (notebook, index) => {
 
-    button.className = "content-item";
+      const button =
+        document.createElement("button");
 
-    button.textContent = cleanTitle(notebook.name);
+      button.className =
+        "content-item";
 
-    button.addEventListener("click", () => {
-      loadNotebook(index);
-    });
+      button.type = "button";
 
-    contentsList.appendChild(button);
-  });
+      button.textContent =
+        cleanTitle(notebook.name);
+
+      button.addEventListener(
+        "click",
+        () => loadNotebook(index)
+      );
+
+      contentsList.appendChild(button);
+    }
+  );
 }
 
 
-/* ---------------------------------------------------------
+/* =========================================
    LOAD NOTE
---------------------------------------------------------- */
+========================================= */
 
 async function loadNotebook(index) {
+
   if (!notebooks[index]) return;
 
   currentIndex = index;
@@ -125,9 +220,11 @@ async function loadNotebook(index) {
   updateActiveContent();
   updateNavigationButtons();
 
-  const notebook = notebooks[index];
+  const notebook =
+    notebooks[index];
 
-  noteTitle.textContent = cleanTitle(notebook.name);
+  noteTitle.textContent =
+    cleanTitle(notebook.name);
 
   noteContent.innerHTML = `
     <div class="note-loading">
@@ -136,15 +233,25 @@ async function loadNotebook(index) {
   `;
 
   try {
-    const response = await fetch(notebook.download_url);
+
+    const response =
+      await fetch(
+        notebook.download_url
+      );
 
     if (!response.ok) {
-      throw new Error("Could not load notebook.");
+      throw new Error(
+        "Could not load notebook."
+      );
     }
 
-    const markdown = await response.text();
+    const markdown =
+      await response.text();
 
-    noteContent.innerHTML = markdownToHTML(markdown);
+    noteContent.innerHTML =
+      markdownToHTML(markdown);
+
+    renderMath();
 
     window.scrollTo({
       top: 0,
@@ -152,6 +259,7 @@ async function loadNotebook(index) {
     });
 
   } catch (error) {
+
     console.error(error);
 
     noteContent.innerHTML = `
@@ -166,303 +274,609 @@ async function loadNotebook(index) {
 }
 
 
-/* ---------------------------------------------------------
+/* =========================================
    ACTIVE CONTENT
---------------------------------------------------------- */
+========================================= */
 
 function updateActiveContent() {
-  const items =
-    document.querySelectorAll(".content-item");
 
-  items.forEach((item, index) => {
-    item.classList.toggle(
-      "active",
-      index === currentIndex
+  const items =
+    document.querySelectorAll(
+      ".content-item"
     );
-  });
+
+  items.forEach(
+    (item, index) => {
+
+      item.classList.toggle(
+        "active",
+        index === currentIndex
+      );
+    }
+  );
 }
 
 
-/* ---------------------------------------------------------
+/* =========================================
    PREVIOUS / NEXT
---------------------------------------------------------- */
+========================================= */
 
 function showPrevious() {
+
   if (currentIndex <= 0) return;
 
-  loadNotebook(currentIndex - 1);
+  loadNotebook(
+    currentIndex - 1
+  );
 }
+
 
 function showNext() {
-  if (currentIndex >= notebooks.length - 1) return;
 
-  loadNotebook(currentIndex + 1);
+  if (
+    currentIndex >=
+    notebooks.length - 1
+  ) {
+    return;
+  }
+
+  loadNotebook(
+    currentIndex + 1
+  );
 }
 
 
-/* ---------------------------------------------------------
+/* =========================================
    NAVIGATION BUTTONS
---------------------------------------------------------- */
+========================================= */
 
 function updateNavigationButtons() {
+
   const previousNotebook =
     notebooks[currentIndex - 1];
 
   const nextNotebook =
     notebooks[currentIndex + 1];
 
+
   if (previousNotebook) {
+
     previousBtn.disabled = false;
 
-    previousBtn.innerHTML = `
-      ← ${escapeHTML(
-        cleanTitle(previousNotebook.name)
-      )}
-    `;
+    previousBtn.textContent =
+      `← ${cleanTitle(
+        previousNotebook.name
+      )}`;
+
   } else {
+
     previousBtn.disabled = true;
-    previousBtn.textContent = "← Previous";
+
+    previousBtn.textContent =
+      "← Previous";
   }
 
 
   if (nextNotebook) {
+
     nextBtn.disabled = false;
 
-    nextBtn.innerHTML = `
-      ${escapeHTML(
-        cleanTitle(nextNotebook.name)
-      )} →
-    `;
+    nextBtn.textContent =
+      `${cleanTitle(
+        nextNotebook.name
+      )} →`;
+
   } else {
+
     nextBtn.disabled = true;
-    nextBtn.textContent = "Next →";
+
+    nextBtn.textContent =
+      "Next →";
   }
 }
 
 
-/* ---------------------------------------------------------
-   SIMPLE MARKDOWN PARSER
---------------------------------------------------------- */
+/* =========================================
+   MARKDOWN PARSER
+========================================= */
 
 function markdownToHTML(markdown) {
-  let html = escapeHTML(markdown);
 
-  /* Code blocks */
+  let text = markdown;
 
-  html = html.replace(
-    /```([\s\S]*?)```/g,
+
+  /*
+   * Protect LaTeX before HTML escaping.
+   */
+
+  const mathBlocks = [];
+  const inlineMath = [];
+
+
+  text = text.replace(
+    /\$\$([\s\S]*?)\$\$/g,
+    (_, formula) => {
+
+      const id =
+        `MATHBLOCK_${mathBlocks.length}`;
+
+      mathBlocks.push(
+        formula.trim()
+      );
+
+      return `@@${id}@@`;
+    }
+  );
+
+
+  text = text.replace(
+    /\\\[([\s\S]*?)\\\]/g,
+    (_, formula) => {
+
+      const id =
+        `MATHBLOCK_${mathBlocks.length}`;
+
+      mathBlocks.push(
+        formula.trim()
+      );
+
+      return `@@${id}@@`;
+    }
+  );
+
+
+  text = text.replace(
+    /\\\(([\s\S]*?)\\\)/g,
+    (_, formula) => {
+
+      const id =
+        `MATHINLINE_${inlineMath.length}`;
+
+      inlineMath.push(
+        formula.trim()
+      );
+
+      return `@@${id}@@`;
+    }
+  );
+
+
+  text = escapeHTML(text);
+
+
+  /*
+   * Restore block math.
+   */
+
+  mathBlocks.forEach(
+    (formula, index) => {
+
+      const escapedFormula =
+        escapeHTML(formula);
+
+      text = text.replace(
+        `@@MATHBLOCK_${index}@@`,
+        `<div class="formula-box">
+          \\[
+          ${escapedFormula}
+          \\]
+        </div>`
+      );
+    }
+  );
+
+
+  /*
+   * Restore inline math.
+   */
+
+  inlineMath.forEach(
+    (formula, index) => {
+
+      const escapedFormula =
+        escapeHTML(formula);
+
+      text = text.replace(
+        `@@MATHINLINE_${index}@@`,
+        `\\(${escapedFormula}\\)`
+      );
+    }
+  );
+
+
+  /*
+   * Markdown headings.
+   */
+
+  text = text.replace(
+    /^###### (.*)$/gm,
+    "<h6>$1</h6>"
+  );
+
+  text = text.replace(
+    /^##### (.*)$/gm,
+    "<h5>$1</h5>"
+  );
+
+  text = text.replace(
+    /^#### (.*)$/gm,
+    "<h4>$1</h4>"
+  );
+
+  text = text.replace(
+    /^### (.*)$/gm,
+    "<h3>$1</h3>"
+  );
+
+  text = text.replace(
+    /^## (.*)$/gm,
+    "<h2>$1</h2>"
+  );
+
+  text = text.replace(
+    /^# (.*)$/gm,
+    "<h1>$1</h1>"
+  );
+
+
+  /*
+   * Highlight / mark.
+   *
+   * Example:
+   *
+   * <mark>Bagging vs Boosting</mark>
+   */
+
+  text = text.replace(
+    /&lt;mark&gt;([\s\S]*?)&lt;\/mark&gt;/gi,
+    '<mark>$1</mark>'
+  );
+
+
+  /*
+   * Bold.
+   */
+
+  text = text.replace(
+    /\*\*(.*?)\*\*/g,
+    "<strong>$1</strong>"
+  );
+
+
+  /*
+   * Italic.
+   */
+
+  text = text.replace(
+    /(?<!\*)\*([^*\n]+)\*(?!\*)/g,
+    "<em>$1</em>"
+  );
+
+
+  /*
+   * Inline code.
+   */
+
+  text = text.replace(
+    /`([^`\n]+)`/g,
+    "<code>$1</code>"
+  );
+
+
+  /*
+   * Links.
+   */
+
+  text = text.replace(
+    /\[([^\]]+)\]\((https?:\/\/[^)]+)\)/g,
+    '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>'
+  );
+
+
+  /*
+   * Horizontal rule.
+   */
+
+  text = text.replace(
+    /^---$/gm,
+    "<hr>"
+  );
+
+
+  /*
+   * Images.
+   */
+
+  text = text.replace(
+    /!\[([^\]]*)\]\(([^)]+)\)/g,
+    '<img src="$2" alt="$1" loading="lazy">'
+  );
+
+
+  /*
+   * Unordered lists.
+   */
+
+  text = text.replace(
+    /^(?:- |\* )(.*)$/gm,
+    "<li>$1</li>"
+  );
+
+
+  /*
+   * Ordered lists.
+   */
+
+  text = text.replace(
+    /^\d+\. (.*)$/gm,
+    "<li>$1</li>"
+  );
+
+
+  /*
+   * Convert consecutive list items
+   * into one list.
+   */
+
+  text = text.replace(
+    /((?:<li>.*<\/li>\n?)+)/g,
+    match => {
+
+      const isOrdered =
+        /^\d+\./.test(
+          match.trim()
+        );
+
+      return `<ul>${match}</ul>`;
+    }
+  );
+
+
+  /*
+   * Paragraphs.
+   */
+
+  const lines =
+    text.split("\n");
+
+  const result = [];
+
+  let inCodeBlock = false;
+  let inList = false;
+
+
+  lines.forEach(line => {
+
+    const trimmed =
+      line.trim();
+
+
+    if (
+      trimmed.startsWith("<pre>")
+    ) {
+      inCodeBlock = true;
+
+      result.push(line);
+
+      return;
+    }
+
+
+    if (
+      trimmed.endsWith("</pre>")
+    ) {
+      inCodeBlock = false;
+
+      result.push(line);
+
+      return;
+    }
+
+
+    if (inCodeBlock) {
+
+      result.push(line);
+
+      return;
+    }
+
+
+    if (
+      trimmed === ""
+    ) {
+
+      result.push("");
+
+      return;
+    }
+
+
+    if (
+      /^<(h[1-6]|ul|ol|li|hr|blockquote|pre|div|img)/i
+        .test(trimmed)
+    ) {
+
+      result.push(line);
+
+      return;
+    }
+
+
+    if (
+      trimmed.startsWith("</")
+    ) {
+
+      result.push(line);
+
+      return;
+    }
+
+
+    result.push(
+      `<p>${line}</p>`
+    );
+  });
+
+
+  text =
+    result.join("\n");
+
+
+  /*
+   * Blockquotes.
+   */
+
+  text = text.replace(
+    /^&gt; (.*)$/gm,
+    "<blockquote>$1</blockquote>"
+  );
+
+
+  /*
+   * Code fences.
+   */
+
+  text = text.replace(
+    /```(?:\w+)?\n?([\s\S]*?)```/g,
     (_, code) => `
       <pre><code>${code.trim()}</code></pre>
     `
   );
 
-  /* Headings */
 
-  html = html.replace(
-    /^###### (.*)$/gm,
-    "<h6>$1</h6>"
+  /*
+   * Clean excessive empty paragraphs.
+   */
+
+  text = text.replace(
+    /<p>\s*<\/p>/g,
+    ""
   );
 
-  html = html.replace(
-    /^##### (.*)$/gm,
-    "<h5>$1</h5>"
-  );
 
-  html = html.replace(
-    /^#### (.*)$/gm,
-    "<h4>$1</h4>"
-  );
-
-  html = html.replace(
-    /^### (.*)$/gm,
-    "<h3>$1</h3>"
-  );
-
-  html = html.replace(
-    /^## (.*)$/gm,
-    "<h2>$1</h2>"
-  );
-
-  html = html.replace(
-    /^# (.*)$/gm,
-    "<h1>$1</h1>"
-  );
-
-  /* Bold */
-
-  html = html.replace(
-    /\*\*(.*?)\*\*/g,
-    "<strong>$1</strong>"
-  );
-
-  /* Italic */
-
-  html = html.replace(
-    /(?<!\*)\*([^*\n]+)\*(?!\*)/g,
-    "<em>$1</em>"
-  );
-
-  /* Inline code */
-
-  html = html.replace(
-    /`([^`\n]+)`/g,
-    "<code>$1</code>"
-  );
-
-  /* Links */
-
-  html = html.replace(
-    /\[([^\]]+)\]\((https?:\/\/[^)]+)\)/g,
-    '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>'
-  );
-
-  /* Horizontal rule */
-
-  html = html.replace(
-    /^---$/gm,
-    "<hr>"
-  );
-
-  /* Unordered lists */
-
-  html = html.replace(
-    /^(?:- |\* )(.*)$/gm,
-    "<li>$1</li>"
-  );
-
-  html = html.replace(
-    /(<li>.*<\/li>)/gs,
-    "<ul>$1</ul>"
-  );
-
-  /* Ordered lists */
-
-  html = html.replace(
-    /^\d+\. (.*)$/gm,
-    "<li>$1</li>"
-  );
-
-  /* Paragraphs */
-
-  const lines = html.split("\n");
-
-  const result = [];
-
-  let insideBlock = false;
-
-  lines.forEach(line => {
-    const trimmed = line.trim();
-
-    if (
-      trimmed.startsWith("<pre>") ||
-      trimmed.startsWith("<ul>") ||
-      trimmed.startsWith("<ol>")
-    ) {
-      insideBlock = true;
-    }
-
-    if (
-      trimmed.startsWith("</pre>") ||
-      trimmed.startsWith("</ul>") ||
-      trimmed.startsWith("</ol>")
-    ) {
-      insideBlock = false;
-    }
-
-    if (
-      trimmed === "" ||
-      trimmed.startsWith("<h") ||
-      trimmed.startsWith("</h") ||
-      trimmed.startsWith("<pre") ||
-      trimmed.startsWith("</pre") ||
-      trimmed.startsWith("<ul") ||
-      trimmed.startsWith("</ul") ||
-      trimmed.startsWith("<li") ||
-      trimmed.startsWith("<hr") ||
-      trimmed.startsWith("<blockquote")
-    ) {
-      result.push(line);
-      return;
-    }
-
-    if (!insideBlock) {
-      result.push(`<p>${line}</p>`);
-    } else {
-      result.push(line);
-    }
-  });
-
-  html = result.join("\n");
-
-  /* Blockquotes */
-
-  html = html.replace(
-    /^&gt; (.*)$/gm,
-    "<blockquote>$1</blockquote>"
-  );
-
-  return html;
+  return text;
 }
 
 
-/* ---------------------------------------------------------
+/* =========================================
+   MATHJAX
+========================================= */
+
+function renderMath() {
+
+  if (
+    typeof MathJax !== "undefined" &&
+    MathJax.typesetPromise
+  ) {
+
+    MathJax.typesetClear([
+      noteContent
+    ]);
+
+    MathJax.typesetPromise([
+      noteContent
+    ]).catch(error => {
+      console.error(
+        "MathJax rendering error:",
+        error
+      );
+    });
+  }
+}
+
+
+/* =========================================
    TITLE CLEANUP
---------------------------------------------------------- */
+========================================= */
 
 function cleanTitle(filename) {
+
   return filename
-    .replace(/\.(md|markdown)$/i, "")
-    .replace(/[-_]+/g, " ")
-    .replace(/\b\w/g, letter =>
-      letter.toUpperCase()
+    .replace(
+      /\.(md|markdown)$/i,
+      ""
+    )
+    .replace(
+      /[-_]+/g,
+      " "
+    )
+    .replace(
+      /\b\w/g,
+      letter =>
+        letter.toUpperCase()
     );
 }
 
 
-/* ---------------------------------------------------------
-   ESCAPE HTML
---------------------------------------------------------- */
+/* =========================================
+   HTML ESCAPE
+========================================= */
 
 function escapeHTML(value) {
+
   return value
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
+    .replace(
+      /&/g,
+      "&amp;"
+    )
+    .replace(
+      /</g,
+      "&lt;"
+    )
+    .replace(
+      />/g,
+      "&gt;"
+    )
+    .replace(
+      /"/g,
+      "&quot;"
+    )
+    .replace(
+      /'/g,
+      "&#039;"
+    );
 }
 
 
-/* ---------------------------------------------------------
-   LOADING / ERROR
---------------------------------------------------------- */
+/* =========================================
+   LOADING
+========================================= */
 
 function showLoading(show) {
+
   if (!loading) return;
 
   loading.style.display =
     show ? "flex" : "none";
 }
 
+
+/* =========================================
+   ERROR
+========================================= */
+
 function showError(message) {
+
   if (!errorMessage) return;
 
-  errorMessage.textContent = message;
-  errorMessage.style.display = "block";
+  errorMessage.textContent =
+    message;
+
+  errorMessage.style.display =
+    "block";
 }
 
 
-/* ---------------------------------------------------------
+/* =========================================
    THEME
---------------------------------------------------------- */
+========================================= */
 
 function initializeTheme() {
-  const savedTheme =
-    localStorage.getItem("xi-notes-theme");
 
-  /*
-   * Light theme is the default.
-   */
+  const savedTheme =
+    localStorage.getItem(
+      "xi-notes-theme"
+    );
 
   const theme =
     savedTheme || "light";
@@ -475,6 +889,7 @@ function initializeTheme() {
 
 
 function toggleTheme() {
+
   const currentTheme =
     document.documentElement.dataset.theme;
 
@@ -491,11 +906,14 @@ function toggleTheme() {
     newTheme
   );
 
-  updateThemeButton(newTheme);
+  updateThemeButton(
+    newTheme
+  );
 }
 
 
 function updateThemeButton(theme) {
+
   if (!themeToggle) return;
 
   themeToggle.textContent =
@@ -512,30 +930,36 @@ function updateThemeButton(theme) {
 }
 
 
-/* ---------------------------------------------------------
+/* =========================================
    KEYBOARD NAVIGATION
---------------------------------------------------------- */
+========================================= */
 
-document.addEventListener("keydown", event => {
-  /*
-   * Don't interfere while typing.
-   */
+document.addEventListener(
+  "keydown",
+  event => {
 
-  const tag =
-    document.activeElement?.tagName;
+    const tag =
+      document.activeElement?.tagName;
 
-  if (
-    tag === "INPUT" ||
-    tag === "TEXTAREA"
-  ) {
-    return;
+    if (
+      tag === "INPUT" ||
+      tag === "TEXTAREA"
+    ) {
+      return;
+    }
+
+
+    if (
+      event.key === "ArrowLeft"
+    ) {
+      showPrevious();
+    }
+
+
+    if (
+      event.key === "ArrowRight"
+    ) {
+      showNext();
+    }
   }
-
-  if (event.key === "ArrowLeft") {
-    showPrevious();
-  }
-
-  if (event.key === "ArrowRight") {
-    showNext();
-  }
-});
+);
