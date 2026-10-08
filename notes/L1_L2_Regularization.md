@@ -5,6 +5,7 @@ The key difference is **how they penalize the weights**.
 
 #### <mark>L1 Regularization — Lasso</mark>
 L1 adds the **sum of the absolute values** of the weights to the loss:
+
 $$
 Loss = Original\ Loss + \lambda \sum |w_i|
 $$
@@ -14,6 +15,7 @@ This produces a **sparse model** and effectively performs **feature selection**.
 
 #### <mark>L2 Regularization — Ridge</mark>
 L2 adds the **sum of squared weights** to the loss:
+
 $$
 Loss = Original\ Loss + \lambda \sum w_i^2
 $$
