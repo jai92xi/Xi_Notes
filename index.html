@@ -70,7 +70,7 @@
 
     <!-- ===================================================
          CONTENTS HEADER
-         Search + Hide/Show
+         Search + Completion + Hide/Show
          =================================================== -->
 
     <div
@@ -102,6 +102,33 @@
           <span></span>
         </button>
 
+      </div>
+
+
+      <!-- =================================================
+           COMPLETION INDICATOR
+           ================================================= -->
+
+      <div
+        id="completion-status"
+        class="completion-status"
+        aria-live="polite"
+        aria-label="Completion progress"
+      >
+        <span
+          id="completion-emoji"
+          class="completion-emoji"
+          aria-hidden="true"
+        >
+          😡
+        </span>
+
+        <span
+          id="completion-count"
+          class="completion-count"
+        >
+          0/0 completed
+        </span>
       </div>
 
     </div>
