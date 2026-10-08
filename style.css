@@ -390,6 +390,67 @@ body.dark-theme ::selection {
 
 
 /* =========================================================
+   COMPLETION STATUS
+   ========================================================= */
+
+.completion-status {
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  gap: 7px;
+
+  min-height: 34px;
+
+  margin-top: 9px;
+
+  padding: 6px 10px;
+
+  border: 1px solid var(--border);
+
+  border-radius: 10px;
+
+  background: var(--bg-card);
+
+  box-shadow: var(--shadow-small);
+
+  color: var(--text-soft);
+
+  font-size: 11px;
+
+  font-weight: 600;
+
+  line-height: 1.2;
+
+  user-select: none;
+
+  transition:
+    background-color var(--transition),
+    border-color var(--transition),
+    color var(--transition);
+}
+
+.completion-emoji {
+  display: inline-flex;
+
+  align-items: center;
+  justify-content: center;
+
+  width: 20px;
+  height: 20px;
+
+  font-size: 16px;
+
+  line-height: 1;
+}
+
+.completion-count {
+  white-space: nowrap;
+}
+
+
+/* =========================================================
    HIDE / SHOW CONTENT BUTTON
    ========================================================= */
 
@@ -450,12 +511,6 @@ body.dark-theme ::selection {
     opacity 120ms ease;
 }
 
-
-/*
- * OPEN STATE
- * Three horizontal lines = hide contents
- */
-
 .contents-toggle span:nth-child(1) {
   transform: translateY(-4px);
 }
@@ -467,12 +522,6 @@ body.dark-theme ::selection {
 .contents-toggle span:nth-child(3) {
   transform: translateY(4px);
 }
-
-
-/*
- * HIDDEN STATE
- * Right-facing chevron = show contents
- */
 
 .contents-toggle.collapsed span:nth-child(1) {
   width: 10px;
@@ -507,13 +556,13 @@ body.dark-theme ::selection {
   overflow-y: auto;
 
   padding: 4px 12px 16px;
+
+  /*
+   * Keep the contents visible inside the mobile sidebar.
+   * The sidebar itself controls the mobile slide-in.
+   */
+  display: block;
 }
-
-
-/*
- * Navigation items remain compact.
- * No permanent box around every concept.
- */
 
 .topic-button {
   width: 100%;
@@ -549,6 +598,12 @@ body.dark-theme ::selection {
   font-weight: 400;
 
   line-height: 1.4;
+
+  /*
+   * Requested:
+   * Contents list in upper case.
+   */
+  text-transform: uppercase;
 
   transition:
     background-color var(--transition),
@@ -634,6 +689,14 @@ body.dark-theme .topic-button.active {
   color: #c3b5ff;
 }
 
+body.dark-theme .completion-status {
+  background: var(--bg-card);
+
+  border-color: var(--border);
+
+  color: var(--text-soft);
+}
+
 
 /* =========================================================
    SIDEBAR FOOTER
@@ -686,12 +749,6 @@ main {
 /* =========================================================
    TOP NAVIGATION BAR
    ========================================================= */
-
-/*
- * The bar itself is intentionally clean.
- * The curved Gen-Z borders belong ONLY to the two
- * navigation buttons.
- */
 
 .page-navigation {
   position: fixed;
@@ -750,12 +807,6 @@ body.dark-theme .page-navigation {
 /* =========================================================
    PREVIOUS / NEXT BUTTONS
    ========================================================= */
-
-/*
- * No large blue rectangle.
- * Each navigation button gets its own subtle curved
- * Gen-Z border.
- */
 
 .page-nav-button {
   min-width: 0;
@@ -946,13 +997,11 @@ body.dark-theme .page-nav-button:hover:not(:disabled) {
 @keyframes note-enter {
   from {
     opacity: 0;
-
     transform: translateY(4px);
   }
 
   to {
     opacity: 1;
-
     transform: translateY(0);
   }
 }
@@ -1853,6 +1902,25 @@ body.dark-theme .theme-button:hover {
     display: none;
   }
 
+  /*
+   * Keep completion indicator hidden when the contents
+   * panel itself is hidden.
+   */
+  .sidebar.contents-hidden .completion-status {
+    display: none;
+  }
+
+  /*
+   * Mobile contents visibility.
+   */
+  .sidebar.mobile-open .topic-navigation {
+    display: block;
+
+    visibility: visible;
+
+    opacity: 1;
+  }
+
   main,
   .sidebar.contents-hidden ~ main {
     margin-left: 0;
@@ -1958,6 +2026,17 @@ body.dark-theme .theme-button:hover {
   .page-nav-title {
     max-width: 145px;
   }
+
+  .completion-status {
+    margin-top: 8px;
+
+    min-height: 32px;
+
+    padding:
+      5px 9px;
+
+    font-size: 10.5px;
+  }
 }
 
 
@@ -2011,6 +2090,22 @@ body.dark-theme .theme-button:hover {
 
     bottom: 14px;
   }
+
+  .completion-status {
+    min-height: 31px;
+
+    padding:
+      5px 8px;
+
+    font-size: 10px;
+  }
+
+  .completion-emoji {
+    width: 18px;
+    height: 18px;
+
+    font-size: 15px;
+  }
 }
 
 
@@ -2033,633 +2128,4 @@ body.dark-theme .theme-button:hover {
 
     transition-duration: 0.01ms !important;
   }
-}
-
-/* JAGS CHECKBOX LOGIC */
-/* =========================================================
-   DAILY REVISION TRACKER
-   ========================================================= */
-
-/* ---------------------------------------------------------
-   1. FIXED MONTHLY CALENDAR
-   --------------------------------------------------------- */
-
-.daily-revision-panel {
-  position: fixed;
-
-  top: 90px;
-  right: 24px;
-
-  width: 210px;
-
-  padding: 14px;
-
-  box-sizing: border-box;
-
-  border: 1px solid rgba(120, 130, 150, 0.18);
-
-  border-radius: 14px;
-
-  background:
-    linear-gradient(
-      145deg,
-      rgba(255, 255, 255, 0.96),
-      rgba(244, 247, 255, 0.96)
-    );
-
-  box-shadow:
-    0 12px 35px rgba(40, 50, 90, 0.12);
-
-  backdrop-filter: blur(14px);
-
-  z-index: 999;
-
-  user-select: none;
-}
-
-
-/* ---------------------------------------------------------
-   MONTH HEADER
-   --------------------------------------------------------- */
-
-.daily-revision-panel-header {
-  display: flex;
-
-  align-items: center;
-  justify-content: center;
-
-  margin-bottom: 11px;
-
-  color: #20243a;
-
-  font-size: 14px;
-
-  font-weight: 700;
-
-  letter-spacing: 0.2px;
-}
-
-
-/* ---------------------------------------------------------
-   2 + 3. TODAY COUNT + STREAK
-   --------------------------------------------------------- */
-
-.daily-revision-stats {
-  display: grid;
-
-  grid-template-columns:
-    1fr 1fr;
-
-  gap: 7px;
-
-  margin-bottom: 12px;
-}
-
-
-.daily-stat {
-  display: flex;
-
-  flex-direction: column;
-
-  align-items: center;
-  justify-content: center;
-
-  min-height: 48px;
-
-  padding: 7px 5px;
-
-  border-radius: 9px;
-
-  background:
-    rgba(120, 110, 255, 0.08);
-}
-
-
-.daily-stat strong {
-  color: #6157d9;
-
-  font-size: 17px;
-
-  line-height: 1.1;
-}
-
-
-.daily-stat span {
-  margin-top: 3px;
-
-  color: #777b91;
-
-  font-size: 9px;
-
-  font-weight: 600;
-
-  text-transform: uppercase;
-
-  letter-spacing: 0.5px;
-}
-
-
-/* ---------------------------------------------------------
-   WEEKDAYS
-   --------------------------------------------------------- */
-
-.daily-revision-weekdays {
-  display: grid;
-
-  grid-template-columns:
-    repeat(7, 1fr);
-
-  gap: 4px;
-
-  margin-bottom: 5px;
-}
-
-
-.daily-revision-weekdays span {
-  color: #9296a8;
-
-  font-size: 9px;
-
-  font-weight: 700;
-
-  text-align: center;
-}
-
-
-/* ---------------------------------------------------------
-   CALENDAR GRID
-   --------------------------------------------------------- */
-
-.daily-revision-calendar-grid {
-  display: grid;
-
-  grid-template-columns:
-    repeat(7, 1fr);
-
-  gap: 4px;
-}
-
-
-.daily-revision-day {
-  display: flex;
-
-  align-items: center;
-  justify-content: center;
-
-  width: 21px;
-  height: 21px;
-
-  border-radius: 5px;
-
-  background: #e9ebf2;
-
-  color: #777b8e;
-
-  font-size: 9px;
-
-  font-weight: 600;
-
-  transition:
-    transform 0.12s ease,
-    background 0.12s ease;
-}
-
-
-.daily-revision-day.empty {
-  visibility: hidden;
-}
-
-
-/* ---------------------------------------------------------
-   GITHUB-LIKE GREEN
-   --------------------------------------------------------- */
-
-.daily-revision-day.completed {
-  background: #39c463;
-
-  color: #ffffff;
-
-  box-shadow:
-    inset 0 0 0 1px rgba(0, 100, 30, 0.08);
-}
-
-
-.daily-revision-day.completed:hover {
-  background: #2eaf55;
-
-  transform: scale(1.12);
-}
-
-
-/* ---------------------------------------------------------
-   TODAY
-   --------------------------------------------------------- */
-
-.daily-revision-day.today {
-  outline: 2px solid #635bff;
-
-  outline-offset: 1px;
-}
-
-
-.daily-revision-day.today.completed {
-  background: #39c463;
-
-  outline-color: #20a94b;
-}
-
-
-/* ---------------------------------------------------------
-   FUTURE DAYS
-   --------------------------------------------------------- */
-
-.daily-revision-day.future {
-  background: transparent;
-
-  color: #c3c6d0;
-
-  opacity: 0.45;
-}
-
-
-/* ---------------------------------------------------------
-   LEGEND
-   --------------------------------------------------------- */
-
-.daily-revision-legend {
-  display: flex;
-
-  justify-content: center;
-
-  gap: 12px;
-
-  margin-top: 12px;
-
-  color: #85899a;
-
-  font-size: 8px;
-}
-
-
-.daily-revision-legend span {
-  display: flex;
-
-  align-items: center;
-
-  gap: 4px;
-}
-
-
-.legend-box {
-  width: 8px;
-  height: 8px;
-
-  border-radius: 2px;
-
-  background: #39c463;
-}
-
-
-.legend-box.legend-today {
-  background: #e9ebf2;
-
-  outline: 1px solid #635bff;
-
-  outline-offset: 1px;
-}
-
-
-/* ---------------------------------------------------------
-   6. CHECKBOX BEFORE HEADINGS
-   --------------------------------------------------------- */
-
-.daily-revision-checkbox {
-  width: 17px;
-  height: 17px;
-
-  margin: 0 9px 0 0 !important;
-
-  padding: 0;
-
-  vertical-align: middle;
-
-  accent-color: #39c463;
-
-  cursor: pointer;
-}
-
-
-/* ---------------------------------------------------------
-   COMPLETED HEADING
-   Green + strike-through
-   --------------------------------------------------------- */
-
-.daily-revision-completed {
-  color: #249447 !important;
-
-  text-decoration:
-    line-through;
-
-  text-decoration-thickness: 2px;
-
-  text-decoration-color:
-    #39b95b;
-
-  opacity: 0.85;
-
-  transition:
-    color 0.2s ease,
-    opacity 0.2s ease;
-}
-
-
-/* ---------------------------------------------------------
-   COMPLETED CONTENT
-   --------------------------------------------------------- */
-
-.daily-revision-completed-content {
-  color: #319653 !important;
-
-  text-decoration:
-    line-through;
-
-  text-decoration-thickness: 1.3px;
-
-  text-decoration-color:
-    rgba(50, 180, 90, 0.75);
-
-  opacity: 0.72;
-
-  transition:
-    color 0.2s ease,
-    opacity 0.2s ease;
-}
-
-
-/* ---------------------------------------------------------
-   5. GEN-Z CONTENT BACKGROUND
-   --------------------------------------------------------- */
-
-/*
- * Only the rendered note area gets this subtle
- * modern lavender / blue gradient.
- *
- * It does not change the sidebar.
- */
-
-#content,
-.content {
-  background:
-    linear-gradient(
-      135deg,
-      rgba(245, 243, 255, 0.92),
-      rgba(239, 248, 255, 0.92) 48%,
-      rgba(247, 241, 255, 0.92)
-    ) !important;
-
-  border-radius: 18px;
-
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.65);
-}
-
-
-/*
- * Very subtle decorative glow.
- */
-#content::before,
-.content::before {
-  pointer-events: none;
-}
-
-
-/* ---------------------------------------------------------
-   4. NAVIGATION BUTTONS
-   --------------------------------------------------------- */
-
-button,
-.nav-button,
-#prevBtn,
-#nextBtn,
-.prev-button,
-.next-button {
-  transition:
-    transform 0.15s ease,
-    box-shadow 0.15s ease,
-    background 0.15s ease;
-}
-
-
-/*
- * Previous
- */
-#prevBtn,
-.prev-button {
-  background:
-    linear-gradient(
-      135deg,
-      #7c6cff,
-      #6255e8
-    ) !important;
-
-  color: #ffffff !important;
-
-  border-color: transparent !important;
-
-  box-shadow:
-    0 5px 14px rgba(98, 85, 232, 0.22);
-}
-
-
-/*
- * Next
- */
-#nextBtn,
-.next-button {
-  background:
-    linear-gradient(
-      135deg,
-      #20c997,
-      #18a978
-    ) !important;
-
-  color: #ffffff !important;
-
-  border-color: transparent !important;
-
-  box-shadow:
-    0 5px 14px rgba(24, 169, 120, 0.22);
-}
-
-
-/*
- * Hover
- */
-#prevBtn:hover,
-#nextBtn:hover,
-.prev-button:hover,
-.next-button:hover {
-  transform: translateY(-1px);
-
-  box-shadow:
-    0 7px 18px rgba(70, 70, 120, 0.22);
-}
-
-
-/* ---------------------------------------------------------
-   DARK THEME
-   --------------------------------------------------------- */
-
-body.dark-theme
-.daily-revision-panel {
-  background:
-    linear-gradient(
-      145deg,
-      rgba(30, 32, 48, 0.97),
-      rgba(25, 30, 45, 0.97)
-    );
-
-  border-color:
-    rgba(255, 255, 255, 0.10);
-
-  box-shadow:
-    0 15px 40px rgba(0, 0, 0, 0.35);
-}
-
-
-body.dark-theme
-.daily-revision-panel-header {
-  color: #f0f1ff;
-}
-
-
-body.dark-theme
-.daily-stat {
-  background:
-    rgba(120, 110, 255, 0.14);
-}
-
-
-body.dark-theme
-.daily-stat strong {
-  color: #a69fff;
-}
-
-
-body.dark-theme
-.daily-stat span {
-  color: #9699ac;
-}
-
-
-body.dark-theme
-.daily-revision-day {
-  background:
-    rgba(255, 255, 255, 0.09);
-
-  color: #a8abba;
-}
-
-
-body.dark-theme
-.daily-revision-day.completed {
-  background: #32b957;
-
-  color: #ffffff;
-}
-
-
-body.dark-theme
-.daily-revision-day.future {
-  background: transparent;
-
-  color: #666a7b;
-}
-
-
-body.dark-theme
-.daily-revision-completed {
-  color: #68d98a !important;
-
-  text-decoration-color:
-    #45c96d;
-}
-
-
-body.dark-theme
-.daily-revision-completed-content {
-  color: #65c983 !important;
-
-  text-decoration-color:
-    rgba(70, 200, 110, 0.65);
-}
-
-
-/*
- * Dark mode Gen-Z background
- */
-body.dark-theme
-#content,
-body.dark-theme
-.content {
-  background:
-    linear-gradient(
-      135deg,
-      rgba(35, 31, 58, 0.96),
-      rgba(27, 42, 57, 0.96) 50%,
-      rgba(44, 31, 58, 0.96)
-    ) !important;
-}
-
-
-/* ---------------------------------------------------------
-   MOBILE
-   --------------------------------------------------------- */
-
-@media (max-width: 1100px) {
-
-  /*
-   * Move the calendar back into normal flow
-   * when there isn't enough right-side space.
-   */
-  .daily-revision-panel {
-    position: relative;
-
-    top: auto;
-    right: auto;
-
-    width: 210px;
-
-    margin:
-      0 0 18px auto;
-  }
-
-}
-
-
-@media (max-width: 760px) {
-
-  .daily-revision-panel {
-    width: 200px;
-
-    padding: 12px;
-
-    margin:
-      0 0 15px auto;
-  }
-
-
-  .daily-revision-day {
-    width: 20px;
-    height: 20px;
-  }
-
-
-  .daily-revision-checkbox {
-    width: 15px;
-    height: 15px;
-
-    margin-right: 7px !important;
-  }
-
 }
