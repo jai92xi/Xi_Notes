@@ -1,6 +1,7 @@
 /* =========================================================
    AI & ML KEY CONCEPTS
-   app.js — PART 1 OF 2
+   app.js
+   PART 1 OF 2
    ========================================================= */
 
 const GITHUB_USER = "jai92xi";
@@ -78,7 +79,6 @@ document.addEventListener("DOMContentLoaded", () => {
   setupContentsToggle();
   setupMobileMenu();
   setupTopNavigation();
-  setupProgressIndicator();
 
   loadTopics();
 
@@ -93,23 +93,16 @@ function configureMarkdown() {
 
   if (typeof marked === "undefined") {
 
-    console.error(
-      "Marked.js was not loaded."
-    );
+    console.error("Marked.js was not loaded.");
 
     return;
   }
 
   marked.setOptions({
-
     gfm: true,
-
     breaks: true,
-
     headerIds: true,
-
     mangle: false
-
   });
 
 }
@@ -121,32 +114,34 @@ function configureMarkdown() {
 
 function setupMathJax() {
 
-  window.MathJax = window.MathJax || {
+  window.MathJax =
+    window.MathJax || {
 
-    tex: {
-      inlineMath: [
-        ["$", "$"],
-        ["\\(", "\\)"]
-      ],
+      tex: {
+        inlineMath: [
+          ["$", "$"],
+          ["\\(", "\\)"]
+        ],
 
-      displayMath: [
-        ["$$", "$$"],
-        ["\\[", "\\]"]
-      ]
-    },
+        displayMath: [
+          ["$$", "$$"],
+          ["\\[", "\\]"]
+        ]
+      },
 
-    options: {
-      skipHtmlTags: [
-        "script",
-        "noscript",
-        "style",
-        "textarea",
-        "pre",
-        "code"
-      ]
-    }
+      options: {
+        skipHtmlTags: [
+          "script",
+          "noscript",
+          "style",
+          "textarea",
+          "pre",
+          "code"
+        ]
+      }
 
-  };
+    };
+
 
   if (
     typeof window.MathJax.typesetPromise ===
@@ -156,6 +151,7 @@ function setupMathJax() {
     return;
 
   }
+
 
   if (
     document.querySelector(
@@ -167,22 +163,23 @@ function setupMathJax() {
 
   }
 
+
   const script =
     document.createElement("script");
+
 
   script.src =
     "https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js";
 
   script.async = true;
 
-  script.dataset.xiMathjax =
-    "true";
+  script.dataset.xiMathjax = "true";
+
 
   script.onload = () => {
-
     typesetMath();
-
   };
+
 
   document.head.appendChild(
     script
@@ -201,10 +198,12 @@ async function loadTopics() {
 
     showLoadingSidebar();
 
+
     const apiURL =
       `https://api.github.com/repos/` +
       `${GITHUB_USER}/${GITHUB_REPO}/contents/` +
       `${NOTES_FOLDER}?ref=${GITHUB_BRANCH}`;
+
 
     const response =
       await fetch(
@@ -214,6 +213,7 @@ async function loadTopics() {
         }
       );
 
+
     if (!response.ok) {
 
       throw new Error(
@@ -222,8 +222,10 @@ async function loadTopics() {
 
     }
 
+
     const files =
       await response.json();
+
 
     topics =
       files
@@ -265,9 +267,7 @@ async function loadTopics() {
         );
 
 
-    createSidebar(
-      topics
-    );
+    createSidebar(topics);
 
 
     if (topics.length > 0) {
@@ -275,9 +275,11 @@ async function loadTopics() {
       const requestedTopic =
         getTopicFromURL();
 
+
       const initialTopic =
         requestedTopic ||
         topics[0];
+
 
       await loadMarkdown(
         initialTopic,
@@ -299,6 +301,7 @@ async function loadTopics() {
       "Could not load topics:",
       error
     );
+
 
     showError(
       "Couldn't load your notes.",
@@ -369,9 +372,7 @@ function formatTopicName(filename) {
     "Llms": "LLMs",
 
     "Nlp": "NLP",
-
     "Cv": "CV",
-
     "Rag": "RAG",
 
     "Vllm": "vLLM",
@@ -398,17 +399,13 @@ function formatTopicName(filename) {
     "Lora": "LoRA",
 
     "Sql": "SQL",
-
     "Json": "JSON",
 
     "Pytorch": "PyTorch",
-
     "Tensorflow": "TensorFlow",
 
     "Keras": "Keras",
-
     "Knn": "KNN",
-
     "Svm": "SVM",
 
     "Xgboost": "XGBoost"
@@ -438,14 +435,15 @@ function getTopicFromURL() {
       window.location.search
     );
 
+
   const file =
     params.get("note");
 
+
   if (!file) {
-
     return null;
-
   }
+
 
   return (
     topics.find(
@@ -460,20 +458,21 @@ function getTopicFromURL() {
 function updateURL(topic) {
 
   if (!topic) {
-
     return;
-
   }
+
 
   const url =
     new URL(
       window.location.href
     );
 
+
   url.searchParams.set(
     "note",
     topic.file
   );
+
 
   window.history.replaceState(
     {},
@@ -491,13 +490,11 @@ function updateURL(topic) {
 function createSidebar(items) {
 
   if (!topicNavigation) {
-
     return;
-
   }
 
-  topicNavigation.innerHTML =
-    "";
+
+  topicNavigation.innerHTML = "";
 
 
   if (items.length === 0) {
@@ -521,14 +518,18 @@ function createSidebar(items) {
           "button"
         );
 
+
       button.type =
         "button";
+
 
       button.className =
         "topic-button";
 
+
       button.dataset.file =
         topic.file;
+
 
       button.innerHTML = `
 
@@ -556,6 +557,7 @@ function createSidebar(items) {
             topic,
             true
           );
+
 
           closeMobileSidebar();
 
@@ -617,9 +619,7 @@ async function loadMarkdown(
 
 
     if (index === -1) {
-
       return;
-
     }
 
 
@@ -627,17 +627,13 @@ async function loadMarkdown(
       index;
 
 
-    updateURL(
-      topic
-    );
+    updateURL(topic);
 
     updateTopNavigation();
 
 
     const markdownURL =
-      getMarkdownURL(
-        topic
-      );
+      getMarkdownURL(topic);
 
 
     const response =
@@ -675,9 +671,7 @@ async function loadMarkdown(
 
 
     content.innerHTML =
-      marked.parse(
-        markdown
-      );
+      marked.parse(markdown);
 
 
     content.classList.add(
@@ -697,24 +691,42 @@ async function loadMarkdown(
 
     normalizeCodeBlocks();
 
-    typesetMath();
-
-    updateActiveTopic(
-      topic
-    );
+    updateActiveTopic(topic);
 
     updateTopNavigation();
+
+    typesetMath();
 
 
     if (scrollToTop) {
 
       window.scrollTo({
-
         top: 0,
-
         behavior: "smooth"
-
       });
+
+    }
+
+
+    /*
+     * Daily revision tracker.
+     *
+     * Only 1CheatSheet.md receives
+     * checkboxes and the tracker panel.
+     */
+    if (
+      topic.file === DAILY_REVISION_FILE
+    ) {
+
+      addDailyRevisionCheckboxes(
+        topic
+      );
+
+    } else {
+
+      removeDailyRevisionPanel();
+
+      updateProgressIndicator();
 
     }
 
@@ -748,9 +760,7 @@ function getMarkdownURL(topic) {
     `${GITHUB_REPO}/` +
     `${GITHUB_BRANCH}/` +
     `${NOTES_FOLDER}/` +
-    `${encodeURIComponent(
-      topic.file
-    )}`
+    `${encodeURIComponent(topic.file)}`
   );
 
 }
@@ -763,31 +773,31 @@ function getMarkdownURL(topic) {
 function typesetMath() {
 
   if (!content) {
-
     return;
-
   }
 
+
   if (
-    typeof window.MathJax ===
-    "undefined"
+    typeof window.MathJax === "undefined"
   ) {
 
     return;
 
   }
+
 
   const typeset =
     window.MathJax.typesetPromise;
 
+
   if (
-    typeof typeset !==
-    "function"
+    typeof typeset !== "function"
   ) {
 
     return;
 
   }
+
 
   typeset.call(
     window.MathJax,
@@ -813,9 +823,7 @@ function typesetMath() {
 function fixMarkdownImages() {
 
   if (!content) {
-
     return;
-
   }
 
 
@@ -835,35 +843,20 @@ function fixMarkdownImages() {
 
 
       if (!source) {
-
         return;
-
       }
 
 
       if (
-        source.startsWith(
-          "http://"
-        ) ||
-        source.startsWith(
-          "https://"
-        ) ||
-        source.startsWith(
-          "//"
-        ) ||
-        source.startsWith(
-          "data:"
-        ) ||
-        source.startsWith(
-          "blob:"
-        )
+        source.startsWith("http://") ||
+        source.startsWith("https://") ||
+        source.startsWith("//") ||
+        source.startsWith("data:") ||
+        source.startsWith("blob:")
       ) {
 
-        image.loading =
-          "lazy";
-
-        image.decoding =
-          "async";
+        image.loading = "lazy";
+        image.decoding = "async";
 
         return;
 
@@ -904,6 +897,7 @@ function fixMarkdownImages() {
       image.loading =
         "lazy";
 
+
       image.decoding =
         "async";
 
@@ -920,9 +914,7 @@ function fixMarkdownImages() {
 function updateActiveTopic(topic) {
 
   if (!topicNavigation) {
-
     return;
-
   }
 
 
@@ -974,9 +966,7 @@ function updateActiveTopic(topic) {
 function setupSearch() {
 
   if (!searchInput) {
-
     return;
-
   }
 
 
@@ -1007,6 +997,7 @@ function setupSearch() {
 
             const name =
               topic.name.toLowerCase();
+
 
             const filename =
               topic.file.toLowerCase();
@@ -1092,9 +1083,7 @@ function goToPrevious() {
 
 
   if (!previous) {
-
     return;
-
   }
 
 
@@ -1126,9 +1115,7 @@ function goToNext() {
 
 
   if (!next) {
-
     return;
-
   }
 
 
@@ -1232,19 +1219,8 @@ function setupContentsToggle() {
   );
 
 
-  contentsToggle.setAttribute(
-    "aria-label",
+  updateContentsToggleLabels(
     initiallyHidden
-      ? "Show contents"
-      : "Hide contents"
-  );
-
-
-  contentsToggle.setAttribute(
-    "title",
-    initiallyHidden
-      ? "Show contents"
-      : "Hide contents"
   );
 
 
@@ -1255,13 +1231,8 @@ function setupContentsToggle() {
       event.preventDefault();
 
 
-      sidebar.classList.toggle(
-        "contents-hidden"
-      );
-
-
       const hidden =
-        sidebar.classList.contains(
+        sidebar.classList.toggle(
           "contents-hidden"
         );
 
@@ -1280,22 +1251,38 @@ function setupContentsToggle() {
       );
 
 
-      contentsToggle.setAttribute(
-        "aria-label",
+      updateContentsToggleLabels(
         hidden
-          ? "Show contents"
-          : "Hide contents"
-      );
-
-
-      contentsToggle.setAttribute(
-        "title",
-        hidden
-          ? "Show contents"
-          : "Hide contents"
       );
 
     }
+  );
+
+}
+
+
+function updateContentsToggleLabels(
+  hidden
+) {
+
+  if (!contentsToggle) {
+    return;
+  }
+
+
+  contentsToggle.setAttribute(
+    "aria-label",
+    hidden
+      ? "Show contents"
+      : "Hide contents"
+  );
+
+
+  contentsToggle.setAttribute(
+    "title",
+    hidden
+      ? "Show contents"
+      : "Hide contents"
   );
 
 }
@@ -1418,9 +1405,7 @@ function closeMobileSidebar() {
 function setupTheme() {
 
   if (!themeButton) {
-
     return;
-
   }
 
 
@@ -1485,9 +1470,7 @@ function setupTheme() {
 function updateThemeButton() {
 
   if (!themeButton) {
-
     return;
-
   }
 
 
@@ -1545,9 +1528,7 @@ function updateThemeButton() {
 function addCopyButtons() {
 
   if (!content) {
-
     return;
-
   }
 
 
@@ -1584,8 +1565,10 @@ function addCopyButtons() {
       button.type =
         "button";
 
+
       button.className =
         "copy-button";
+
 
       button.textContent =
         "Copy";
@@ -1651,6 +1634,7 @@ function showCopiedState(button) {
       button.textContent =
         "Copy";
 
+
       button.classList.remove(
         "copied"
       );
@@ -1683,6 +1667,7 @@ function fallbackCopy(
 
   textarea.style.position =
     "fixed";
+
 
   textarea.style.left =
     "-9999px";
@@ -1729,9 +1714,7 @@ function fallbackCopy(
 function addHeadingIds() {
 
   if (!content) {
-
     return;
-
   }
 
 
@@ -1767,9 +1750,7 @@ function addHeadingIds() {
 
 
       if (!id) {
-
         return;
-
       }
 
 
@@ -1786,6 +1767,7 @@ function addHeadingIds() {
 
         id =
           `${original}-${counter}`;
+
 
         counter++;
 
@@ -1811,9 +1793,7 @@ function addHeadingIds() {
 function replaceConceptHeading() {
 
   if (!content) {
-
     return;
-
   }
 
 
@@ -1853,9 +1833,7 @@ function replaceConceptHeading() {
 function normalizeCodeBlocks() {
 
   if (!content) {
-
     return;
-
   }
 
 
@@ -1884,9 +1862,7 @@ function normalizeCodeBlocks() {
 function setupExternalLinks() {
 
   if (!content) {
-
     return;
-
   }
 
 
@@ -1979,15 +1955,8 @@ function setupKeyboardShortcuts() {
               );
 
 
-              contentsToggle.setAttribute(
-                "aria-label",
-                "Hide contents"
-              );
-
-
-              contentsToggle.setAttribute(
-                "title",
-                "Hide contents"
+              updateContentsToggleLabels(
+                false
               );
 
             }
@@ -2081,9 +2050,7 @@ function isTyping(event) {
 
 
   if (!element) {
-
     return false;
-
   }
 
 
@@ -2109,9 +2076,7 @@ function isTyping(event) {
 function showLoading() {
 
   if (!content) {
-
     return;
-
   }
 
 
@@ -2140,9 +2105,7 @@ function showLoading() {
 function showLoadingSidebar() {
 
   if (!topicNavigation) {
-
     return;
-
   }
 
 
@@ -2167,9 +2130,7 @@ function showMessage(
 ) {
 
   if (!content) {
-
     return;
-
   }
 
 
@@ -2202,9 +2163,7 @@ function showError(
 ) {
 
   if (!content) {
-
     return;
-
   }
 
 
@@ -2246,35 +2205,28 @@ function escapeHTML(value) {
   return div.innerHTML;
 
 }
-/* =========================================================
-   PART 2 — DAILY REVISION TRACKER
-   Append this directly after Part 1
-   ========================================================= */
 
-/*
- * IMPORTANT:
- * This section replaces the duplicated/older
- * daily-revision code from the original app.js.
- *
- * It provides:
- * - Daily checkboxes only for 1CheatSheet.md
- * - Per-heading completion history
- * - IST date handling
- * - Current-day completion
- * - Current streak
- * - Monthly GitHub-style calendar
- * - Automatic refresh at midnight IST
- * - Progress indicator updates
- */
+
+/* =========================================================
+   END OF PART 1
+   ========================================================= */
+/* =========================================================
+   AI & ML KEY CONCEPTS
+   app.js
+   PART 2 OF 2
+   DAILY REVISION TRACKER
+   ========================================================= */
 
 
 /* =========================================================
    DAILY REVISION CONFIG
    ========================================================= */
 
-const DAILY_REVISION_FILE = "1CheatSheet.md";
+const DAILY_REVISION_FILE =
+  "1CheatSheet.md";
 
-const DAILY_REVISION_TIMEZONE = "Asia/Kolkata";
+const DAILY_REVISION_TIMEZONE =
+  "Asia/Kolkata";
 
 const DAILY_REVISION_STORAGE_PREFIX =
   "xi-notes-daily:";
@@ -2289,17 +2241,28 @@ function getDailyRevisionDate() {
   return new Intl.DateTimeFormat(
     "en-CA",
     {
-      timeZone: DAILY_REVISION_TIMEZONE,
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit"
+      timeZone:
+        DAILY_REVISION_TIMEZONE,
+
+      year:
+        "numeric",
+
+      month:
+        "2-digit",
+
+      day:
+        "2-digit"
     }
-  ).format(new Date());
+  ).format(
+    new Date()
+  );
 
 }
 
 
-function parseDailyRevisionDate(dateString) {
+function parseDailyRevisionDate(
+  dateString
+) {
 
   const [
     year,
@@ -2336,13 +2299,10 @@ function getDailyRevisionHeadings() {
       "h1, h2, h3, h4, h5, h6"
     )
   ).filter(
-    heading => {
-
-      return Boolean(
+    heading =>
+      Boolean(
         heading.id
-      );
-
-    }
+      )
   );
 
 }
@@ -2395,7 +2355,9 @@ function getDailyRevisionHistory(
 
     if (
       !data ||
-      typeof data.history !== "object"
+      !data.history ||
+      typeof data.history !==
+        "object"
     ) {
 
       return {};
@@ -2453,7 +2415,7 @@ function saveDailyRevisionHistory(
 
 
 /* =========================================================
-   DATE-SPECIFIC STATE
+   REVISION STATE
    ========================================================= */
 
 function wasDailyRevisionCompleted(
@@ -2514,7 +2476,7 @@ function setDailyRevisionState(
 
 
 /* =========================================================
-   COMPLETED SECTION
+   SECTION COMPLETION
    ========================================================= */
 
 function updateDailyRevisionSection(
@@ -2540,10 +2502,6 @@ function updateDailyRevisionSection(
 
   while (current) {
 
-    /*
-     * Stop when another heading at the
-     * same or higher level is reached.
-     */
     if (
       /^H[1-6]$/.test(
         current.tagName
@@ -2583,7 +2541,7 @@ function updateDailyRevisionSection(
 
 
 /* =========================================================
-   TODAY'S PROGRESS
+   TODAY'S STATS
    ========================================================= */
 
 function getTodayRevisionStats() {
@@ -2621,7 +2579,7 @@ function getTodayRevisionStats() {
 
 
 /* =========================================================
-   COMPLETE DAY CHECK
+   ENTIRE DAY COMPLETE
    ========================================================= */
 
 function isRevisionDayComplete(
@@ -2679,10 +2637,6 @@ function getCurrentRevisionStreak() {
     );
 
 
-  /*
-   * Use a calendar date rather than
-   * the browser's local timezone.
-   */
   let date =
     new Date(
       Date.UTC(
@@ -2741,7 +2695,7 @@ function getCurrentRevisionStreak() {
 
 
 /* =========================================================
-   CHECKBOX SETUP
+   DAILY REVISION CHECKBOXES
    ========================================================= */
 
 function addDailyRevisionCheckboxes(
@@ -2751,7 +2705,8 @@ function addDailyRevisionCheckboxes(
   if (
     !content ||
     !topic ||
-    topic.file !== DAILY_REVISION_FILE
+    topic.file !==
+      DAILY_REVISION_FILE
   ) {
 
     return;
@@ -2767,8 +2722,7 @@ function addDailyRevisionCheckboxes(
     heading => {
 
       /*
-       * Prevent duplicate checkboxes
-       * if this function is called again.
+       * Prevent duplicate checkboxes.
        */
       if (
         heading.querySelector(
@@ -2820,10 +2774,6 @@ function addDailyRevisionCheckboxes(
         "Read today";
 
 
-      /*
-       * Put checkbox before the
-       * heading text.
-       */
       heading.insertBefore(
         checkbox,
         heading.firstChild
@@ -2877,7 +2827,7 @@ function addDailyRevisionCheckboxes(
   );
 
 
-  updateDailyRevisionCalendar();
+  addDailyRevisionCalendar();
 
   updateProgressIndicator();
 
@@ -2918,9 +2868,11 @@ function getCurrentMonthInfo() {
 
   return {
 
-    year: today.year,
+    year:
+      today.year,
 
-    month: today.month,
+    month:
+      today.month,
 
     days:
       lastDay.getUTCDate(),
@@ -2934,7 +2886,7 @@ function getCurrentMonthInfo() {
 
 
 /* =========================================================
-   DAILY REVISION CALENDAR
+   DAILY REVISION PANEL
    ========================================================= */
 
 function addDailyRevisionCalendar() {
@@ -2975,20 +2927,37 @@ function addDailyRevisionCalendar() {
 }
 
 
+function removeDailyRevisionPanel() {
+
+  const panel =
+    document.querySelector(
+      ".daily-revision-panel"
+    );
+
+
+  if (panel) {
+
+    panel.remove();
+
+  }
+
+}
+
+
+/* =========================================================
+   UPDATE CALENDAR
+   ========================================================= */
+
 function updateDailyRevisionCalendar() {
 
-  let panel =
+  const panel =
     document.querySelector(
       ".daily-revision-panel"
     );
 
 
   if (!panel) {
-
-    addDailyRevisionCalendar();
-
     return;
-
   }
 
 
@@ -3041,7 +3010,9 @@ function updateDailyRevisionCalendar() {
 
 
   header.innerHTML = `
-    <span>${escapeHTML(monthName)}</span>
+    <span>
+      ${escapeHTML(monthName)}
+    </span>
   `;
 
 
@@ -3085,7 +3056,6 @@ function updateDailyRevisionCalendar() {
 
     </div>
 
-
     <div class="daily-stat">
 
       <strong>
@@ -3107,7 +3077,7 @@ function updateDailyRevisionCalendar() {
 
 
   /*
-   * Weekday labels
+   * Weekday headings
    */
   const weekdays =
     document.createElement(
@@ -3166,9 +3136,6 @@ function updateDailyRevisionCalendar() {
     "daily-revision-calendar-grid";
 
 
-  /*
-   * Empty cells before day 1.
-   */
   for (
     let i = 0;
     i < firstWeekday;
@@ -3320,7 +3287,6 @@ function updateDailyRevisionCalendar() {
 
     </span>
 
-
     <span>
 
       <i class="legend-box legend-today"></i>
@@ -3340,7 +3306,87 @@ function updateDailyRevisionCalendar() {
 
 
 /* =========================================================
-   MIDNIGHT IST WATCHER
+   PROGRESS INDICATOR
+   ========================================================= */
+
+function updateProgressIndicator() {
+
+  if (!progressIndicator) {
+
+    progressIndicator =
+      document.getElementById(
+        "progress-indicator"
+      );
+
+  }
+
+
+  /*
+   * If your HTML does not have a progress
+   * indicator, simply do nothing.
+   */
+  if (!progressIndicator) {
+    return;
+  }
+
+
+  const currentTopic =
+    topics[currentTopicIndex];
+
+
+  if (
+    !currentTopic ||
+    currentTopic.file !==
+      DAILY_REVISION_FILE
+  ) {
+
+    progressIndicator.textContent =
+      "";
+
+
+    progressIndicator.removeAttribute(
+      "data-progress"
+    );
+
+
+    return;
+
+  }
+
+
+  const stats =
+    getTodayRevisionStats();
+
+
+  const percentage =
+    stats.total > 0
+      ? Math.round(
+          (
+            stats.completed /
+            stats.total
+          ) * 100
+        )
+      : 0;
+
+
+  progressIndicator.textContent =
+    `${stats.completed}/${stats.total} · ${percentage}%`;
+
+
+  progressIndicator.dataset.progress =
+    String(percentage);
+
+
+  progressIndicator.setAttribute(
+    "aria-label",
+    `Today's revision progress: ${stats.completed} of ${stats.total} completed`
+  );
+
+}
+
+
+/* =========================================================
+   MIDNIGHT IST REFRESH
    ========================================================= */
 
 function setupDailyRevisionMidnightWatcher() {
@@ -3357,7 +3403,8 @@ function setupDailyRevisionMidnightWatcher() {
 
 
       if (
-        currentDate === lastDate
+        currentDate ===
+        lastDate
       ) {
 
         return;
@@ -3370,10 +3417,8 @@ function setupDailyRevisionMidnightWatcher() {
 
 
       /*
-       * A new IST day has started.
-       *
-       * Reload the note so all checkboxes
-       * reflect the new day's state.
+       * Only reload the revision note
+       * if it is currently open.
        */
       if (
         currentTopicIndex >= 0 &&
@@ -3397,146 +3442,7 @@ function setupDailyRevisionMidnightWatcher() {
 
 
 /* =========================================================
-   PROGRESS INDICATOR
-   ========================================================= */
-
-function updateProgressIndicator() {
-
-  /*
-   * Use the existing progress indicator
-   * if the main application provides one.
-   */
-  if (
-    !progressIndicator
-  ) {
-
-    progressIndicator =
-      document.getElementById(
-        "progress-indicator"
-      );
-
-  }
-
-
-  const stats =
-    getTodayRevisionStats();
-
-
-  /*
-   * Only show revision progress for
-   * 1CheatSheet.md.
-   */
-  const currentTopic =
-    topics[currentTopicIndex];
-
-
-  if (
-    !currentTopic ||
-    currentTopic.file !==
-      DAILY_REVISION_FILE
-  ) {
-
-    return;
-
-  }
-
-
-  if (!progressIndicator) {
-    return;
-  }
-
-
-  const percentage =
-    stats.total > 0
-      ? Math.round(
-          (
-            stats.completed /
-            stats.total
-          ) * 100
-        )
-      : 0;
-
-
-  progressIndicator.textContent =
-    `${stats.completed}/${stats.total} · ${percentage}%`;
-
-
-  progressIndicator.setAttribute(
-    "aria-label",
-    `Today's revision progress: ${stats.completed} of ${stats.total} completed`
-  );
-
-
-  progressIndicator.dataset.progress =
-    String(percentage);
-
-}
-
-
-/* =========================================================
-   PATCH loadMarkdown
-   ========================================================= */
-
-/*
- * Save the application's original function.
- *
- * The main application can continue using the same
- * loadMarkdown() API while the tracker adds its
- * checkbox functionality afterward.
- */
-const xiNotesOriginalLoadMarkdown =
-  loadMarkdown;
-
-
-loadMarkdown =
-  async function (
-    topic,
-    scrollToTop = true
-  ) {
-
-    await xiNotesOriginalLoadMarkdown(
-      topic,
-      scrollToTop
-    );
-
-
-    if (
-      !topic ||
-      topic.file !== DAILY_REVISION_FILE
-    ) {
-
-      /*
-       * Remove tracker panel when viewing
-       * another note.
-       */
-      const panel =
-        document.querySelector(
-          ".daily-revision-panel"
-        );
-
-
-      if (panel) {
-        panel.remove();
-      }
-
-
-      return;
-
-    }
-
-
-    addDailyRevisionCheckboxes(
-      topic
-    );
-
-
-    addDailyRevisionCalendar();
-
-  };
-
-
-/* =========================================================
-   INITIALIZATION
+   DAILY REVISION INITIALIZATION
    ========================================================= */
 
 document.addEventListener(
@@ -3550,20 +3456,5 @@ document.addEventListener(
 
 
 /* =========================================================
-   SAFETY INITIALIZATION
+   END OF APP.JS
    ========================================================= */
-
-/*
- * If DOMContentLoaded has already fired before this
- * appended code executes, initialize immediately.
- */
-if (
-  document.readyState !== "loading"
-) {
-
-  /*
-   * Do not duplicate the watcher.
-   * The normal DOMContentLoaded handler above handles
-   * the standard application startup path.
-   */
-}
