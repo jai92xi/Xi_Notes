@@ -2035,3 +2035,17 @@ h4,
 blockquote {
     text-align: left;
 }
+/* Left-align text inside code blocks */
+pre,
+pre code,
+pre code span,
+code {
+    text-align: left !important;
+}
+
+/* Keep code blocks aligned to the left */
+pre {
+    direction: ltr;
+    margin-left: 0;
+    margin-right: auto;
+}
