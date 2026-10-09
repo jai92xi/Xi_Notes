@@ -1,43 +1,219 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#f4efff">
+  <meta name="description" content="AI and Machine Learning revision notes.">
 
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
-  >
-
-  <meta
-    name="description"
-    content="AI and Machine Learning revision notes by Xi."
-  >
-
-  <title>Xi Notes — AI & ML</title>
+  <title>Xi Notes</title>
 
   <link rel="stylesheet" href="style.css">
+
+  <!-- Gen Z light theme and responsive contents controls -->
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f4efff;
+      --sidebar-bg: #eee7ff;
+      --surface: #fffaff;
+      --text: #28213d;
+      --text-secondary: #625777;
+      --border: #e1d5f6;
+      --hover: #e8ddff;
+      --accent: #7855e8;
+      --accent-bg: #e7dcff;
+      --search-bg: #fffaff;
+      --code-bg: #eee8f8;
+      --callout-pink: #ffe3ef;
+      --callout-purple: #e9ddff;
+      --callout-blue: #dff5ff;
+    }
+
+    html[data-theme="dark"] {
+      color-scheme: dark;
+    }
+
+    body {
+      background:
+        radial-gradient(ellipse at 85% 5%, #ffe4f0 0, transparent 35%),
+        var(--bg);
+    }
+
+    .sidebar-header .subtitle {
+      display: none;
+    }
+
+    .topbar-title {
+      display: none;
+    }
+
+    .app-layout {
+      min-height: 100vh;
+    }
+
+    .mobile-contents-toggle {
+      display: none;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 10px 14px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: var(--surface);
+      color: var(--text);
+      font-weight: 650;
+      cursor: pointer;
+    }
+
+    .main {
+      min-width: 0;
+    }
+
+    .workspace {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 190px;
+      align-items: start;
+      gap: 24px;
+      max-width: 1500px;
+      margin: 0 auto;
+    }
+
+    .note {
+      min-width: 0;
+    }
+
+    .quote-pane {
+      position: sticky;
+      top: 90px;
+      padding-top: 28px;
+    }
+
+    .quote-card {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 18px;
+      width: 100%;
+      min-height: 190px;
+      padding: 20px;
+      border: 1px solid #e2d0ff;
+      border-radius: 20px;
+      background: linear-gradient(145deg, #e8ddff, #ffe4ef);
+      color: #302244;
+      box-shadow: 0 12px 35px #7455a51a;
+      transform: rotate(1deg);
+    }
+
+    .quote-mark {
+      font-size: 36px;
+      line-height: 1;
+      color: #8058dc;
+    }
+
+    .quote-text {
+      font-size: 18px;
+      line-height: 1.4;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+    }
+
+    .quote-caption {
+      font-size: 11px;
+      font-weight: 650;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      opacity: 0.7;
+    }
+
+    .mobile-overlay {
+      display: none;
+    }
+
+    @media (max-width: 1050px) {
+      .workspace {
+        grid-template-columns: minmax(0, 1fr);
+      }
+
+      .quote-pane {
+        display: none;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .mobile-contents-toggle {
+        display: inline-flex;
+      }
+
+      .sidebar {
+        display: none;
+        width: min(86vw, 320px);
+        max-width: 100%;
+        box-shadow: 12px 0 35px #30224420;
+      }
+
+      .sidebar.mobile-open {
+        display: block;
+      }
+
+      .mobile-overlay.visible {
+        display: block;
+        position: fixed;
+        inset: 0;
+        z-index: 150;
+        background: #20162e70;
+      }
+
+      .main {
+        margin-left: 0 !important;
+        width: 100%;
+      }
+
+      .topbar {
+        gap: 8px;
+        padding: 10px 12px;
+      }
+
+      .topic-button {
+        max-width: 34vw;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .note {
+        padding-left: 16px;
+        padding-right: 16px;
+      }
+
+      .footer {
+        padding-left: 16px;
+        padding-right: 16px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        scroll-behavior: auto !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+  </style>
 
   <!-- MathJax for LaTeX formulas -->
   <script>
     window.MathJax = {
       tex: {
-        inlineMath: [
-          ["\\(", "\\)"]
-        ],
-        displayMath: [
-          ["\\[", "\\]"],
-          ["$$", "$$"]
-        ]
+        inlineMath: [["\\(", "\\)"]],
+        displayMath: [["\\[", "\\]"], ["$$", "$$"]]
       },
       options: {
         skipHtmlTags: [
-          "script",
-          "noscript",
-          "style",
-          "textarea",
-          "pre",
-          "code"
+          "script", "noscript", "style",
+          "textarea", "pre", "code"
         ]
       }
     };
@@ -47,20 +223,21 @@
     src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"
     async
   ></script>
-
 </head>
-
 
 <body>
 
-  <!-- =====================================
-       SIDEBAR
-  ====================================== -->
+  <!-- Mobile overlay -->
+  <div
+    id="mobileOverlay"
+    class="mobile-overlay"
+    aria-hidden="true"
+  ></div>
 
-  <aside class="sidebar">
+  <!-- Sidebar / table of contents -->
+  <aside class="sidebar" id="sidebar">
 
     <div class="sidebar-header">
-
       <a
         href="https://github.com/jai92xi/Xi_Notes"
         target="_blank"
@@ -69,21 +246,11 @@
       >
         Xi Notes
       </a>
-
-      <span class="subtitle">
-        AI & ML Revision
-      </span>
-
     </div>
 
+    <!-- Search is inserted by app.js -->
 
-    <!-- Search box is inserted here by app.js -->
-
-
-    <div class="contents-title">
-      CONTENTS
-    </div>
-
+    <div class="contents-title">CONTENTS</div>
 
     <nav
       id="contentsList"
@@ -95,19 +262,21 @@
 
   </aside>
 
-
-  <!-- =====================================
-       MAIN
-  ====================================== -->
-
+  <!-- Main application -->
   <main class="main">
 
-
-    <!-- ===================================
-         FIXED TOP BAR
-    ==================================== -->
-
     <header class="topbar">
+
+      <button
+        id="mobileContentsToggle"
+        class="mobile-contents-toggle"
+        type="button"
+        aria-controls="sidebar"
+        aria-expanded="false"
+      >
+        <span aria-hidden="true">☰</span>
+        <span id="contentsToggleLabel">Contents</span>
+      </button>
 
       <button
         id="previousBtn"
@@ -118,11 +287,9 @@
         ← Previous
       </button>
 
-
-      <div class="topbar-title">
+      <div class="topbar-title" aria-hidden="true">
         Xi Notes
       </div>
-
 
       <div class="topbar-right">
 
@@ -135,97 +302,125 @@
           Next →
         </button>
 
-
         <button
           id="themeToggle"
           class="theme-button"
           type="button"
-          aria-label="Switch theme"
+          aria-label="Switch to dark theme"
           title="Switch theme"
         >
           ☾
         </button>
 
       </div>
-
     </header>
 
+    <div class="workspace">
 
-    <!-- ===================================
-         NOTE
-    ==================================== -->
+      <article class="note">
 
-    <article class="note">
+        <div id="loading" class="loading">
+          Loading notes...
+        </div>
 
+        <div
+          id="errorMessage"
+          class="error-message"
+          role="alert"
+        ></div>
 
-      <div
-        id="loading"
-        class="loading"
-      >
-        Loading notes...
-      </div>
+        <header class="note-header">
+          <h1 id="noteTitle">Select a topic</h1>
+        </header>
 
+        <section
+          id="noteContent"
+          class="note-content"
+        >
+          <!-- Markdown rendered by app.js -->
+        </section>
 
-      <div
-        id="errorMessage"
-        class="error-message"
-        role="alert"
-      ></div>
+      </article>
 
+      <!-- Floating quote in the otherwise empty right pane -->
+      <aside class="quote-pane" aria-label="Daily motivation">
+        <div class="quote-card">
+          <div class="quote-mark" aria-hidden="true">“</div>
+          <div class="quote-text">
+            Discipline beats motivation.
+          </div>
+          <div class="quote-caption">
+            Keep showing up
+          </div>
+        </div>
+      </aside>
 
-      <!-- Note title only -->
-      <header class="note-header">
-
-        <h1 id="noteTitle">
-          Select a topic
-        </h1>
-
-      </header>
-
-
-      <!-- Actual notebook content -->
-
-      <section
-        id="noteContent"
-        class="note-content"
-      >
-        <!-- Markdown rendered here -->
-      </section>
-
-
-    </article>
-
-
-    <!-- ===================================
-         FOOTER
-    ==================================== -->
+    </div>
 
     <footer class="footer">
-
-      <span>
-        Xi Notes
-      </span>
-
+      <span>Made for focused learning</span>
       <a
         href="https://github.com/jai92xi/Xi_Notes/tree/main/notes"
         target="_blank"
         rel="noopener noreferrer"
       >
-        GitHub ↗
+        Notes on GitHub ↗
       </a>
-
     </footer>
-
 
   </main>
 
-
-  <!-- =====================================
-       APP JS
-  ====================================== -->
-
   <script src="app.js"></script>
 
-</body>
+  <!-- Mobile contents toggle -->
+  <script>
+    (() => {
+      const toggle = document.getElementById("mobileContentsToggle");
+      const sidebar = document.getElementById("sidebar");
+      const overlay = document.getElementById("mobileOverlay");
+      const label = document.getElementById("contentsToggleLabel");
 
+      if (!toggle || !sidebar || !overlay) return;
+
+      function setContentsOpen(open) {
+        sidebar.classList.toggle("mobile-open", open);
+        overlay.classList.toggle("visible", open);
+        toggle.setAttribute("aria-expanded", String(open));
+        overlay.setAttribute("aria-hidden", String(!open));
+
+        if (label) {
+          label.textContent = open ? "Close contents" : "Contents";
+        }
+      }
+
+      toggle.addEventListener("click", () => {
+        const open = !sidebar.classList.contains("mobile-open");
+        setContentsOpen(open);
+      });
+
+      overlay.addEventListener("click", () => {
+        setContentsOpen(false);
+      });
+
+      sidebar.addEventListener("click", event => {
+        if (event.target.closest(".content-item")) {
+          setContentsOpen(false);
+        }
+      });
+
+      document.addEventListener("keydown", event => {
+        if (event.key === "Escape") {
+          setContentsOpen(false);
+        }
+      });
+
+      window.addEventListener("resize", () => {
+        if (window.innerWidth > 768) {
+          setContentsOpen(false);
+        }
+      });
+    })();
+  </script>
+
+</body>
 </html>
