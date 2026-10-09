@@ -1,195 +1,158 @@
+
 <!DOCTYPE html>
-<html lang="en" data-theme="light">
-
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#f4efff">
-  <meta name="description" content="AI and Machine Learning revision notes.">
+  <meta charset="UTF-8" />
 
-  <title>Xi Notes</title>
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  />
 
-  <link rel="stylesheet" href="style.css">
+  <meta
+    name="theme-color"
+    content="#f8f7ff"
+  />
 
-  <!-- Gen Z light theme and responsive contents controls -->
+  <meta
+    name="description"
+    content="Xi Notes — your personal AI, Machine Learning, Data Engineering, and technical interview revision space."
+  />
+
+  <title>Xi Notes — Learn. Revise. Repeat.</title>
+
+  <link rel="icon" href="./favicon.ico" />
+
+  <!-- Modern, readable typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+  <link
+    href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet"
+  />
+
+  <!-- KaTeX styles for mathematical formulas -->
+  <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.css"
+  />
+
+  <!-- Main application styles -->
+  <link rel="stylesheet" href="./style.css" />
+
+  <!-- Default theme and small accessibility improvements -->
   <style>
     :root {
       color-scheme: light;
-      --bg: #f4efff;
-      --sidebar-bg: #eee7ff;
-      --surface: #fffaff;
-      --text: #28213d;
-      --text-secondary: #625777;
-      --border: #e1d5f6;
-      --hover: #e8ddff;
-      --accent: #7855e8;
-      --accent-bg: #e7dcff;
-      --search-bg: #fffaff;
-      --code-bg: #eee8f8;
-      --callout-pink: #ffe3ef;
-      --callout-purple: #e9ddff;
-      --callout-blue: #dff5ff;
+      --xi-page-bg: #f8f7ff;
+      --xi-text: #24213a;
+      --xi-accent: #8b78f9;
+      --xi-highlight: #fff09b;
     }
 
-    html[data-theme="dark"] {
-      color-scheme: dark;
+    html {
+      min-height: 100%;
+      scroll-behavior: smooth;
+      background: var(--xi-page-bg);
     }
 
     body {
-      background:
-        radial-gradient(ellipse at 85% 5%, #ffe4f0 0, transparent 35%),
-        var(--bg);
-    }
-
-    .sidebar-header .subtitle {
-      display: none;
-    }
-
-    .topbar-title {
-      display: none;
-    }
-
-    .app-layout {
       min-height: 100vh;
+      margin: 0;
+      background: var(--xi-page-bg);
+      color: var(--xi-text);
+      font-family: "DM Sans", sans-serif;
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
     }
 
-    .mobile-contents-toggle {
-      display: none;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      padding: 10px 14px;
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      background: var(--surface);
-      color: var(--text);
-      font-weight: 650;
-      cursor: pointer;
+    button,
+    input,
+    textarea {
+      font: inherit;
     }
 
-    .main {
-      min-width: 0;
+    button {
+      -webkit-tap-highlight-color: transparent;
     }
 
-    .workspace {
+    button:focus-visible,
+    input:focus-visible,
+    a:focus-visible {
+      outline: 3px solid rgba(139, 120, 249, 0.55);
+      outline-offset: 3px;
+    }
+
+    ::selection {
+      color: #24213a;
+      background: #fff09b;
+    }
+
+    mark,
+    .xi-highlight {
+      padding: 0.08em 0.22em;
+      border-radius: 0.2em;
+      background: #fff09b;
+      color: #29243d;
+      box-decoration-break: clone;
+      -webkit-box-decoration-break: clone;
+    }
+
+    .xi-app-loading {
       display: grid;
-      grid-template-columns: minmax(0, 1fr) 190px;
-      align-items: start;
-      gap: 24px;
-      max-width: 1500px;
-      margin: 0 auto;
+      min-height: 100vh;
+      place-items: center;
+      padding: 24px;
+      box-sizing: border-box;
     }
 
-    .note {
-      min-width: 0;
+    .xi-app-loading-inner {
+      max-width: 360px;
+      text-align: center;
     }
 
-    .quote-pane {
-      position: sticky;
-      top: 90px;
-      padding-top: 28px;
-    }
-
-    .quote-card {
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      gap: 18px;
-      width: 100%;
-      min-height: 190px;
-      padding: 20px;
-      border: 1px solid #e2d0ff;
-      border-radius: 20px;
-      background: linear-gradient(145deg, #e8ddff, #ffe4ef);
-      color: #302244;
-      box-shadow: 0 12px 35px #7455a51a;
-      transform: rotate(1deg);
-    }
-
-    .quote-mark {
-      font-size: 36px;
-      line-height: 1;
-      color: #8058dc;
-    }
-
-    .quote-text {
-      font-size: 18px;
-      line-height: 1.4;
+    .xi-app-loading-logo {
+      display: grid;
+      width: 58px;
+      height: 58px;
+      margin: 0 auto 20px;
+      place-items: center;
+      border-radius: 19px;
+      background: #eae5ff;
+      color: #6d56dc;
+      font-family: "Plus Jakarta Sans", sans-serif;
+      font-size: 24px;
       font-weight: 800;
-      letter-spacing: -0.5px;
+      box-shadow: 0 8px 25px rgba(139, 120, 249, 0.12);
     }
 
-    .quote-caption {
-      font-size: 11px;
-      font-weight: 650;
-      letter-spacing: 1.5px;
-      text-transform: uppercase;
-      opacity: 0.7;
+    .xi-app-loading h1 {
+      margin: 0;
+      font-family: "Plus Jakarta Sans", sans-serif;
+      font-size: 23px;
+      letter-spacing: -0.8px;
     }
 
-    .mobile-overlay {
-      display: none;
+    .xi-app-loading p {
+      margin: 9px 0 0;
+      color: #858198;
+      font-size: 14px;
     }
 
-    @media (max-width: 1050px) {
-      .workspace {
-        grid-template-columns: minmax(0, 1fr);
-      }
-
-      .quote-pane {
-        display: none;
-      }
+    .xi-app-loading-spinner {
+      width: 25px;
+      height: 25px;
+      margin: 22px auto 0;
+      border: 3px solid #e8e3ff;
+      border-top-color: #8b78f9;
+      border-radius: 50%;
+      animation: xi-spin 0.8s linear infinite;
     }
 
-    @media (max-width: 768px) {
-      .mobile-contents-toggle {
-        display: inline-flex;
-      }
-
-      .sidebar {
-        display: none;
-        width: min(86vw, 320px);
-        max-width: 100%;
-        box-shadow: 12px 0 35px #30224420;
-      }
-
-      .sidebar.mobile-open {
-        display: block;
-      }
-
-      .mobile-overlay.visible {
-        display: block;
-        position: fixed;
-        inset: 0;
-        z-index: 150;
-        background: #20162e70;
-      }
-
-      .main {
-        margin-left: 0 !important;
-        width: 100%;
-      }
-
-      .topbar {
-        gap: 8px;
-        padding: 10px 12px;
-      }
-
-      .topic-button {
-        max-width: 34vw;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-      }
-
-      .note {
-        padding-left: 16px;
-        padding-right: 16px;
-      }
-
-      .footer {
-        padding-left: 16px;
-        padding-right: 16px;
+    @keyframes xi-spin {
+      to {
+        transform: rotate(360deg);
       }
     }
 
@@ -198,229 +161,34 @@
       *::before,
       *::after {
         scroll-behavior: auto !important;
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
         transition-duration: 0.01ms !important;
       }
     }
   </style>
-
-  <!-- MathJax for LaTeX formulas -->
-  <script>
-    window.MathJax = {
-      tex: {
-        inlineMath: [["\\(", "\\)"]],
-        displayMath: [["\\[", "\\]"], ["$$", "$$"]]
-      },
-      options: {
-        skipHtmlTags: [
-          "script", "noscript", "style",
-          "textarea", "pre", "code"
-        ]
-      }
-    };
-  </script>
-
-  <script
-    src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"
-    async
-  ></script>
 </head>
 
 <body>
-
-  <!-- Mobile overlay -->
-  <div
-    id="mobileOverlay"
-    class="mobile-overlay"
-    aria-hidden="true"
-  ></div>
-
-  <!-- Sidebar / table of contents -->
-  <aside class="sidebar" id="sidebar">
-
-    <div class="sidebar-header">
-      <a
-        href="https://github.com/jai92xi/Xi_Notes"
-        target="_blank"
-        rel="noopener noreferrer"
-        class="logo"
-      >
-        Xi Notes
-      </a>
-    </div>
-
-    <!-- Search is inserted by app.js -->
-
-    <div class="contents-title">CONTENTS</div>
-
-    <nav
-      id="contentsList"
-      class="contents-list"
-      aria-label="Notes"
-    >
-      <!-- Topics loaded by app.js -->
-    </nav>
-
-  </aside>
-
-  <!-- Main application -->
-  <main class="main">
-
-    <header class="topbar">
-
-      <button
-        id="mobileContentsToggle"
-        class="mobile-contents-toggle"
-        type="button"
-        aria-controls="sidebar"
-        aria-expanded="false"
-      >
-        <span aria-hidden="true">☰</span>
-        <span id="contentsToggleLabel">Contents</span>
-      </button>
-
-      <button
-        id="previousBtn"
-        class="topic-button previous"
-        type="button"
-        title="Previous topic"
-      >
-        ← Previous
-      </button>
-
-      <div class="topbar-title" aria-hidden="true">
-        Xi Notes
-      </div>
-
-      <div class="topbar-right">
-
-        <button
-          id="nextBtn"
-          class="topic-button next"
-          type="button"
-          title="Next topic"
-        >
-          Next →
-        </button>
-
-        <button
-          id="themeToggle"
-          class="theme-button"
-          type="button"
-          aria-label="Switch to dark theme"
-          title="Switch theme"
-        >
-          ☾
-        </button>
-
-      </div>
-    </header>
-
-    <div class="workspace">
-
-      <article class="note">
-
-        <div id="loading" class="loading">
-          Loading notes...
-        </div>
-
+  <div id="app">
+    <div class="xi-app-loading">
+      <div class="xi-app-loading-inner">
+        <div class="xi-app-loading-logo">Xi</div>
+        <h1>Xi Notes</h1>
+        <p>Preparing your revision space...</p>
         <div
-          id="errorMessage"
-          class="error-message"
-          role="alert"
+          class="xi-app-loading-spinner"
+          role="status"
+          aria-label="Loading application"
         ></div>
-
-        <header class="note-header">
-          <h1 id="noteTitle">Select a topic</h1>
-        </header>
-
-        <section
-          id="noteContent"
-          class="note-content"
-        >
-          <!-- Markdown rendered by app.js -->
-        </section>
-
-      </article>
-
-      <!-- Floating quote in the otherwise empty right pane -->
-      <aside class="quote-pane" aria-label="Daily motivation">
-        <div class="quote-card">
-          <div class="quote-mark" aria-hidden="true">“</div>
-          <div class="quote-text">
-            Discipline beats motivation.
-          </div>
-          <div class="quote-caption">
-            Keep showing up
-          </div>
-        </div>
-      </aside>
-
+      </div>
     </div>
+  </div>
 
-    <footer class="footer">
-      <span>Made for focused learning</span>
-      <a
-        href="https://github.com/jai92xi/Xi_Notes/tree/main/notes"
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        Notes on GitHub ↗
-      </a>
-    </footer>
-
-  </main>
-
-  <script src="app.js"></script>
-
-  <!-- Mobile contents toggle -->
-  <script>
-    (() => {
-      const toggle = document.getElementById("mobileContentsToggle");
-      const sidebar = document.getElementById("sidebar");
-      const overlay = document.getElementById("mobileOverlay");
-      const label = document.getElementById("contentsToggleLabel");
-
-      if (!toggle || !sidebar || !overlay) return;
-
-      function setContentsOpen(open) {
-        sidebar.classList.toggle("mobile-open", open);
-        overlay.classList.toggle("visible", open);
-        toggle.setAttribute("aria-expanded", String(open));
-        overlay.setAttribute("aria-hidden", String(!open));
-
-        if (label) {
-          label.textContent = open ? "Close contents" : "Contents";
-        }
-      }
-
-      toggle.addEventListener("click", () => {
-        const open = !sidebar.classList.contains("mobile-open");
-        setContentsOpen(open);
-      });
-
-      overlay.addEventListener("click", () => {
-        setContentsOpen(false);
-      });
-
-      sidebar.addEventListener("click", event => {
-        if (event.target.closest(".content-item")) {
-          setContentsOpen(false);
-        }
-      });
-
-      document.addEventListener("keydown", event => {
-        if (event.key === "Escape") {
-          setContentsOpen(false);
-        }
-      });
-
-      window.addEventListener("resize", () => {
-        if (window.innerWidth > 768) {
-          setContentsOpen(false);
-        }
-      });
-    })();
-  </script>
-
+  <!--
+    app.js replaces the initial loading screen with the full application.
+    It loads Markdown, DOMPurify, and KaTeX as required.
+  -->
+  <script src="./app.js" defer></script>
 </body>
 </html>
