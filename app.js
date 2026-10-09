@@ -963,3 +963,238 @@ document.addEventListener(
     }
   }
 );
+/* =========================================================
+   XI NOTES — CHEAT SHEET CHECKLIST
+   Adds persistent checkboxes to 1CheatSheet.md headings.
+   ========================================================= */
+
+(function initCheatSheetChecklist() {
+  "use strict";
+
+  const CHECKLIST_FILE = "1CheatSheet.md";
+  const STORAGE_PREFIX = "xi-notes-checklist-v1:";
+  const COMPLETE_CLASS = "xi-section-complete";
+
+  function getCurrentFile() {
+    if (
+      typeof currentTopicIndex === "number" &&
+      Array.isArray(topics) &&
+      topics[currentTopicIndex]
+    ) {
+      return topics[currentTopicIndex].file;
+    }
+
+    return "";
+  }
+
+  function getStorageKey(file) {
+    return STORAGE_PREFIX + file;
+  }
+
+  function readCompleted(file) {
+    try {
+      const saved = localStorage.getItem(getStorageKey(file));
+      return saved ? JSON.parse(saved) : {};
+    } catch (error) {
+      console.warn("Could not read checklist progress:", error);
+      return {};
+    }
+  }
+
+  function saveCompleted(file, completed) {
+    try {
+      localStorage.setItem(
+        getStorageKey(file),
+        JSON.stringify(completed)
+      );
+    } catch (error) {
+      console.warn("Could not save checklist progress:", error);
+    }
+  }
+
+  function getHeadingKey(heading, index) {
+    const text = heading.textContent
+      .replace(/\s+/g, " ")
+      .trim();
+
+    return `${heading.tagName}:${index}:${text}`;
+  }
+
+  function getSectionElements(heading) {
+    const elements = [];
+    const level = Number(heading.tagName.slice(1));
+    let sibling = heading.nextElementSibling;
+
+    while (sibling) {
+      const isHeading = /^H[1-6]$/.test(sibling.tagName);
+
+      if (
+        isHeading &&
+        Number(sibling.tagName.slice(1)) <= level
+      ) {
+        break;
+      }
+
+      elements.push(sibling);
+      sibling = sibling.nextElementSibling;
+    }
+
+    return elements;
+  }
+
+  function applyCompletion(heading, section, checked) {
+    heading.classList.toggle(COMPLETE_CLASS, checked);
+
+    heading.style.textDecoration = checked
+      ? "line-through 2px #16a34a"
+      : "";
+
+    heading.style.textDecorationColor = checked
+      ? "#16a34a"
+      : "";
+
+    heading.style.textDecorationThickness = checked
+      ? "2px"
+      : "";
+
+    section.forEach(element => {
+      element.classList.toggle(COMPLETE_CLASS, checked);
+
+      element.style.textDecoration = checked
+        ? "line-through 2px #16a34a"
+        : "";
+
+      element.style.textDecorationColor = checked
+        ? "#16a34a"
+        : "";
+
+      element.style.textDecorationThickness = checked
+        ? "2px"
+        : "";
+    });
+  }
+
+  function addChecklist() {
+    if (!content || getCurrentFile() !== CHECKLIST_FILE) {
+      return;
+    }
+
+    const headings = Array.from(
+      content.querySelectorAll("h1, h2, h3, h4, h5, h6")
+    );
+
+    if (!headings.length) return;
+
+    const completed = readCompleted(CHECKLIST_FILE);
+
+    headings.forEach((heading, index) => {
+      // Prevent duplicate checkboxes if this function runs again.
+      if (heading.querySelector(".xi-checklist-checkbox")) {
+        return;
+      }
+
+      const key = getHeadingKey(heading, index);
+      const section = getSectionElements(heading);
+      const label = document.createElement("label");
+      const checkbox = document.createElement("input");
+
+      label.className = "xi-checklist-label";
+      label.title = "Mark this section as completed";
+
+      checkbox.type = "checkbox";
+      checkbox.className = "xi-checklist-checkbox";
+      checkbox.checked = Boolean(completed[key]);
+      checkbox.setAttribute(
+        "aria-label",
+        `Mark ${heading.textContent.trim()} as completed`
+      );
+
+      // Keep the checkbox separate from the heading text.
+      label.appendChild(checkbox);
+      heading.insertBefore(label, heading.firstChild);
+
+      applyCompletion(heading, section, checkbox.checked);
+
+      checkbox.addEventListener("change", () => {
+        completed[key] = checkbox.checked;
+
+        saveCompleted(CHECKLIST_FILE, completed);
+
+        // Recalculate the section in case the document changed.
+        applyCompletion(
+          heading,
+          getSectionElements(heading),
+          checkbox.checked
+        );
+      });
+    });
+  }
+
+  // Add the checkbox styling without requiring a separate CSS edit.
+  function addChecklistStyles() {
+    if (document.getElementById("xi-checklist-styles")) return;
+
+    const style = document.createElement("style");
+    style.id = "xi-checklist-styles";
+
+    style.textContent = `
+      .xi-checklist-label {
+        display: inline-flex;
+        align-items: center;
+        vertical-align: middle;
+        margin-right: 0.55em;
+        cursor: pointer;
+      }
+
+      .xi-checklist-checkbox {
+        appearance: auto;
+        width: 1.05em;
+        height: 1.05em;
+        margin: 0;
+        accent-color: #16a34a;
+        cursor: pointer;
+        flex-shrink: 0;
+      }
+
+      .xi-section-complete {
+        text-decoration-line: line-through;
+        text-decoration-color: #16a34a;
+        text-decoration-thickness: 2px;
+      }
+
+      .xi-section-complete code,
+      .xi-section-complete pre {
+        text-decoration: inherit;
+        text-decoration-color: #16a34a;
+      }
+
+      .xi-checklist-checkbox:focus-visible {
+        outline: 2px solid #16a34a;
+        outline-offset: 3px;
+      }
+    `;
+
+    document.head.appendChild(style);
+  }
+
+  function runChecklist() {
+    addChecklistStyles();
+    addChecklist();
+  }
+
+  // Expose a function for the existing Markdown-loading routine.
+  window.refreshXiChecklist = runChecklist;
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", runChecklist);
+  } else {
+    runChecklist();
+  }
+})();
+One required integration
+In your existing loadMarkdown() function, find the part immediately after the Markdown has been rendered into content and the heading IDs have been added. Add:
+
+javascript
+if (window.refreshXiChecklist) {
+  window.refreshXiChecklist();
+}
