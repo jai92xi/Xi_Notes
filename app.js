@@ -1175,7 +1175,7 @@
 
   function buildApp() {
     // Remove old layout and its conflicting IDs.
-    document.body.innerHTML = `
+    document.querySelector("#app").innerHTML = `
       <div id="xiApp">
         <header class="xi-topbar">
           <button class="xi-icon-btn" id="xiMenu"
