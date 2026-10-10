@@ -1,194 +1,403 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#f6f4ff" />
 
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
-  />
-
-  <meta
-    name="theme-color"
-    content="#f8f7ff"
-  />
-
+  <title>Xi Notes — Daily Revision</title>
   <meta
     name="description"
-    content="Xi Notes — your personal AI, Machine Learning, Data Engineering, and technical interview revision space."
+    content="A personal knowledge space for daily revision, technical notes, and learning."
   />
-
-  <title>Xi Notes — Learn. Revise. Repeat.</title>
-
-  <link rel="icon" href="./favicon.ico" />
 
   <!-- Modern, readable typography -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-
   <link
-    href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+    href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;450;500;550;600;650;700;750;800&family=JetBrains+Mono:wght@400;500;600&display=swap"
     rel="stylesheet"
   />
 
-  <!-- KaTeX styles for mathematical formulas -->
+  <!-- Main stylesheet -->
+  <link rel="stylesheet" href="./style.css" />
+
+  <!-- Markdown and math styling -->
   <link
     rel="stylesheet"
     href="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.css"
   />
 
-  <!-- Main application styles -->
-  <link rel="stylesheet" href="./style.css" />
-
-  <!-- Default theme and small accessibility improvements -->
-  <style>
-    :root {
-      color-scheme: light;
-      --xi-page-bg: #f8f7ff;
-      --xi-text: #24213a;
-      --xi-accent: #8b78f9;
-      --xi-highlight: #fff09b;
-    }
-
-    html {
-      min-height: 100%;
-      scroll-behavior: smooth;
-      background: var(--xi-page-bg);
-    }
-
-    body {
-      min-height: 100vh;
-      margin: 0;
-      background: var(--xi-page-bg);
-      color: var(--xi-text);
-      font-family: "DM Sans", sans-serif;
-      -webkit-font-smoothing: antialiased;
-      text-rendering: optimizeLegibility;
-    }
-
-    button,
-    input,
-    textarea {
-      font: inherit;
-    }
-
-    button {
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    button:focus-visible,
-    input:focus-visible,
-    a:focus-visible {
-      outline: 3px solid rgba(139, 120, 249, 0.55);
-      outline-offset: 3px;
-    }
-
-    ::selection {
-      color: #24213a;
-      background: #fff09b;
-    }
-
-    mark,
-    .xi-highlight {
-      padding: 0.08em 0.22em;
-      border-radius: 0.2em;
-      background: #fff09b;
-      color: #29243d;
-      box-decoration-break: clone;
-      -webkit-box-decoration-break: clone;
-    }
-
-    .xi-app-loading {
-      display: grid;
-      min-height: 100vh;
-      place-items: center;
-      padding: 24px;
-      box-sizing: border-box;
-    }
-
-    .xi-app-loading-inner {
-      max-width: 360px;
-      text-align: center;
-    }
-
-    .xi-app-loading-logo {
-      display: grid;
-      width: 58px;
-      height: 58px;
-      margin: 0 auto 20px;
-      place-items: center;
-      border-radius: 19px;
-      background: #eae5ff;
-      color: #6d56dc;
-      font-family: "Plus Jakarta Sans", sans-serif;
-      font-size: 24px;
-      font-weight: 800;
-      box-shadow: 0 8px 25px rgba(139, 120, 249, 0.12);
-    }
-
-    .xi-app-loading h1 {
-      margin: 0;
-      font-family: "Plus Jakarta Sans", sans-serif;
-      font-size: 23px;
-      letter-spacing: -0.8px;
-    }
-
-    .xi-app-loading p {
-      margin: 9px 0 0;
-      color: #858198;
-      font-size: 14px;
-    }
-
-    .xi-app-loading-spinner {
-      width: 25px;
-      height: 25px;
-      margin: 22px auto 0;
-      border: 3px solid #e8e3ff;
-      border-top-color: #8b78f9;
-      border-radius: 50%;
-      animation: xi-spin 0.8s linear infinite;
-    }
-
-    @keyframes xi-spin {
-      to {
-        transform: rotate(360deg);
-      }
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      *,
-      *::before,
-      *::after {
-        scroll-behavior: auto !important;
-        animation-duration: 0.01ms !important;
-        animation-iteration-count: 1 !important;
-        transition-duration: 0.01ms !important;
-      }
-    }
-  </style>
+  <link
+    rel="icon"
+    href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='24' fill='%237c4dff'/%3E%3Ctext x='50' y='68' font-size='58' font-family='Arial' font-weight='bold' text-anchor='middle' fill='white'%3EXi%3C/text%3E%3C/svg%3E"
+  />
 </head>
 
 <body>
-  <div id="app">
-    <div class="xi-app-loading">
-      <div class="xi-app-loading-inner">
-        <div class="xi-app-loading-logo">Xi</div>
-        <h1>Xi Notes</h1>
-        <p>Preparing your revision space...</p>
-        <div
-          class="xi-app-loading-spinner"
-          role="status"
-          aria-label="Loading application"
-        ></div>
+  <div class="app-shell" id="appShell">
+
+    <!-- Mobile backdrop for the sidebar -->
+    <button
+      class="sidebar-backdrop"
+      id="sidebarBackdrop"
+      type="button"
+      aria-label="Close navigation"
+      tabindex="-1"
+    ></button>
+
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar" aria-label="Notes navigation">
+
+      <div class="sidebar-header">
+        <a class="brand" href="./" aria-label="Xi Notes home">
+          <span class="brand-mark">Xi</span>
+          <span class="brand-name">Xi Notes</span>
+        </a>
+
+        <!-- The only sidebar toggle: three-line menu -->
+        <button
+          class="icon-button sidebar-toggle"
+          id="sidebarToggle"
+          type="button"
+          aria-label="Collapse sidebar"
+          aria-controls="sidebar"
+          aria-expanded="true"
+          title="Collapse sidebar"
+        >
+          <svg
+            class="menu-icon"
+            viewBox="0 0 24 24"
+            fill="none"
+            aria-hidden="true"
+          >
+            <path
+              d="M4 6H20M4 12H20M4 18H20"
+              stroke="currentColor"
+              stroke-width="1.8"
+              stroke-linecap="round"
+            />
+          </svg>
+        </button>
       </div>
-    </div>
+
+      <div class="sidebar-content">
+
+        <!-- Search -->
+        <div class="search-wrapper">
+          <svg
+            class="search-icon"
+            viewBox="0 0 24 24"
+            fill="none"
+            aria-hidden="true"
+          >
+            <circle
+              cx="10.8"
+              cy="10.8"
+              r="6.8"
+              stroke="currentColor"
+              stroke-width="1.8"
+            />
+            <path
+              d="M16 16L21 21"
+              stroke="currentColor"
+              stroke-width="1.8"
+              stroke-linecap="round"
+            />
+          </svg>
+
+          <input
+            id="noteSearch"
+            class="search-input"
+            type="search"
+            placeholder="Search your notes..."
+            autocomplete="off"
+            aria-label="Search notes"
+          />
+
+          <kbd class="search-shortcut">/</kbd>
+        </div>
+
+        <!-- Notes list header -->
+        <div class="section-heading">
+          <span class="section-label">YOUR LIBRARY</span>
+          <span class="notes-count" id="notesCount">—</span>
+        </div>
+
+        <!-- Populated dynamically from the GitHub notes folder -->
+        <nav
+          class="notes-navigation"
+          id="notesNavigation"
+          aria-label="Available notes"
+        >
+          <div class="loading-notes" id="loadingNotes">
+            <span class="loading-spinner" aria-hidden="true"></span>
+            <span>Loading your notes...</span>
+          </div>
+        </nav>
+
+        <!-- Empty search state -->
+        <div class="empty-search" id="emptySearch" hidden>
+          <span class="empty-search-icon" aria-hidden="true">⌕</span>
+          <p>No matching notes</p>
+          <span>Try another search term.</span>
+        </div>
+
+      </div>
+
+      <footer class="sidebar-footer">
+        <div class="sidebar-footer-mark" aria-hidden="true">✳</div>
+        <div class="sidebar-footer-copy">
+          <strong>Keep showing up.</strong>
+          <span>One topic at a time.</span>
+        </div>
+        <span class="online-indicator" title="Revision workspace"></span>
+      </footer>
+
+    </aside>
+
+    <!-- Main application -->
+    <main class="main-panel" id="mainPanel">
+
+      <!-- Top navigation -->
+      <header class="topbar">
+
+        <div class="topbar-leading">
+          <!-- This button also reopens the sidebar when collapsed -->
+          <button
+            class="icon-button topbar-menu"
+            id="topbarMenu"
+            type="button"
+            aria-label="Open navigation"
+            aria-controls="sidebar"
+            aria-expanded="true"
+            title="Toggle navigation"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              aria-hidden="true"
+            >
+              <path
+                d="M4 6H20M4 12H20M4 18H20"
+                stroke="currentColor"
+                stroke-width="1.8"
+                stroke-linecap="round"
+              />
+            </svg>
+          </button>
+
+          <div class="current-note-heading">
+            <span class="current-note-eyebrow">NOW REVISING</span>
+            <h1 class="current-note-name" id="currentNoteName">
+              Choose a topic
+            </h1>
+          </div>
+        </div>
+
+        <div class="topbar-actions">
+          <div class="reading-progress" aria-label="Reading progress">
+            <div class="progress-track">
+              <div
+                class="progress-fill"
+                id="readingProgressFill"
+              ></div>
+            </div>
+            <span id="readingProgressText">0% read</span>
+          </div>
+
+          <div class="navigation-buttons">
+            <button
+              class="nav-button nav-previous"
+              id="previousNote"
+              type="button"
+              disabled
+            >
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                aria-hidden="true"
+              >
+                <path
+                  d="M19 12H5M11 6L5 12L11 18"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+              <span>Previous</span>
+            </button>
+
+            <button
+              class="nav-button nav-next"
+              id="nextNote"
+              type="button"
+              disabled
+            >
+              <span>Next</span>
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                aria-hidden="true"
+              >
+                <path
+                  d="M5 12H19M13 6L19 12L13 18"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+            </button>
+          </div>
+        </div>
+
+      </header>
+
+      <!-- Subtle accent below the header -->
+      <div class="topbar-accent" aria-hidden="true"></div>
+
+      <!-- Scrollable reading workspace -->
+      <section class="reading-workspace" id="readingWorkspace">
+
+        <!-- Welcome / loading / error states -->
+        <div class="welcome-panel" id="welcomePanel">
+          <div class="welcome-decoration welcome-decoration-one"></div>
+          <div class="welcome-decoration welcome-decoration-two"></div>
+
+          <div class="welcome-content">
+            <span class="welcome-badge">
+              <span class="welcome-badge-dot"></span>
+              YOUR PERSONAL REVISION SPACE
+            </span>
+
+            <h2>
+              Small steps.<br />
+              <span>Serious progress.</span>
+            </h2>
+
+            <p>
+              Choose a note from your library and get into the habit
+              of revising a little every day.
+            </p>
+
+            <button
+              class="welcome-button"
+              id="startRevision"
+              type="button"
+            >
+              Start revising
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                aria-hidden="true"
+              >
+                <path
+                  d="M5 12H19M13 6L19 12L13 18"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+            </button>
+          </div>
+
+          <div class="welcome-orb welcome-orb-one"></div>
+          <div class="welcome-orb welcome-orb-two"></div>
+        </div>
+
+        <!-- Actual note card -->
+        <article
+          class="content-card"
+          id="contentCard"
+          aria-labelledby="articleTitle"
+          hidden
+        >
+
+          <!-- Daily checklist banner; visible for the cheat sheet only -->
+          <div
+            class="revision-banner"
+            id="revisionBanner"
+            hidden
+          >
+            <span class="revision-banner-check" aria-hidden="true">✓</span>
+            <span>Daily revision checklist · Resets at midnight IST</span>
+          </div>
+
+          <!-- Markdown content injected by app.js -->
+          <div class="article-content" id="articleContent">
+            <h2 id="articleTitle" class="article-title"></h2>
+          </div>
+
+          <!-- Bottom navigation -->
+          <footer class="article-footer">
+            <span class="article-footer-label">
+              END OF NOTES
+            </span>
+
+            <button
+              class="next-topic-link"
+              id="footerNextNote"
+              type="button"
+            >
+              Next topic
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                aria-hidden="true"
+              >
+                <path
+                  d="M5 12H19M13 6L19 12L13 18"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+            </button>
+          </footer>
+
+        </article>
+
+        <!-- Error state -->
+        <div class="status-panel" id="errorPanel" hidden>
+          <div class="status-icon status-icon-error" aria-hidden="true">!</div>
+          <h2>Couldn't load this note</h2>
+          <p id="errorMessage">
+            Please check your connection and try again.
+          </p>
+          <button
+            class="status-button"
+            id="retryLoad"
+            type="button"
+          >
+            Try again
+          </button>
+        </div>
+
+      </section>
+
+      <!-- Lightweight status bar -->
+      <footer class="app-footer">
+        <span class="app-footer-left">
+          <span class="footer-dot"></span>
+          <span>Made for consistent learning</span>
+        </span>
+        <span class="app-footer-right">XI NOTES</span>
+      </footer>
+
+    </main>
   </div>
 
-  <!--
-    app.js replaces the initial loading screen with the full application.
-    It loads Markdown, DOMPurify, and KaTeX as required.
-  -->
-  <script src="./app.js" defer></script>
+  <!-- Markdown dependencies -->
+  <script src="https://cdn.jsdelivr.net/npm/marked@15.0.7/marked.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.2.6/dist/purify.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/contrib/auto-render.min.js"></script>
+
+  <!-- Application logic -->
+  <script src="./app.js"></script>
 </body>
 </html>
