@@ -1,16 +1,19 @@
 
 /* =========================================================
    XI NOTES — COMPLETE APP.JS
-   Theme: Lavender + Mint + Pink
    Features:
-   - Searchable GitHub Markdown notes
-   - Direct links using ?note=notes/example.md
-   - Previous / Next navigation in the top bar
-   - Collapsible sidebar with hamburger menu
+   - GitHub Markdown note loading
+   - Direct note URLs using ?note=notes/example.md
+   - Searchable sidebar
+   - Collapsible hamburger menu
+   - Previous / Next topic navigation
+   - Motivational quote in the top pane
+   - No duplicate filename heading in the article
    - Markdown, LaTeX formulas and code highlighting
-   - Cheat sheet heading checkboxes
-   - Green strike-through for completed sections
-   - Checkbox state saved in localStorage
+   - Cheat-sheet-only checkboxes and completion counter
+   - Green completed sections with strike-through
+   - Checklist progress saved separately for each IST date
+   - Automatic reset after midnight IST
    ========================================================= */
 
 (() => {
@@ -36,10 +39,11 @@
     request: 0,
     libraries: {},
     checked: {},
-    mobileOpen: false
+    mobileOpen: false,
+    istDate: ""
   };
 
-  const STORAGE_KEY = "xi-notes-cheatsheet-checks-v2";
+  let resetTimer = null;
 
   /* =========================================================
      HELPERS
@@ -106,9 +110,37 @@
     return /(?:^|\/)1CheatSheet\.md$/i.test(normalize(path));
   }
 
+  /* =========================================================
+     IST DATE AND DAILY CHECKLIST STORAGE
+     ========================================================= */
+
+  function getISTDate() {
+    const parts = new Intl.DateTimeFormat("en-CA", {
+      timeZone: "Asia/Kolkata",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit"
+    }).formatToParts(new Date());
+
+    const values = Object.fromEntries(
+      parts.map(part => [part.type, part.value])
+    );
+
+    return `${values.year}-${values.month}-${values.day}`;
+  }
+
+  function getRevisionStorageKey(date = getISTDate()) {
+    return `xi-notes-cheatsheet-checks-v3-${date}`;
+  }
+
   function readRevisionState() {
+    state.istDate = getISTDate();
+
     try {
-      const saved = localStorage.getItem(STORAGE_KEY);
+      const saved = localStorage.getItem(
+        getRevisionStorageKey(state.istDate)
+      );
+
       state.checked = saved ? JSON.parse(saved) : {};
 
       if (
@@ -119,16 +151,19 @@
         state.checked = {};
       }
     } catch (error) {
-      console.warn("Could not restore revision checklist.", error);
+      console.warn("Could not restore checklist progress.", error);
       state.checked = {};
     }
   }
 
   function saveRevisionState() {
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(state.checked));
+      localStorage.setItem(
+        getRevisionStorageKey(state.istDate),
+        JSON.stringify(state.checked)
+      );
     } catch (error) {
-      console.warn("Could not save revision checklist.", error);
+      console.warn("Could not save checklist progress.", error);
     }
   }
 
@@ -140,6 +175,73 @@
     ].join("::");
   }
 
+  function clearVisibleChecklist() {
+    document
+      .querySelectorAll("#xiMarkdown .xi-check-section")
+      .forEach(section => {
+        section.classList.remove("is-checked");
+
+        const checkbox = section.querySelector(
+          ":scope > .xi-check-heading .xi-checkbox"
+        );
+
+        if (checkbox) checkbox.checked = false;
+      });
+  }
+
+  function resetForNewISTDay() {
+    const today = getISTDate();
+
+    if (today === state.istDate) return false;
+
+    state.istDate = today;
+    state.checked = {};
+
+    saveRevisionState();
+    clearVisibleChecklist();
+    updateChecklistCounter();
+
+    return true;
+  }
+
+  function scheduleISTReset() {
+    clearTimeout(resetTimer);
+
+    const [year, month, day] = getISTDate()
+      .split("-")
+      .map(Number);
+
+    // Convert the next IST midnight to UTC.
+    const nextMidnightUTC =
+      Date.UTC(year, month - 1, day + 1, 0, 0, 0) -
+      (5 * 60 + 30) * 60 * 1000;
+
+    const delay = Math.max(
+      1000,
+      nextMidnightUTC - Date.now() + 1000
+    );
+
+    resetTimer = setTimeout(() => {
+      resetForNewISTDay();
+      scheduleISTReset();
+    }, delay);
+  }
+
+  function ensureCurrentISTDay() {
+    const changed = resetForNewISTDay();
+
+    if (changed && isCheatSheet(state.path)) {
+      const article = $("#xiMarkdown");
+
+      if (article) {
+        buildDailyChecklist(article);
+        enhanceMarkdown(article);
+      }
+    }
+
+    scheduleISTReset();
+  }
+
   /* =========================================================
      BUILD INTERFACE
      ========================================================= */
@@ -148,7 +250,9 @@
     const root = $("#app");
 
     if (!root) {
-      console.error('Xi Notes requires <div id="app"></div> in index.html.');
+      console.error(
+        'Xi Notes requires <div id="app"></div> in index.html.'
+      );
       return;
     }
 
@@ -169,9 +273,22 @@
             Revision notes
           </div>
 
+          <div class="xi-top-quote">
+            “Your body can stand almost anything.
+            It's your mind that you have to convince.”
+          </div>
+
           <div class="xi-top-spacer"></div>
 
           <span class="xi-read-meta" id="xiReadMeta"></span>
+
+          <span
+            class="xi-checklist-counter"
+            id="xiChecklistCounter"
+            aria-live="polite"
+            style="display:none">
+            0/0 completed
+          </span>
 
           <button
             class="xi-nav-btn"
@@ -217,15 +334,6 @@
           <main class="xi-reader">
             <div class="xi-reader-scroll" id="xiReaderScroll">
               <div class="xi-article-wrap">
-                <header class="xi-article-header">
-                  <h1 class="xi-article-title" id="xiArticleTitle">
-                    Loading notes…
-                  </h1>
-                  <div
-                    class="xi-article-subtitle"
-                    id="xiArticleSubtitle"></div>
-                </header>
-
                 <article class="xi-markdown" id="xiMarkdown">
                   <p>Connecting to GitHub…</p>
                 </article>
@@ -238,8 +346,7 @@
   }
 
   /* =========================================================
-     GEN-Z THEME
-     Main content styling is also defined in style.css.
+     RUNTIME THEME AND RESPONSIVE BEHAVIOR
      ========================================================= */
 
   function injectStyles() {
@@ -252,15 +359,12 @@
       #xiApp {
         --xi-bg: #f5efff;
         --xi-paper: #ffffff;
-        --xi-soft: #fbf7ff;
+        --xi-soft: #fffaff;
         --xi-ink: #29213d;
         --xi-body: #514765;
         --xi-muted: #9588aa;
         --xi-line: #e6dcf5;
         --xi-accent: #8057d9;
-        --xi-accent-hover: #6840bd;
-        --xi-accent-soft: #f0e8ff;
-
         background: var(--xi-bg);
       }
 
@@ -301,9 +405,37 @@
         color: #6037b3;
       }
 
-      #xiApp .xi-markdown .xi-check-section {
-        margin: 13px 0;
-        padding: 13px 15px;
+      #xiApp .xi-top-quote {
+        flex: 0 1 520px;
+        min-width: 0;
+        padding: 5px 12px;
+        border-left: 3px solid #e7a4ca;
+        color: #6e4b85;
+        font-size: 11px;
+        font-style: italic;
+        font-weight: 650;
+        line-height: 1.4;
+        text-align: center;
+      }
+
+      #xiApp .xi-checklist-counter {
+        flex: 0 0 auto;
+        align-items: center;
+        justify-content: center;
+        padding: 5px 9px;
+        border: 1px solid #8ce0b4;
+        border-radius: 8px;
+        background: #effdf5;
+        color: #16864a;
+        font-size: 11px;
+        font-weight: 750;
+        white-space: nowrap;
+        font-variant-numeric: tabular-nums;
+      }
+
+      #xiApp .xi-check-section {
+        margin: 11px 0;
+        padding: 12px 15px;
         border: 1px solid #e7dcf7;
         border-radius: 10px;
         background: #fff;
@@ -314,6 +446,7 @@
         display: flex;
         align-items: flex-start;
         gap: 10px;
+        min-width: 0;
       }
 
       #xiApp .xi-check-heading > h1,
@@ -322,9 +455,9 @@
       #xiApp .xi-check-heading > h4,
       #xiApp .xi-check-heading > h5,
       #xiApp .xi-check-heading > h6 {
-        flex: 1;
+        flex: 1 1 auto;
         min-width: 0;
-        margin: 0 0 9px !important;
+        margin: 0 0 8px !important;
         padding: 0 !important;
         border: 0 !important;
       }
@@ -333,7 +466,7 @@
         flex: 0 0 17px;
         width: 17px;
         height: 17px;
-        margin: 4px 0 0;
+        margin: 3px 0 0;
         accent-color: #19a765;
         cursor: pointer;
       }
@@ -370,34 +503,28 @@
 
       #xiApp .xi-check-section.is-checked
       > .xi-check-section {
-        border-color: #8ce0b4;
-        background: #effdf5;
-      }
-
-      #xiApp .xi-check-section.is-checked
-      > .xi-check-section.is-checked {
-        background: #e4f9ec;
+        border-color: #b2e9c8;
+        background: #f3fff7;
       }
 
       #xiApp .xi-mobile-backdrop {
         display: none;
       }
 
-      @media (max-width: 620px) {
-        #xiApp .xi-check-section {
-          padding: 11px;
+      @media (max-width: 1000px) {
+        #xiApp .xi-top-quote {
+          flex-basis: 350px;
+          font-size: 10px;
         }
+      }
 
-        #xiApp .xi-topbar {
-          gap: 6px;
-          padding: 0 8px;
-        }
-
-        #xiApp .xi-top-current,
-        #xiApp .xi-read-meta {
+      @media (max-width: 760px) {
+        #xiApp .xi-top-quote {
           display: none;
         }
+      }
 
+      @media (max-width: 620px) {
         #xiApp .xi-layout {
           position: relative;
           display: block;
@@ -408,6 +535,7 @@
           z-index: 12;
           inset: 0 auto 0 0;
           width: min(310px, 87vw);
+          height: 100%;
           box-shadow: 12px 0 35px #25332d20;
           transform: translateX(-105%);
           transition: transform 180ms ease;
@@ -426,6 +554,20 @@
 
         #xiApp.xi-mobile-open .xi-mobile-backdrop {
           display: block;
+        }
+
+        #xiApp .xi-top-current,
+        #xiApp .xi-read-meta {
+          display: none;
+        }
+
+        #xiApp .xi-checklist-counter {
+          padding: 4px 6px;
+          font-size: 10px;
+        }
+
+        #xiApp .xi-check-section {
+          padding: 11px;
         }
       }
     `;
@@ -521,7 +663,7 @@
   }
 
   /* =========================================================
-     SEARCH AND NOTE LIST
+     SEARCH AND SIDEBAR
      ========================================================= */
 
   function renderLibrary() {
@@ -573,8 +715,7 @@
   }
 
   /* =========================================================
-     SCRIPT LOADER
-     Load each library once and wait for it to initialize.
+     EXTERNAL SCRIPT LOADER
      ========================================================= */
 
   function loadScript(url, key) {
@@ -618,7 +759,7 @@
   }
 
   /* =========================================================
-     MARKDOWN LIBRARIES
+     REQUIRED MARKDOWN LIBRARIES
      ========================================================= */
 
   async function ensureMarkdownLibraries() {
@@ -629,8 +770,10 @@
       );
     }
 
-    if (!window.DOMPurify ||
-        typeof window.DOMPurify.sanitize !== "function") {
+    if (
+      !window.DOMPurify ||
+      typeof window.DOMPurify.sanitize !== "function"
+    ) {
       await loadScript(
         "https://cdn.jsdelivr.net/npm/dompurify@3.2.6/dist/purify.min.js",
         "dompurify"
@@ -641,20 +784,21 @@
       throw new Error("The Markdown library did not initialize.");
     }
 
-    if (!window.DOMPurify ||
-        typeof window.DOMPurify.sanitize !== "function") {
+    if (
+      !window.DOMPurify ||
+      typeof window.DOMPurify.sanitize !== "function"
+    ) {
       throw new Error("The HTML sanitizer did not initialize.");
     }
   }
 
   /* =========================================================
-     MATH AND CODE LIBRARIES
-     These are optional. Their failure must not block a note.
+     OPTIONAL MATH AND CODE LIBRARIES
      ========================================================= */
 
   async function ensureMathLibraries() {
     try {
-      if (!document.querySelector("#xiKatexStyles")) {
+      if (!$("#xiKatexStyles")) {
         const css = document.createElement("link");
         css.id = "xiKatexStyles";
         css.rel = "stylesheet";
@@ -664,33 +808,34 @@
         document.head.appendChild(css);
       }
 
-      // KaTeX core must load before its auto-render extension.
-      if (!window.katex ||
-          typeof window.katex.render !== "function") {
+      if (!window.katex || typeof window.katex.render !== "function") {
         await loadScript(
           "https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.js",
           "katex"
         );
       }
 
-      if (!window.katex ||
-          typeof window.katex.render !== "function") {
-        throw new Error("KaTeX core failed to initialize.");
-      }
-
-      if (typeof window.renderMathInElement !== "function") {
+      if (
+        window.katex &&
+        typeof window.katex.render === "function" &&
+        typeof window.renderMathInElement !== "function"
+      ) {
         await loadScript(
           "https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/contrib/auto-render.min.js",
           "katex-auto-render"
         );
       }
 
-      if (typeof window.renderMathInElement !== "function") {
-        throw new Error("KaTeX auto-render did not initialize.");
+      if (
+        !window.katex ||
+        typeof window.katex.render !== "function" ||
+        typeof window.renderMathInElement !== "function"
+      ) {
+        throw new Error("KaTeX did not initialize.");
       }
     } catch (error) {
       console.warn(
-        "Formula rendering is unavailable; the note can still be read.",
+        "Formula rendering is unavailable; notes can still be read.",
         error
       );
     }
@@ -698,7 +843,7 @@
 
   async function ensureCodeHighlighting() {
     try {
-      if (!document.querySelector("#xiHighlightStyles")) {
+      if (!$("#xiHighlightStyles")) {
         const css = document.createElement("link");
         css.id = "xiHighlightStyles";
         css.rel = "stylesheet";
@@ -708,8 +853,10 @@
         document.head.appendChild(css);
       }
 
-      if (!window.hljs ||
-          typeof window.hljs.highlightElement !== "function") {
+      if (
+        !window.hljs ||
+        typeof window.hljs.highlightElement !== "function"
+      ) {
         await loadScript(
           "https://cdn.jsdelivr.net/npm/highlight.js@11.11.1/lib/common.min.js",
           "highlight-js"
@@ -721,7 +868,6 @@
   }
 
   async function enhanceMarkdown(article) {
-    // External links should open in a new tab.
     article.querySelectorAll("a[href]").forEach(link => {
       const href = link.getAttribute("href") || "";
 
@@ -731,9 +877,10 @@
       }
     });
 
-    // Code highlighting is optional.
-    if (window.hljs &&
-        typeof window.hljs.highlightElement === "function") {
+    if (
+      window.hljs &&
+      typeof window.hljs.highlightElement === "function"
+    ) {
       article.querySelectorAll("pre code").forEach(code => {
         try {
           window.hljs.highlightElement(code);
@@ -743,7 +890,6 @@
       });
     }
 
-    // Render LaTeX only if both KaTeX components are available.
     if (
       window.katex &&
       typeof window.katex.render === "function" &&
@@ -764,24 +910,42 @@
           ]
         });
       } catch (error) {
-        // This avoids the ParseError failure breaking navigation.
-        console.warn(
-          "Formula rendering failed; keeping the Markdown note available.",
-          error
-        );
+        // Formula errors should never prevent the note from opening.
+        console.warn("Formula rendering failed; showing the note anyway.", error);
       }
     }
   }
 
   /* =========================================================
      CHEAT SHEET CHECKLIST
-     Only enabled for notes/1CheatSheet.md.
-     Each heading owns the content until the next heading at
-     the same or higher level. Nested sections remain nested.
+     Only notes/1CheatSheet.md receives checkboxes.
+     Each heading owns content up to the next heading at the
+     same or higher level.
      ========================================================= */
 
+  function updateChecklistCounter() {
+    const counter = $("#xiChecklistCounter");
+    if (!counter) return;
+
+    const enabled = isCheatSheet(state.path);
+    counter.style.display = enabled ? "inline-flex" : "none";
+
+    if (!enabled) return;
+
+    const checkboxes = Array.from(
+      document.querySelectorAll("#xiMarkdown .xi-checkbox")
+    );
+
+    const completed = checkboxes.filter(checkbox => checkbox.checked).length;
+
+    counter.textContent = `${completed}/${checkboxes.length} completed`;
+  }
+
   function buildDailyChecklist(article) {
-    if (!isCheatSheet(state.path)) return;
+    if (!isCheatSheet(state.path)) {
+      updateChecklistCounter();
+      return;
+    }
 
     const originalNodes = Array.from(article.childNodes);
     const rootBlocks = [];
@@ -823,6 +987,15 @@
       stack.push(item);
     });
 
+    function isHeadingItem(block) {
+      return Boolean(
+        block &&
+        typeof block === "object" &&
+        Array.isArray(block.blocks) &&
+        block.heading
+      );
+    }
+
     function makeSection(item) {
       const headingText = item.heading.textContent.trim();
 
@@ -853,9 +1026,13 @@
       }
 
       checkbox.addEventListener("change", () => {
+        ensureCurrentISTDay();
+
         state.checked[key] = checkbox.checked;
         wrapper.classList.toggle("is-checked", checkbox.checked);
+
         saveRevisionState();
+        updateChecklistCounter();
       });
 
       headingRow.appendChild(checkbox);
@@ -863,12 +1040,7 @@
       wrapper.appendChild(headingRow);
 
       item.blocks.forEach(block => {
-        if (
-          block &&
-          typeof block === "object" &&
-          Array.isArray(block.blocks) &&
-          block.heading
-        ) {
+        if (isHeadingItem(block)) {
           wrapper.appendChild(makeSection(block));
         } else {
           wrapper.appendChild(block);
@@ -881,12 +1053,7 @@
     const fragment = document.createDocumentFragment();
 
     rootBlocks.forEach(block => {
-      if (
-        block &&
-        typeof block === "object" &&
-        Array.isArray(block.blocks) &&
-        block.heading
-      ) {
+      if (isHeadingItem(block)) {
         fragment.appendChild(makeSection(block));
       } else {
         fragment.appendChild(block);
@@ -894,6 +1061,7 @@
     });
 
     article.replaceChildren(fragment);
+    updateChecklistCounter();
   }
 
   /* =========================================================
@@ -937,18 +1105,28 @@
     }
 
     const current = $("#xiTopCurrent");
+
     if (current) {
       current.textContent = note ? note.title : "Revision notes";
     }
 
     const meta = $("#xiReadMeta");
+
     if (meta) {
       meta.textContent = note
         ? `${state.index + 1} of ${state.notes.length}`
         : "";
     }
 
+    const counter = $("#xiChecklistCounter");
+
+    if (counter) {
+      counter.style.display =
+        isCheatSheet(state.path) ? "inline-flex" : "none";
+    }
+
     renderLibrary();
+    updateChecklistCounter();
   }
 
   /* =========================================================
@@ -967,47 +1145,45 @@
   }
 
   function showMessage(title, message, retry = false) {
-    const heading = $("#xiArticleTitle");
     const article = $("#xiMarkdown");
+    if (!article) return;
 
-    if (heading) heading.textContent = title;
+    article.replaceChildren();
 
-    if (article) {
-      article.replaceChildren();
+    const stateBox = document.createElement("div");
+    stateBox.className = "xi-state";
 
-      const stateBox = document.createElement("div");
-      stateBox.className = "xi-state";
+    const stateHeading = document.createElement("h2");
+    stateHeading.textContent = title;
 
-      const stateHeading = document.createElement("h2");
-      stateHeading.textContent = title;
+    const paragraph = document.createElement("p");
+    paragraph.textContent = message;
 
-      const paragraph = document.createElement("p");
-      paragraph.textContent = message;
+    stateBox.append(stateHeading, paragraph);
 
-      stateBox.append(stateHeading, paragraph);
+    if (retry) {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "xi-retry";
+      button.textContent = "Try again";
 
-      if (retry) {
-        const button = document.createElement("button");
-        button.type = "button";
-        button.className = "xi-retry";
-        button.textContent = "Try again";
+      button.addEventListener("click", () => {
+        if (state.path) {
+          openNote(state.path, { updateHistory: false });
+        } else {
+          initialize();
+        }
+      });
 
-        button.addEventListener("click", () => {
-          if (state.path) {
-            openNote(state.path, { updateHistory: false });
-          } else {
-            initialize();
-          }
-        });
-
-        stateBox.appendChild(button);
-      }
-
-      article.appendChild(stateBox);
+      stateBox.appendChild(button);
     }
+
+    article.appendChild(stateBox);
   }
 
   async function openNote(path, options = {}) {
+    ensureCurrentISTDay();
+
     const normalized = normalize(path);
 
     const note = state.notes.find(item =>
@@ -1039,18 +1215,16 @@
     if (window.matchMedia("(max-width: 620px)").matches) {
       $("#xiApp").classList.remove("xi-mobile-open");
       $("#xiMenu").setAttribute("aria-expanded", "false");
+      state.mobileOpen = false;
     }
 
-    const heading = $("#xiArticleTitle");
     const article = $("#xiMarkdown");
     const scroller = $("#xiReaderScroll");
 
-    if (heading) heading.textContent = note.title;
     if (article) article.innerHTML = "<p>Loading note…</p>";
     if (scroller) scroller.scrollTop = 0;
 
     try {
-      // Required libraries: Markdown parser and HTML sanitizer.
       await ensureMarkdownLibraries();
 
       const markdown = await fetchMarkdown(normalized);
@@ -1062,14 +1236,16 @@
         breaks: false
       });
 
-      // Sanitize rendered Markdown before inserting it into the page.
       const safeHTML = window.DOMPurify.sanitize(parsed, {
         USE_PROFILES: { html: true }
       });
 
       article.innerHTML = safeHTML;
 
-      // Avoid duplicate display of the note's title.
+      /*
+       * Remove the first H1 only when it repeats the note title.
+       * The filename remains in the top pane, not twice on the page.
+       */
       const firstHeading = $("#xiMarkdown h1");
 
       if (
@@ -1080,7 +1256,6 @@
         firstHeading.remove();
       }
 
-      // Optional libraries must never prevent a note from opening.
       await Promise.allSettled([
         ensureMathLibraries(),
         ensureCodeHighlighting()
@@ -1088,19 +1263,15 @@
 
       if (requestId !== state.request) return;
 
-      // Add checkboxes only for the cheat sheet.
       if (isCheatSheet(normalized)) {
         buildDailyChecklist(article);
+      } else {
+        updateChecklistCounter();
       }
 
       await enhanceMarkdown(article);
 
       if (requestId !== state.request) return;
-
-      if (heading) heading.textContent = note.title;
-
-      const subtitle = $("#xiArticleSubtitle");
-      if (subtitle) subtitle.textContent = "";
 
       updateNavigation();
     } catch (error) {
@@ -1173,7 +1344,10 @@
     });
 
     next.addEventListener("click", () => {
-      if (state.index >= 0 && state.index < state.notes.length - 1) {
+      if (
+        state.index >= 0 &&
+        state.index < state.notes.length - 1
+      ) {
         openNote(state.notes[state.index + 1].path);
       }
     });
@@ -1194,6 +1368,18 @@
       if (!window.matchMedia("(max-width: 620px)").matches) {
         $("#xiApp").classList.remove("xi-mobile-open");
         state.mobileOpen = false;
+      }
+    });
+
+    /*
+     * Browsers may suspend timers when a tab is in the background.
+     * Check the IST date when the user returns to the page.
+     */
+    window.addEventListener("focus", ensureCurrentISTDay);
+
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "visible") {
+        ensureCurrentISTDay();
       }
     });
 
@@ -1303,6 +1489,7 @@
 
   function start() {
     readRevisionState();
+    scheduleISTReset();
     injectStyles();
     buildApp();
 
