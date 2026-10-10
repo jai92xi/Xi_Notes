@@ -7,72 +7,34 @@
 
   <meta
     name="description"
-    content="A clean, searchable technical interview revision workspace."
-  >
-  <meta name="theme-color" content="#f1f4ef">
-
-  <title>Revision Notes</title>
-
-  <!-- Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link
-    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
-    rel="stylesheet"
+    content="Xi Notes — a technical interview revision workspace for data engineering, AI, ML, and software engineering."
   >
 
-  <!-- Markdown math and code highlighting styles are loaded by app.js -->
+  <meta name="theme-color" content="#f5efff">
 
-  <style>
-    *,
-    *::before,
-    *::after {
-      box-sizing: border-box;
-    }
+  <title>Xi Notes — Technical Interview Revision</title>
 
-    html,
-    body {
-      width: 100%;
-      height: 100%;
-      margin: 0;
-    }
+  <link rel="stylesheet" href="./style.css">
 
-    body {
-      overflow: hidden;
-      background: #f1f4ef;
-      color: #25332d;
-      font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI",
-        Arial, sans-serif;
-      -webkit-font-smoothing: antialiased;
-    }
-
-    #app {
-      width: 100%;
-      height: 100%;
-      min-height: 0;
-    }
-
-    button,
-    input {
-      font: inherit;
-    }
-
-    button:focus-visible,
-    input:focus-visible {
-      outline: 3px solid #b4cbb8;
-      outline-offset: 2px;
-    }
-
-    ::selection {
-      background: #dce9da;
-      color: #25332d;
-    }
-  </style>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <link rel="preconnect" href="https://raw.githubusercontent.com" crossorigin>
+  <link rel="preconnect" href="https://api.github.com" crossorigin>
 </head>
 
 <body>
-  <div id="app"></div>
+  <div id="app">
+    <main class="xi-state" role="status" aria-live="polite">
+      <h2>Loading Xi Notes…</h2>
+      <p>Please wait while your notes are loaded.</p>
+    </main>
+  </div>
 
-  <script src="./app.js" defer></script>
+  <noscript>
+    <div style="margin: 24px; padding: 16px; border: 1px solid #e6dcf5; border-radius: 12px; background: #ffffff; color: #514765;">
+      Xi Notes requires JavaScript. Please enable JavaScript in your browser and reload the page.
+    </div>
+  </noscript>
+
+  <script src="./app.js"></script>
 </body>
 </html>
