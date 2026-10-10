@@ -1807,7 +1807,6 @@
       ? `${index + 1} / ${state.notes.length}`
       : "Ready to revise";
 
-    $("#xiReadProgress").textContent = "";
     renderLibrary();
   }
 
