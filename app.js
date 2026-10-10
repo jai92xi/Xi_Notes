@@ -813,13 +813,11 @@
               ? `<div class="xi-cheat-sheet-banner">
                    <span class="xi-cheat-sheet-icon">✓</span>
                    <div>
-                     <strong>Daily revision checklist</strong>
                      <span>Check off each topic as you revise it. Resets at midnight IST.</span>
                    </div>
                  </div>`
               : ""}
 
-            ${buildContentsIndexFromMarkdown(renderedBody)}
 
             <div class="xi-markdown ${cheatSheet ? "xi-cheat-sheet" : ""}">
               ${renderedBody}
