@@ -1,14 +1,11 @@
+
 /* =========================================================
-   XI NOTES — DAILY REVISION WORKSPACE
-   GitHub Pages + Markdown + KaTeX
+   XI NOTES — COMPLETE APPLICATION
+   GitHub Pages + Markdown + KaTeX + Daily Revision
    ========================================================= */
 
 (() => {
   "use strict";
-
-  /* -------------------------------------------------------
-     1. CONFIGURATION
-     ------------------------------------------------------- */
 
   const CONFIG = {
     owner: "jai92xi",
@@ -16,40 +13,10 @@
     branch: "main",
     notesFolder: "notes",
     cheatSheet: "1CheatSheet.md",
-
-    githubApi:
-      "https://api.github.com/repos/jai92xi/Xi_Notes",
-
-    rawBase:
-      "https://raw.githubusercontent.com/jai92xi/Xi_Notes/main",
-
-    contentBase:
-      "https://cdn.jsdelivr.net/gh/jai92xi/Xi_Notes@main",
-
-    refreshMs: 5 * 60 * 1000
+    apiBase: "https://api.github.com/repos/jai92xi/Xi_Notes",
+    rawBase: "https://raw.githubusercontent.com/jai92xi/Xi_Notes/main",
+    cdnBase: "https://cdn.jsdelivr.net/gh/jai92xi/Xi_Notes@main"
   };
-
-  /* -------------------------------------------------------
-     2. STATE
-     ------------------------------------------------------- */
-
-  const state = {
-    notes: [],
-    currentPath: "",
-    currentIndex: -1,
-    searchTerm: "",
-    sidebarCollapsed: false,
-    mobileSidebarOpen: false,
-    loading: false,
-    requestId: 0,
-    checkedSections: {},
-    istDate: getIstDate(),
-    midnightTimer: null
-  };
-
-  /* -------------------------------------------------------
-     3. DOM HELPERS
-     ------------------------------------------------------- */
 
   const $ = (selector, root = document) =>
     root.querySelector(selector);
@@ -57,67 +24,70 @@
   const $$ = (selector, root = document) =>
     Array.from(root.querySelectorAll(selector));
 
-  function findElement(...selectors) {
-    for (const selector of selectors) {
-      const element = $(selector);
-      if (element) return element;
-    }
-    return null;
-  }
+  const state = {
+    notes: [],
+    currentPath: "",
+    currentIndex: -1,
+    searchTerm: "",
+    requestId: 0,
+    checkedSections: {},
+    istDate: getISTDate(),
+    sidebarCollapsed: false,
+    mobileSidebarOpen: false,
+    tocOpen: false
+  };
 
-  function makeElement(tag, className, text) {
-    const element = document.createElement(tag);
+  const el = {
+    shell: $("#appShell"),
+    sidebar: $("#sidebar"),
+    sidebarToggle: $("#sidebarToggle"),
+    topbarMenu: $("#topbarMenu"),
+    backdrop: $("#sidebarBackdrop"),
+    search: $("#noteSearch"),
+    noteCount: $("#notesCount"),
+    navigation: $("#notesNavigation"),
+    workspace: $("#readingWorkspace"),
+    welcome: $("#welcomePanel"),
+    start: $("#startRevision"),
+    card: $("#contentCard"),
+    banner: $("#revisionBanner"),
+    article: $("#articleContent"),
+    title: $("#currentNoteName"),
+    previous: $("#previousNote"),
+    next: $("#nextNote"),
+    footerNext: $("#footerNextNote"),
+    progressFill: $("#readingProgressFill"),
+    progressText: $("#readingProgressText"),
+    error: $("#errorPanel"),
+    errorMessage: $("#errorMessage"),
+    retry: $("#retryLoad")
+  };
 
-    if (className) element.className = className;
-    if (text !== undefined) element.textContent = text;
+  /* ---------------------------------------------------------
+     HELPERS
+     --------------------------------------------------------- */
 
-    return element;
-  }
-
-  function escapeHTML(value) {
-    return String(value).replace(/[&<>"']/g, character => ({
-      "&": "&amp;",
-      "<": "&lt;",
-      ">": "&gt;",
-      '"': "&quot;",
-      "'": "&#39;"
-    })[character]);
+  function normalizePath(path) {
+    return String(path || "")
+      .replace(/\\/g, "/")
+      .replace(/^\/+/, "")
+      .replace(/\/+/g, "/")
+      .replace(/^(?:\.\/)+/, "");
   }
 
   function encodePath(path) {
-    return path
+    return normalizePath(path)
       .split("/")
-      .map(part => encodeURIComponent(part))
+      .map(encodeURIComponent)
       .join("/");
   }
 
-  function decodePath(path) {
-    try {
-      return decodeURIComponent(path);
-    } catch {
-      return path;
-    }
-  }
-
-  function getFileName(path) {
-    const filename = path.split("/").pop() || path;
-
-    return filename
+  function getTitle(path) {
+    return (path.split("/").pop() || path)
       .replace(/\.md$/i, "")
       .replace(/[-_]/g, " ")
       .replace(/\s+/g, " ")
       .trim();
-  }
-
-  function getDisplayTitle(path) {
-    return getFileName(path);
-  }
-
-  function normalizePath(path) {
-    return String(path || "")
-      .replace(/^\/+/, "")
-      .replace(/\\/g, "/")
-      .replace(/\/+/g, "/");
   }
 
   function isCheatSheet(path) {
@@ -125,13 +95,14 @@
       `${CONFIG.notesFolder}/${CONFIG.cheatSheet}`.toLowerCase();
   }
 
-  function getNoteUrl(path) {
-    return `?note=${encodeURIComponent(normalizePath(path))}`;
+  function getRequestedPath() {
+    return normalizePath(
+      new URLSearchParams(location.search).get("note") || ""
+    );
   }
 
-  function updateUrl(path, replace = false) {
-    const url = new URL(window.location.href);
-
+  function setURL(path, replace = false) {
+    const url = new URL(location.href);
     url.searchParams.set("note", normalizePath(path));
 
     if (replace) {
@@ -141,605 +112,228 @@
     }
   }
 
-  /* -------------------------------------------------------
-     4. ICONS
-     ------------------------------------------------------- */
-
-  const ICONS = {
-    menu: `
-      <svg viewBox="0 0 24 24" fill="none"
-           stroke="currentColor" stroke-width="1.8"
-           stroke-linecap="round">
-        <path d="M4 6h16M4 12h16M4 18h16"/>
-      </svg>
-    `,
-
-    search: `
-      <svg viewBox="0 0 24 24" fill="none"
-           stroke="currentColor" stroke-width="1.8"
-           stroke-linecap="round">
-        <circle cx="10.8" cy="10.8" r="6.8"/>
-        <path d="m16 16 4 4"/>
-      </svg>
-    `,
-
-    previous: `
-      <svg viewBox="0 0 24 24" fill="none"
-           stroke="currentColor" stroke-width="1.8"
-           stroke-linecap="round" stroke-linejoin="round">
-        <path d="m14.5 18-6-6 6-6"/>
-        <path d="M9 12h11"/>
-      </svg>
-    `,
-
-    next: `
-      <svg viewBox="0 0 24 24" fill="none"
-           stroke="currentColor" stroke-width="1.8"
-           stroke-linecap="round" stroke-linejoin="round">
-        <path d="m9.5 18 6-6-6-6"/>
-        <path d="M4 12h11"/>
-      </svg>
-    `,
-
-    check: `
-      <svg viewBox="0 0 24 24" fill="none"
-           stroke="currentColor" stroke-width="2.2"
-           stroke-linecap="round" stroke-linejoin="round">
-        <path d="m5 12 4 4L19 6"/>
-      </svg>
-    `,
-
-    book: `
-      <svg viewBox="0 0 24 24" fill="none"
-           stroke="currentColor" stroke-width="1.8"
-           stroke-linecap="round" stroke-linejoin="round">
-        <path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v17H6.5A2.5 2.5 0 0 0 4 22z"/>
-        <path d="M4 5.5v14A2.5 2.5 0 0 1 6.5 17H20"/>
-      </svg>
-    `,
-
-    arrowRight: `
-      <svg viewBox="0 0 24 24" fill="none"
-           stroke="currentColor" stroke-width="1.8"
-           stroke-linecap="round" stroke-linejoin="round">
-        <path d="M5 12h14M13 6l6 6-6 6"/>
-      </svg>
-    `
-  };
-
-  /* -------------------------------------------------------
-     5. LOAD REQUIRED LIBRARIES
-     ------------------------------------------------------- */
-
-  function loadScript(src) {
-    return new Promise((resolve, reject) => {
-      const existing = $$("script").find(script => script.src === src);
-
-      if (existing) {
-        if (existing.dataset.loaded === "true") {
-          resolve();
-          return;
-        }
-
-        existing.addEventListener("load", resolve, { once: true });
-        existing.addEventListener(
-          "error",
-          () => reject(new Error(`Could not load ${src}`)),
-          { once: true }
-        );
-
-        return;
-      }
-
-      const script = document.createElement("script");
-      script.src = src;
-      script.async = true;
-
-      script.onload = () => {
-        script.dataset.loaded = "true";
-        resolve();
-      };
-
-      script.onerror = () => {
-        reject(new Error(`Could not load ${src}`));
-      };
-
-      document.head.appendChild(script);
-    });
+  function escapeHTML(value) {
+    return String(value).replace(/[&<>"']/g, char => ({
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      '"': "&quot;",
+      "'": "&#39;"
+    })[char]);
   }
 
-  function loadStylesheet(href) {
-    return new Promise((resolve, reject) => {
-      const existing = $$('link[rel="stylesheet"]').find(
-        link => link.href === href
-      );
-
-      if (existing) {
-        resolve();
-        return;
-      }
-
-      const link = document.createElement("link");
-      link.rel = "stylesheet";
-      link.href = href;
-
-      link.onload = resolve;
-      link.onerror = () =>
-        reject(new Error(`Could not load stylesheet ${href}`));
-
-      document.head.appendChild(link);
-    });
+  function setHidden(element, hidden) {
+    if (element) element.hidden = hidden;
   }
 
-  async function ensureLibraries() {
-    if (!window.marked) {
-      await loadScript(
-        "https://cdn.jsdelivr.net/npm/marked@15.0.7/marked.min.js"
-      );
-    }
+  function showError(message) {
+    setHidden(el.welcome, true);
+    setHidden(el.card, true);
+    setHidden(el.error, false);
 
-    if (!window.DOMPurify) {
-      await loadScript(
-        "https://cdn.jsdelivr.net/npm/dompurify@3.2.6/dist/purify.min.js"
-      );
-    }
-
-    if (!window.renderMathInElement) {
-      await loadStylesheet(
-        "https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.css"
-      );
-
-      await loadScript(
-        "https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.js"
-      );
-
-      await loadScript(
-        "https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/contrib/auto-render.min.js"
-      );
-    }
-
-    if (window.marked?.setOptions) {
-      window.marked.setOptions({
-        gfm: true,
-        breaks: false
-      });
+    if (el.errorMessage) {
+      el.errorMessage.textContent = message;
     }
   }
 
-  /* -------------------------------------------------------
-     6. FIND PAGE ELEMENTS
-     ------------------------------------------------------- */
-
-  const elements = {
-    shell: findElement("#appShell", ".app-shell"),
-    sidebar: findElement("#sidebar", ".sidebar"),
-    sidebarContent: findElement(
-      "#sidebarContent",
-      ".sidebar-content"
-    ),
-    notesNavigation: findElement(
-      "#notesNavigation",
-      "#notesList",
-      ".notes-navigation"
-    ),
-    searchInput: findElement(
-      "#searchInput",
-      "#noteSearch",
-      ".search-input"
-    ),
-    noteCount: findElement(
-      "#notesCount",
-      "#noteCount",
-      ".notes-count"
-    ),
-    currentTitle: findElement(
-      "#currentNoteName",
-      "#currentNoteTitle",
-      ".current-note-name"
-    ),
-    article: findElement(
-      "#articleContent",
-      "#markdownContent",
-      ".article-content"
-    ),
-    contentCard: findElement(
-      "#contentCard",
-      ".content-card"
-    ),
-    workspace: findElement(
-      "#readingWorkspace",
-      ".reading-workspace"
-    ),
-    previousButton: findElement(
-      "#previousButton",
-      "#prevButton",
-      ".nav-previous"
-    ),
-    nextButton: findElement(
-      "#nextButton",
-      ".nav-next"
-    ),
-    progressFill: findElement(
-      "#progressFill",
-      ".progress-fill"
-    ),
-    progressText: findElement(
-      "#readingProgressText",
-      "#progressText"
-    ),
-    revisionBanner: findElement(
-      "#revisionBanner",
-      ".revision-banner"
-    ),
-    articleFooter: findElement(
-      "#articleFooter",
-      ".article-footer"
-    ),
-    backdrop: findElement(
-      "#sidebarBackdrop",
-      ".sidebar-backdrop"
-    )
-  };
-
-  /* -------------------------------------------------------
-     7. PREPARE PAGE STRUCTURE
-     ------------------------------------------------------- */
-
-  function ensurePageStructure() {
-    if (!elements.shell) {
-      elements.shell = makeElement("div", "app-shell");
-      elements.shell.id = "appShell";
-      document.body.prepend(elements.shell);
-    }
-
-    if (!elements.sidebar) {
-      elements.sidebar = makeElement("aside", "sidebar");
-      elements.sidebar.id = "sidebar";
-      elements.shell.prepend(elements.sidebar);
-    }
-
-    if (!elements.sidebarContent) {
-      elements.sidebarContent = makeElement(
-        "div",
-        "sidebar-content"
-      );
-      elements.sidebarContent.id = "sidebarContent";
-      elements.sidebar.appendChild(elements.sidebarContent);
-    }
-
-    if (!elements.notesNavigation) {
-      elements.notesNavigation = makeElement(
-        "nav",
-        "notes-navigation"
-      );
-      elements.notesNavigation.id = "notesNavigation";
-      elements.notesNavigation.setAttribute(
-        "aria-label",
-        "Notes"
-      );
-      elements.sidebarContent.appendChild(elements.notesNavigation);
-    }
-
-    if (!elements.searchInput) {
-      const wrapper = makeElement("div", "search-wrapper");
-
-      const searchIcon = makeElement("span", "search-icon");
-      searchIcon.innerHTML = ICONS.search;
-
-      elements.searchInput = document.createElement("input");
-      elements.searchInput.id = "searchInput";
-      elements.searchInput.className = "search-input";
-      elements.searchInput.type = "search";
-      elements.searchInput.placeholder = "Search notes...";
-      elements.searchInput.setAttribute(
-        "aria-label",
-        "Search notes"
-      );
-
-      wrapper.append(searchIcon, elements.searchInput);
-      elements.sidebarContent.prepend(wrapper);
-    }
-
-    let main = findElement("#mainPanel", ".main-panel");
-
-    if (!main) {
-      main = makeElement("main", "main-panel");
-      main.id = "mainPanel";
-      elements.shell.appendChild(main);
-    }
-
-    if (!elements.workspace) {
-      elements.workspace = makeElement(
-        "section",
-        "reading-workspace"
-      );
-      elements.workspace.id = "readingWorkspace";
-      main.appendChild(elements.workspace);
-    }
-
-    if (!elements.contentCard) {
-      elements.contentCard = makeElement(
-        "article",
-        "content-card"
-      );
-      elements.contentCard.id = "contentCard";
-      elements.workspace.appendChild(elements.contentCard);
-    }
-
-    if (!elements.article) {
-      elements.article = makeElement(
-        "div",
-        "article-content"
-      );
-      elements.article.id = "articleContent";
-      elements.contentCard.appendChild(elements.article);
-    }
-
-    ensureTopbar(main);
-    ensureRevisionBanner();
-    ensureBackdrop();
-    ensureProgressElements();
-    ensureFooter();
-    ensureSidebarHeader();
-
-    // Refresh references to elements created during setup.
-    elements.currentTitle = findElement(
-      "#currentNoteName",
-      "#currentNoteTitle",
-      ".current-note-name"
-    );
-
-    elements.previousButton = findElement(
-      "#previousButton",
-      "#prevButton"
-    );
-
-    elements.nextButton = findElement("#nextButton");
-
-    elements.progressFill = findElement("#progressFill");
-    elements.progressText = findElement("#readingProgressText");
-
-    elements.revisionBanner = findElement("#revisionBanner");
-    elements.backdrop = findElement("#sidebarBackdrop");
-    elements.articleFooter = findElement("#articleFooter");
+  function hideError() {
+    setHidden(el.error, true);
   }
-
-  function ensureSidebarHeader() {
-    let header = findElement("#sidebarHeader", ".sidebar-header");
-
-    if (!header) {
-      header = makeElement("div", "sidebar-header");
-      header.id = "sidebarHeader";
-      elements.sidebar.prepend(header);
-    }
-
-    if (!findElement("#brandName", ".brand-name", header)) {
-      const brand = makeElement("a", "brand");
-      brand.href = window.location.pathname;
-      brand.setAttribute("aria-label", "Xi Notes home");
-
-      const mark = makeElement("span", "brand-mark", "Xi");
-      const name = makeElement("span", "brand-name", "Xi Notes");
-      name.id = "brandName";
-
-      brand.append(mark, name);
-      header.appendChild(brand);
-    }
-
-    // Remove the old X/close button if present.
-    const closeButtons = $$(
-      "#closeSidebar, .close-sidebar, .sidebar-close, [data-action='close-sidebar']",
-      header
-    );
-
-    closeButtons.forEach(button => button.remove());
-  }
-
-  function ensureTopbar(main) {
-    let topbar = findElement("#topbar", ".topbar");
-
-    if (!topbar) {
-      topbar = makeElement("header", "topbar");
-      topbar.id = "topbar";
-
-      const leading = makeElement("div", "topbar-leading");
-
-      const menuButton = makeElement("button", "icon-button topbar-menu");
-      menuButton.id = "sidebarToggle";
-      menuButton.type = "button";
-      menuButton.innerHTML = ICONS.menu;
-      menuButton.setAttribute("aria-label", "Collapse or open notes sidebar");
-      menuButton.setAttribute("aria-expanded", "true");
-
-      const heading = makeElement("div", "current-note-heading");
-
-      const title = makeElement("h1", "current-note-name", "Xi Notes");
-      title.id = "currentNoteName";
-
-      heading.appendChild(title);
-      leading.append(menuButton, heading);
-
-      const actions = makeElement("div", "topbar-actions");
-
-      const progress = makeElement("div", "reading-progress");
-      const track = makeElement("div", "progress-track");
-      const fill = makeElement("div", "progress-fill");
-      fill.id = "progressFill";
-      track.appendChild(fill);
-
-      const progressText = makeElement("span", "", "0% read");
-      progressText.id = "readingProgressText";
-
-      progress.append(track, progressText);
-
-      const buttons = makeElement("div", "navigation-buttons");
-
-      const prev = makeElement("button", "nav-button nav-previous");
-      prev.id = "previousButton";
-      prev.type = "button";
-      prev.innerHTML = `${ICONS.previous}<span>Previous</span>`;
-
-      const next = makeElement("button", "nav-button nav-next");
-      next.id = "nextButton";
-      next.type = "button";
-      next.innerHTML = `<span>Next</span>${ICONS.next}`;
-
-      buttons.append(prev, next);
-      actions.append(progress, buttons);
-      topbar.append(leading, actions);
-
-      main.prepend(topbar);
-    }
-
-    if (!findElement(".topbar-accent", main)) {
-      const accent = makeElement("div", "topbar-accent");
-      accent.setAttribute("aria-hidden", "true");
-      topbar.after(accent);
-    }
-
-    let toggle = findElement("#sidebarToggle");
-
-    if (!toggle) {
-      const leading = findElement(".topbar-leading", topbar);
-      toggle = makeElement("button", "icon-button topbar-menu");
-      toggle.id = "sidebarToggle";
-      toggle.type = "button";
-      toggle.innerHTML = ICONS.menu;
-      toggle.setAttribute("aria-label", "Collapse or open notes sidebar");
-      toggle.setAttribute("aria-expanded", "true");
-      leading?.prepend(toggle);
-    }
-
-    // Ensure the menu uses the three-line icon and not an X.
-    toggle.innerHTML = ICONS.menu;
-    toggle.setAttribute("aria-label", "Collapse or open notes sidebar");
-  }
-
-  function ensureRevisionBanner() {
-    if (!elements.contentCard) return;
-
-    let banner = findElement("#revisionBanner", ".revision-banner");
-
-    if (!banner) {
-      banner = makeElement("div", "revision-banner");
-      banner.id = "revisionBanner";
-
-      const icon = makeElement(
-        "span",
-        "revision-banner-check"
-      );
-      icon.innerHTML = ICONS.check;
-
-      const text = makeElement(
-        "span",
-        "revision-banner-text",
-        "Daily revision checklist · Resets at midnight IST"
-      );
-
-      banner.append(icon, text);
-
-      elements.contentCard.prepend(banner);
-    } else {
-      // Keep the message short and consistent.
-      const text = findElement(
-        ".revision-banner-text",
-        "span:last-child",
-        banner
-      );
-
-      if (text) {
-        text.textContent =
-          "Daily revision checklist · Resets at midnight IST";
-      }
-    }
-  }
-
-  function ensureBackdrop() {
-    if (!elements.backdrop) {
-      elements.backdrop = makeElement("button", "sidebar-backdrop");
-      elements.backdrop.id = "sidebarBackdrop";
-      elements.backdrop.type = "button";
-      elements.backdrop.setAttribute("aria-label", "Close notes menu");
-      elements.backdrop.tabIndex = -1;
-      elements.shell.appendChild(elements.backdrop);
-    }
-  }
-
-  function ensureProgressElements() {
-    if (!findElement("#progressFill")) {
-      const track = findElement(".progress-track");
-      if (track) {
-        const fill = makeElement("div", "progress-fill");
-        fill.id = "progressFill";
-        track.appendChild(fill);
-      }
-    }
-
-    if (!findElement("#readingProgressText")) {
-      const progress = findElement(".reading-progress");
-      if (progress) {
-        const text = makeElement("span", "", "0% read");
-        text.id = "readingProgressText";
-        progress.appendChild(text);
-      }
-    }
-  }
-
-  function ensureFooter() {
-    const main = findElement("#mainPanel", ".main-panel");
-    if (!main || findElement("#appFooter", ".app-footer")) return;
-
-    const footer = makeElement("footer", "app-footer");
-    footer.id = "appFooter";
-
-    const left = makeElement("div", "app-footer-left");
-    const dot = makeElement("span", "footer-dot");
-    const label = makeElement("span", "", "Your daily learning space");
-    left.append(dot, label);
-
-    const right = makeElement("span", "app-footer-right", "KEEP LEARNING");
-    footer.append(left, right);
-
-    main.appendChild(footer);
-  }
-
-  /* -------------------------------------------------------
-     8. SIDEBAR COLLAPSE / MOBILE MENU
-     ------------------------------------------------------- */
 
   function isMobile() {
     return window.matchMedia("(max-width: 760px)").matches;
   }
 
-  function syncSidebarState() {
-    if (!elements.shell) return;
+  /* ---------------------------------------------------------
+     GITHUB NOTE DISCOVERY
+     --------------------------------------------------------- */
 
-    elements.shell.classList.toggle(
+  async function fetchJSON(url) {
+    const response = await fetch(url, {
+      headers: { Accept: "application/vnd.github+json" },
+      cache: "no-store"
+    });
+
+    if (!response.ok) {
+      throw new Error(`GitHub request failed: ${response.status}`);
+    }
+
+    return response.json();
+  }
+
+  async function discoverNotes() {
+    let notes = [];
+
+    try {
+      const data = await fetchJSON(
+        `${CONFIG.apiBase}/git/trees/${CONFIG.branch}?recursive=1`
+      );
+
+      if (Array.isArray(data.tree)) {
+        notes = data.tree
+          .filter(file =>
+            file.type === "blob" &&
+            file.path.startsWith(`${CONFIG.notesFolder}/`) &&
+            /\.md$/i.test(file.path) &&
+            !file.path.split("/").some(part => part.startsWith("."))
+          )
+          .map(file => ({
+            path: normalizePath(file.path),
+            title: getTitle(file.path),
+            sha: file.sha
+          }));
+      }
+    } catch (error) {
+      console.warn("GitHub tree API unavailable; trying folder API.", error);
+    }
+
+    // Fallback: list the notes folder and any subfolders.
+    if (!notes.length) {
+      notes = await discoverFolder(CONFIG.notesFolder);
+    }
+
+    if (!notes.length) {
+      throw new Error(
+        "No Markdown notes found. Check the repository and notes folder."
+      );
+    }
+
+    const unique = new Map();
+    notes.forEach(note => unique.set(note.path, note));
+
+    state.notes = Array.from(unique.values()).sort((a, b) =>
+      a.path.localeCompare(b.path, undefined, {
+        numeric: true,
+        sensitivity: "base"
+      })
+    );
+
+    if (el.noteCount) {
+      el.noteCount.textContent = String(state.notes.length);
+    }
+
+    renderNotesList();
+  }
+
+  async function discoverFolder(folder) {
+    const result = [];
+
+    async function walk(path) {
+      const data = await fetchJSON(
+        `${CONFIG.apiBase}/contents/${encodePath(path)}?ref=${CONFIG.branch}`
+      );
+
+      if (!Array.isArray(data)) return;
+
+      for (const item of data) {
+        if (item.type === "dir") {
+          if (!item.name.startsWith(".")) {
+            await walk(item.path);
+          }
+        } else if (
+          item.type === "file" &&
+          /\.md$/i.test(item.name)
+        ) {
+          result.push({
+            path: normalizePath(item.path),
+            title: getTitle(item.path),
+            sha: item.sha
+          });
+        }
+      }
+    }
+
+    await walk(folder);
+    return result;
+  }
+
+  /* ---------------------------------------------------------
+     SIDEBAR
+     --------------------------------------------------------- */
+
+  function renderNotesList() {
+    if (!el.navigation) return;
+
+    const term = state.searchTerm.trim().toLowerCase();
+    const notes = state.notes.filter(note =>
+      note.title.toLowerCase().includes(term) ||
+      note.path.toLowerCase().includes(term)
+    );
+
+    el.navigation.replaceChildren();
+
+    if (!notes.length) {
+      const empty = document.createElement("div");
+      empty.className = "empty-search";
+      empty.textContent = state.notes.length
+        ? "No matching notes. Try another search."
+        : "Loading notes...";
+      el.navigation.appendChild(empty);
+      return;
+    }
+
+    const fragment = document.createDocumentFragment();
+
+    notes.forEach(note => {
+      const link = document.createElement("a");
+      link.className = "note-link";
+      link.href = `?note=${encodeURIComponent(note.path)}`;
+      link.dataset.notePath = note.path;
+
+      if (note.path === state.currentPath) {
+        link.classList.add("active");
+        link.setAttribute("aria-current", "page");
+      }
+
+      const icon = document.createElement("span");
+      icon.className = "note-icon";
+      icon.textContent = "◇";
+      icon.setAttribute("aria-hidden", "true");
+
+      const title = document.createElement("span");
+      title.className = "note-title";
+      title.textContent = note.title;
+
+      link.append(icon, title);
+      fragment.appendChild(link);
+    });
+
+    el.navigation.appendChild(fragment);
+  }
+
+  function syncSidebar() {
+    if (!el.shell) return;
+
+    el.shell.classList.toggle(
       "sidebar-collapsed",
       state.sidebarCollapsed && !isMobile()
     );
 
-    elements.shell.classList.toggle(
+    el.shell.classList.toggle(
       "mobile-sidebar-open",
       state.mobileSidebarOpen && isMobile()
     );
 
-    const toggle = findElement("#sidebarToggle");
+    [el.sidebarToggle, el.topbarMenu].forEach(button => {
+      if (!button) return;
 
-    if (toggle) {
-      toggle.innerHTML = ICONS.menu;
-      toggle.setAttribute(
+      button.setAttribute(
         "aria-expanded",
         String(isMobile()
           ? state.mobileSidebarOpen
           : !state.sidebarCollapsed)
       );
-    }
 
-    if (elements.backdrop) {
-      elements.backdrop.hidden = !(
-        isMobile() && state.mobileSidebarOpen
+      button.setAttribute(
+        "aria-label",
+        isMobile()
+          ? (state.mobileSidebarOpen ? "Close navigation" : "Open navigation")
+          : (state.sidebarCollapsed ? "Open sidebar" : "Collapse sidebar")
       );
+    });
+
+    if (el.backdrop) {
+      el.backdrop.hidden = !(isMobile() && state.mobileSidebarOpen);
     }
   }
 
@@ -750,173 +344,50 @@
       state.sidebarCollapsed = !state.sidebarCollapsed;
     }
 
-    syncSidebarState();
+    syncSidebar();
   }
 
   function closeMobileSidebar() {
     state.mobileSidebarOpen = false;
-    syncSidebarState();
+    syncSidebar();
   }
 
-  /* -------------------------------------------------------
-     9. GITHUB NOTE DISCOVERY
-     ------------------------------------------------------- */
+  /* ---------------------------------------------------------
+     MARKDOWN AND MATH
+     --------------------------------------------------------- */
 
-  async function fetchJson(url) {
-    const response = await fetch(url, {
-      headers: {
-        Accept: "application/vnd.github+json"
-      },
-      cache: "no-store"
-    });
-
-    if (!response.ok) {
-      throw new Error(
-        `GitHub request failed (${response.status})`
-      );
+  async function ensureLibraries() {
+    if (!window.marked) {
+      throw new Error("Markdown library did not load. Refresh the page.");
     }
 
-    return response.json();
-  }
-
-  async function discoverNotes() {
-    const url =
-      `${CONFIG.githubApi}/git/trees/${CONFIG.branch}?recursive=1`;
-
-    const data = await fetchJson(url);
-
-    if (!Array.isArray(data.tree)) {
-      throw new Error("GitHub returned an invalid file listing.");
+    if (!window.DOMPurify) {
+      throw new Error("HTML sanitizer did not load. Refresh the page.");
     }
 
-    const folderPrefix = `${CONFIG.notesFolder}/`;
-
-    const notes = data.tree
-      .filter(item =>
-        item.type === "blob" &&
-        item.path.startsWith(folderPrefix) &&
-        /\.md$/i.test(item.path) &&
-        !item.path.split("/").some(part => part.startsWith("."))
-      )
-      .map(item => ({
-        path: normalizePath(item.path),
-        title: getDisplayTitle(item.path),
-        sha: item.sha,
-        size: item.size || 0
-      }))
-      .sort((a, b) =>
-        a.title.localeCompare(b.title, undefined, {
-          numeric: true,
-          sensitivity: "base"
-        })
-      );
-
-    if (!notes.length) {
-      throw new Error(
-        `No Markdown files were found under ${CONFIG.notesFolder}/.`
-      );
-    }
-
-    state.notes = notes;
-
-    if (elements.noteCount) {
-      elements.noteCount.textContent = String(notes.length);
-    }
-
-    renderNotesList();
-
-    return notes;
-  }
-
-  /* -------------------------------------------------------
-     10. SIDEBAR NOTE LIST
-     ------------------------------------------------------- */
-
-  function renderNotesList() {
-    const container = elements.notesNavigation;
-    if (!container) return;
-
-    const term = state.searchTerm.trim().toLowerCase();
-
-    const filtered = state.notes.filter(note => {
-      if (!term) return true;
-
-      return note.title.toLowerCase().includes(term) ||
-        note.path.toLowerCase().includes(term);
-    });
-
-    container.replaceChildren();
-
-    if (!filtered.length) {
-      const empty = makeElement("div", "empty-search");
-
-      const icon = makeElement("span", "empty-search-icon", "⌕");
-      const title = makeElement("p", "", "No notes found");
-      const subtitle = makeElement(
-        "span",
-        "",
-        "Try a different search."
-      );
-
-      empty.append(icon, title, subtitle);
-      container.appendChild(empty);
-      return;
-    }
-
-    for (const note of filtered) {
-      const link = document.createElement("a");
-
-      link.className = "note-link";
-      link.href = getNoteUrl(note.path);
-      link.dataset.notePath = note.path;
-
-      if (note.path === state.currentPath) {
-        link.classList.add("active");
-        link.setAttribute("aria-current", "page");
-      }
-
-      const icon = makeElement("span", "note-icon", "◇");
-      icon.setAttribute("aria-hidden", "true");
-
-      const title = makeElement("span", "note-title", note.title);
-
-      link.append(icon, title);
-
-      if (note.path === state.currentPath) {
-        const indicator = makeElement(
-          "span",
-          "note-active-indicator"
-        );
-        indicator.setAttribute("aria-hidden", "true");
-        link.appendChild(indicator);
-      }
-
-      container.appendChild(link);
+    if (window.marked.setOptions) {
+      window.marked.setOptions({
+        gfm: true,
+        breaks: false
+      });
     }
   }
-
-  /* -------------------------------------------------------
-     11. FETCH MARKDOWN CONTENT
-     ------------------------------------------------------- */
 
   async function fetchMarkdown(path) {
     const encoded = encodePath(path);
-
     const urls = [
       `${CONFIG.rawBase}/${encoded}`,
-      `${CONFIG.contentBase}/${encoded}`
+      `${CONFIG.cdnBase}/${encoded}`
     ];
 
     let lastError;
 
     for (const url of urls) {
       try {
-        const response = await fetch(url, {
-          cache: "no-store"
-        });
+        const response = await fetch(url, { cache: "no-store" });
 
         if (!response.ok) {
-          throw new Error(`Could not load note (${response.status}).`);
+          throw new Error(`Unable to fetch note (${response.status}).`);
         }
 
         return await response.text();
@@ -925,93 +396,16 @@
       }
     }
 
-    throw lastError || new Error("Unable to load this note.");
-  }
-
-  /* -------------------------------------------------------
-     12. MATH PROTECTION DURING MARKDOWN PARSING
-     ------------------------------------------------------- */
-
-  function protectMath(markdown) {
-    const expressions = [];
-
-    const protectedMarkdown = String(markdown).replace(
-      /(\$\$[\s\S]+?\$\$|\\\[[\s\S]+?\\\]|\\\([\s\S]+?\\\)|(?<!\\)\$(?!\$)[^\n$]+?(?<!\\)\$)/g,
-      match => {
-        const token = `XI_MATH_PLACEHOLDER_${expressions.length}_END`;
-        expressions.push(match);
-        return token;
-      }
-    );
-
-    return {
-      text: protectedMarkdown,
-      restore(html) {
-        return html.replace(
-          /XI_MATH_PLACEHOLDER_(\d+)_END/g,
-          (match, index) => {
-            const expression = expressions[Number(index)];
-            return expression === undefined
-              ? match
-              : escapeHTML(expression);
-          }
-        );
-      }
-    };
-  }
-
-  /* -------------------------------------------------------
-     13. SAFE MARKDOWN RENDERING
-     ------------------------------------------------------- */
-
-  function applyHighlightSyntax(markdown) {
-    // Supports ==highlighted text== without changing code blocks.
-    const parts = String(markdown).split(
-      /(```[\s\S]*?```|~~~[\s\S]*?~~~|`[^`\n]*`)/g
-    );
-
-    return parts.map((part, index) => {
-      const isCode = index % 2 === 1;
-
-      if (isCode) return part;
-
-      return part.replace(
-        /==(.+?)==/g,
-        (_, text) => `<mark class="xi-highlight">${text}</mark>`
-      );
-    }).join("");
-  }
-
-  function sanitizeHtml(html) {
-    if (window.DOMPurify) {
-      return window.DOMPurify.sanitize(html, {
-        USE_PROFILES: { html: true },
-        ADD_ATTR: [
-          "target",
-          "rel",
-          "class",
-          "id",
-          "aria-label",
-          "data-revision-section"
-        ]
-      });
-    }
-
-    return html;
+    throw lastError || new Error("Unable to load Markdown.");
   }
 
   function renderMarkdown(markdown) {
-    const protectedMath = protectMath(markdown);
-    const preparedMarkdown = applyHighlightSyntax(protectedMath.text);
-
-    const parsed = window.marked.parse(preparedMarkdown);
-    const restored = protectedMath.restore(parsed);
-
-    return sanitizeHtml(restored);
+    const html = window.marked.parse(markdown);
+    return window.DOMPurify.sanitize(html);
   }
 
   function renderMath(container) {
-    if (!window.renderMathInElement || !container) return;
+    if (!window.renderMathInElement) return;
 
     try {
       window.renderMathInElement(container, {
@@ -1024,412 +418,17 @@
         throwOnError: false,
         strict: "ignore",
         ignoredTags: [
-          "script",
-          "noscript",
-          "style",
-          "textarea",
-          "pre",
-          "code",
-          "option"
+          "script", "noscript", "style", "textarea", "pre", "code"
         ]
       });
     } catch (error) {
-      console.warn("Math rendering warning:", error);
+      console.warn("KaTeX rendering warning:", error);
     }
   }
 
-  /* -------------------------------------------------------
-     14. CHEAT SHEET DAILY REVISION
-     ------------------------------------------------------- */
-
-  function getIstDate(date = new Date()) {
-    const parts = new Intl.DateTimeFormat("en-CA", {
-      timeZone: "Asia/Kolkata",
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit"
-    }).formatToParts(date);
-
-    const partMap = Object.fromEntries(
-      parts.map(part => [part.type, part.value])
-    );
-
-    return `${partMap.year}-${partMap.month}-${partMap.day}`;
-  }
-
-  function getChecklistStorageKey() {
-    return `xi-cheatsheet-checks-${state.istDate}`;
-  }
-
-  function loadChecklistState() {
-    try {
-      state.checkedSections = JSON.parse(
-        localStorage.getItem(getChecklistStorageKey()) || "{}"
-      );
-    } catch {
-      state.checkedSections = {};
-    }
-  }
-
-  function saveChecklistState() {
-    try {
-      localStorage.setItem(
-        getChecklistStorageKey(),
-        JSON.stringify(state.checkedSections)
-      );
-    } catch (error) {
-      console.warn("Could not save revision checklist:", error);
-    }
-  }
-
-  function getSectionKey(heading, index) {
-    const normalized = heading
-      .toLowerCase()
-      .replace(/<[^>]*>/g, "")
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/^-|-$/g, "")
-      .slice(0, 100);
-
-    return `${normalized || "topic"}-${index}`;
-  }
-
-  function makeCheatSheetSections(container) {
-    const headings = $$("h1, h2, h3, h4, h5, h6", container);
-
-    if (!headings.length) return;
-
-    const contentNodes = Array.from(container.childNodes);
-    const sections = [];
-    let currentSection = null;
-    let headingIndex = 0;
-
-    for (const node of contentNodes) {
-      if (
-        node.nodeType === Node.ELEMENT_NODE &&
-        /^H[1-6]$/.test(node.tagName)
-      ) {
-        currentSection = {
-          heading: node,
-          nodes: [],
-          index: headingIndex++
-        };
-
-        sections.push(currentSection);
-      } else if (currentSection) {
-        currentSection.nodes.push(node);
-      }
-    }
-
-    if (!sections.length) return;
-
-    const fragment = document.createDocumentFragment();
-
-    for (const section of sections) {
-      const headingText = section.heading.textContent.trim();
-      const key = getSectionKey(headingText, section.index);
-      const checked = Boolean(state.checkedSections[key]);
-
-      const wrapper = makeElement(
-        "section",
-        "cheat-sheet-section"
-      );
-
-      wrapper.dataset.revisionSection = key;
-
-      const headingRow = makeElement(
-        "div",
-        "cheat-sheet-heading"
-      );
-
-      const checkbox = document.createElement("input");
-      checkbox.type = "checkbox";
-      checkbox.className = "cheat-sheet-checkbox";
-      checkbox.checked = checked;
-      checkbox.setAttribute(
-        "aria-label",
-        `Mark ${headingText} as revised`
-      );
-      checkbox.dataset.revisionKey = key;
-
-      section.heading.parentNode?.removeChild(section.heading);
-
-      headingRow.append(checkbox, section.heading);
-      wrapper.appendChild(headingRow);
-
-      for (const node of section.nodes) {
-        wrapper.appendChild(node);
-      }
-
-      if (checked) {
-        wrapper.classList.add("is-checked");
-      }
-
-      fragment.appendChild(wrapper);
-    }
-
-    container.replaceChildren(fragment);
-  }
-
-  function clearDailyChecklistIfNeeded() {
-    const currentDate = getIstDate();
-
-    if (currentDate === state.istDate) return;
-
-    state.istDate = currentDate;
-    state.checkedSections = {};
-
-    try {
-      localStorage.setItem(getChecklistStorageKey(), "{}");
-    } catch {
-      // The checklist remains usable for this page session.
-    }
-
-    if (isCheatSheet(state.currentPath)) {
-      renderCurrentNote({ updateHistory: false });
-    }
-
-    scheduleMidnightReset();
-  }
-
-  function millisecondsUntilNextIstMidnight() {
-    const now = new Date();
-
-    const dateParts = new Intl.DateTimeFormat("en-US", {
-      timeZone: "Asia/Kolkata",
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit"
-    }).formatToParts(now);
-
-    const values = Object.fromEntries(
-      dateParts.map(part => [part.type, part.value])
-    );
-
-    // IST is UTC+05:30. Calculate the next midnight in IST.
-    const todayUtcMidnight = Date.UTC(
-      Number(values.year),
-      Number(values.month) - 1,
-      Number(values.day)
-    );
-
-    const nextIstMidnight =
-      todayUtcMidnight + 24 * 60 * 60 * 1000 -
-      (5 * 60 + 30) * 60 * 1000;
-
-    return Math.max(1000, nextIstMidnight - now.getTime() + 1000);
-  }
-
-  function scheduleMidnightReset() {
-    if (state.midnightTimer) {
-      clearTimeout(state.midnightTimer);
-    }
-
-    state.midnightTimer = setTimeout(() => {
-      clearDailyChecklistIfNeeded();
-      scheduleMidnightReset();
-    }, millisecondsUntilNextIstMidnight());
-  }
-
-  /* -------------------------------------------------------
-     15. UPDATE TITLE AND NAVIGATION
-     ------------------------------------------------------- */
-
-  function updateCurrentTitle(path) {
-    const title = getDisplayTitle(path);
-
-    if (elements.currentTitle) {
-      elements.currentTitle.textContent = title;
-      elements.currentTitle.title = title;
-    }
-
-    document.title = `${title} | Xi Notes`;
-  }
-
-  function updateNavigationButtons() {
-    const index = state.notes.findIndex(
-      note => note.path === state.currentPath
-    );
-
-    state.currentIndex = index;
-
-    if (elements.previousButton) {
-      elements.previousButton.disabled = index <= 0;
-      elements.previousButton.setAttribute(
-        "aria-label",
-        index > 0
-          ? `Previous note: ${state.notes[index - 1].title}`
-          : "No previous note"
-      );
-    }
-
-    if (elements.nextButton) {
-      elements.nextButton.disabled =
-        index < 0 || index >= state.notes.length - 1;
-
-      elements.nextButton.setAttribute(
-        "aria-label",
-        index >= 0 && index < state.notes.length - 1
-          ? `Next note: ${state.notes[index + 1].title}`
-          : "No next note"
-      );
-    }
-  }
-
-  async function navigateByOffset(offset) {
-    const nextIndex = state.currentIndex + offset;
-
-    if (nextIndex < 0 || nextIndex >= state.notes.length) return;
-
-    await openNote(state.notes[nextIndex].path);
-  }
-
-  /* -------------------------------------------------------
-     16. READING PROGRESS
-     ------------------------------------------------------- */
-
-  function updateReadingProgress() {
-    const workspace = elements.workspace;
-    if (!workspace) return;
-
-    const scrollableDistance =
-      workspace.scrollHeight - workspace.clientHeight;
-
-    const percentage = scrollableDistance <= 0
-      ? 100
-      : Math.min(
-          100,
-          Math.max(
-            0,
-            Math.round(
-              (workspace.scrollTop / scrollableDistance) * 100
-            )
-          )
-        );
-
-    if (elements.progressFill) {
-      elements.progressFill.style.width = `${percentage}%`;
-    }
-
-    if (elements.progressText) {
-      elements.progressText.textContent = `${percentage}% read`;
-    }
-  }
-
-  /* -------------------------------------------------------
-     17. OPEN AND RENDER A NOTE
-     ------------------------------------------------------- */
-
-  async function openNote(path, options = {}) {
-    const normalizedPath = normalizePath(path);
-    const noteExists = state.notes.some(
-      note => note.path === normalizedPath
-    );
-
-    if (!noteExists) {
-      showError(
-        "Note not found",
-        "This Markdown file is not in the current GitHub notes list."
-      );
-      return;
-    }
-
-    state.currentPath = normalizedPath;
-    state.currentIndex = state.notes.findIndex(
-      note => note.path === normalizedPath
-    );
-
-    const requestId = ++state.requestId;
-
-    updateCurrentTitle(normalizedPath);
-    updateNavigationButtons();
-    renderNotesList();
-
-    if (options.updateHistory !== false) {
-      updateUrl(normalizedPath, options.replaceHistory === true);
-    }
-
-    closeMobileSidebar();
-
-    if (elements.article) {
-      elements.article.innerHTML = `
-        <div class="loading-notes">
-          <span class="loading-spinner" aria-hidden="true"></span>
-          <span>Loading your notes...</span>
-        </div>
-      `;
-    }
-
-    if (elements.workspace) {
-      elements.workspace.scrollTop = 0;
-    }
-
-    updateReadingProgress();
-
-    try {
-      await ensureLibraries();
-
-      const markdown = await fetchMarkdown(normalizedPath);
-
-      // Ignore older requests if the user has already opened another note.
-      if (requestId !== state.requestId) return;
-
-      const renderedHtml = renderMarkdown(markdown);
-
-      elements.article.innerHTML = renderedHtml;
-
-      // This note title is already displayed in the top bar.
-      // Remove a duplicate top-level heading only when it exactly matches
-      // the filename, avoiding unwanted duplicate title display.
-      removeDuplicateFileTitle(elements.article, normalizedPath);
-
-      if (isCheatSheet(normalizedPath)) {
-        loadChecklistState();
-        makeCheatSheetSections(elements.article);
-      }
-
-      addSafeLinkBehavior(elements.article);
-      renderMath(elements.article);
-      highlightCodeBlocks(elements.article);
-
-      // No content index / table of contents is created.
-      updateReadingProgress();
-      updateNavigationButtons();
-    } catch (error) {
-      if (requestId !== state.requestId) return;
-
-      console.error("Could not open note:", error);
-
-      showError(
-        "Unable to load this note",
-        "Check your internet connection and confirm the Markdown file exists in the notes folder on GitHub."
-      );
-    }
-  }
-
-  function removeDuplicateFileTitle(container, path) {
-    const firstHeading = container.querySelector("h1");
-
-    if (!firstHeading) return;
-
-    const headingText = firstHeading.textContent
-      .trim()
-      .replace(/\s+/g, " ")
-      .toLowerCase();
-
-    const filename = getFileName(path)
-      .trim()
-      .replace(/\s+/g, " ")
-      .toLowerCase();
-
-    if (headingText === filename) {
-      firstHeading.remove();
-    }
-  }
-
-  function addSafeLinkBehavior(container) {
+  function configureLinks(container) {
     $$("a", container).forEach(link => {
       const href = link.getAttribute("href");
-
       if (!href) return;
 
       if (/^https?:\/\//i.test(href)) {
@@ -1437,14 +436,10 @@
         link.rel = "noopener noreferrer";
       }
 
-      if (
-        href.startsWith("#") &&
-        href.length > 1
-      ) {
+      if (href.startsWith("#")) {
         link.addEventListener("click", event => {
-          const target = document.getElementById(
-            decodeURIComponent(href.slice(1))
-          );
+          const id = decodeURIComponent(href.slice(1));
+          const target = document.getElementById(id);
 
           if (target) {
             event.preventDefault();
@@ -1458,177 +453,505 @@
     });
   }
 
-  function highlightCodeBlocks(container) {
-    // Optional syntax highlighting if highlight.js is included in index.html.
-    if (!window.hljs) return;
+  /* ---------------------------------------------------------
+     CONTENTS / CONTEXT PANEL
+     --------------------------------------------------------- */
 
-    $$("pre code", container).forEach(block => {
-      try {
-        window.hljs.highlightElement(block);
-      } catch (error) {
-        console.warn("Code highlighting warning:", error);
+  function createTOC() {
+    if (!el.article || !el.card) return;
+
+    let panel = $("#xiContentsPanel");
+    let toggle = $("#xiContentsToggle");
+
+    if (!panel) {
+      panel = document.createElement("aside");
+      panel.id = "xiContentsPanel";
+      panel.className = "xi-contents-panel";
+      panel.hidden = true;
+      panel.setAttribute("aria-label", "Note contents");
+
+      const heading = document.createElement("div");
+      heading.className = "xi-contents-heading";
+      heading.textContent = "ON THIS PAGE";
+
+      const list = document.createElement("nav");
+      list.id = "xiContentsList";
+      list.className = "xi-contents-list";
+      list.setAttribute("aria-label", "Headings in this note");
+
+      panel.append(heading, list);
+
+      // Place the contents panel before the Markdown article.
+      el.article.before(panel);
+    }
+
+    if (!toggle) {
+      toggle = document.createElement("button");
+      toggle.id = "xiContentsToggle";
+      toggle.className = "xi-contents-toggle";
+      toggle.type = "button";
+      toggle.textContent = "☷ Contents";
+      toggle.setAttribute("aria-expanded", "false");
+      toggle.setAttribute("aria-controls", "xiContentsPanel");
+
+      panel.before(toggle);
+    }
+
+    toggle.onclick = () => {
+      state.tocOpen = !state.tocOpen;
+      panel.hidden = !state.tocOpen;
+      toggle.setAttribute("aria-expanded", String(state.tocOpen));
+      toggle.textContent = state.tocOpen ? "▤ Hide contents" : "☷ Contents";
+    };
+
+    const list = $("#xiContentsList");
+    list.replaceChildren();
+
+    const headings = $$("h1, h2, h3, h4", el.article);
+    const usedIds = new Set();
+
+    headings.forEach((heading, index) => {
+      let base = heading.id ||
+        heading.textContent.trim().toLowerCase()
+          .replace(/[^a-z0-9]+/g, "-")
+          .replace(/^-|-$/g, "") ||
+        `section-${index + 1}`;
+
+      let id = base;
+      let suffix = 2;
+
+      while (usedIds.has(id) || (
+        document.getElementById(id) &&
+        document.getElementById(id) !== heading
+      )) {
+        id = `${base}-${suffix++}`;
       }
+
+      usedIds.add(id);
+      heading.id = id;
+      heading.style.scrollMarginTop = "90px";
+
+      const link = document.createElement("a");
+      link.href = `#${id}`;
+      link.className = "xi-contents-link";
+      link.textContent = heading.textContent.trim();
+      link.dataset.level = heading.tagName.toLowerCase();
+
+      link.addEventListener("click", event => {
+        event.preventDefault();
+        heading.scrollIntoView({ behavior: "smooth", block: "start" });
+
+        history.replaceState(
+          history.state,
+          "",
+          `${location.pathname}${location.search}#${encodeURIComponent(id)}`
+        );
+      });
+
+      list.appendChild(link);
     });
+
+    // Show the contents toggle only when there are headings.
+    toggle.hidden = headings.length === 0;
+    panel.hidden = true;
+    state.tocOpen = false;
+    toggle.setAttribute("aria-expanded", "false");
+    toggle.textContent = "☷ Contents";
   }
 
-  /* -------------------------------------------------------
-     18. ERROR STATE
-     ------------------------------------------------------- */
+  /* ---------------------------------------------------------
+     DAILY CHEAT-SHEET CHECKLIST
+     --------------------------------------------------------- */
 
-  function showError(title, message) {
-    if (!elements.article) return;
+  function getISTDate(date = new Date()) {
+    const parts = new Intl.DateTimeFormat("en-CA", {
+      timeZone: "Asia/Kolkata",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit"
+    }).formatToParts(date);
 
-    elements.article.innerHTML = `
-      <div class="status-panel">
-        <div class="status-icon status-icon-error" aria-hidden="true">!</div>
-        <h2>${escapeHTML(title)}</h2>
-        <p>${escapeHTML(message)}</p>
-        <button type="button" class="status-button" id="retryNoteButton">
-          Try again
-        </button>
-      </div>
-    `;
+    const values = Object.fromEntries(
+      parts.map(part => [part.type, part.value])
+    );
 
-    const retry = findElement("#retryNoteButton", elements.article);
-
-    retry?.addEventListener("click", () => {
-      if (state.currentPath) {
-        openNote(state.currentPath, { updateHistory: false });
-      } else {
-        initializeNotes();
-      }
-    });
+    return `${values.year}-${values.month}-${values.day}`;
   }
 
-  /* -------------------------------------------------------
-     19. EVENT HANDLERS
-     ------------------------------------------------------- */
+  function checklistKey() {
+    return `xi-cheatsheet-checks-${state.istDate}`;
+  }
+
+  function loadChecklist() {
+    try {
+      state.checkedSections = JSON.parse(
+        localStorage.getItem(checklistKey()) || "{}"
+      );
+    } catch {
+      state.checkedSections = {};
+    }
+  }
+
+  function saveChecklist() {
+    try {
+      localStorage.setItem(
+        checklistKey(),
+        JSON.stringify(state.checkedSections)
+      );
+    } catch (error) {
+      console.warn("Checklist could not be saved.", error);
+    }
+  }
+
+  function checkDailyReset() {
+    const today = getISTDate();
+
+    if (today !== state.istDate) {
+      state.istDate = today;
+      state.checkedSections = {};
+      loadChecklist();
+
+      if (isCheatSheet(state.currentPath)) {
+        buildChecklist();
+      }
+    }
+  }
+
+  function sectionKey(heading, index) {
+    const text = heading.toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-|-$/g, "")
+      .slice(0, 90);
+
+    return `${text || "topic"}-${index}`;
+  }
+
+  function buildChecklist() {
+    if (!el.article) return;
+
+    const headings = $$("h1, h2, h3, h4, h5, h6", el.article);
+    if (!headings.length) return;
+
+    const originalNodes = Array.from(el.article.childNodes);
+    const sections = [];
+    let current = null;
+    let index = 0;
+
+    originalNodes.forEach(node => {
+      if (
+        node.nodeType === Node.ELEMENT_NODE &&
+        /^H[1-6]$/.test(node.tagName)
+      ) {
+        current = {
+          heading: node,
+          nodes: [],
+          index: index++
+        };
+
+        sections.push(current);
+      } else if (current) {
+        current.nodes.push(node);
+      }
+    });
+
+    if (!sections.length) return;
+
+    const fragment = document.createDocumentFragment();
+
+    sections.forEach(section => {
+      const text = section.heading.textContent.trim();
+      const key = sectionKey(text, section.index);
+
+      const wrapper = document.createElement("section");
+      wrapper.className = "cheat-sheet-section";
+      wrapper.dataset.revisionSection = key;
+
+      const headingRow = document.createElement("div");
+      headingRow.className = "cheat-sheet-heading";
+
+      const checkbox = document.createElement("input");
+      checkbox.type = "checkbox";
+      checkbox.className = "cheat-sheet-checkbox";
+      checkbox.dataset.revisionKey = key;
+      checkbox.checked = Boolean(state.checkedSections[key]);
+      checkbox.setAttribute("aria-label", `Mark ${text} as revised`);
+
+      if (checkbox.checked) wrapper.classList.add("is-checked");
+
+      headingRow.append(checkbox, section.heading);
+      wrapper.appendChild(headingRow);
+
+      section.nodes.forEach(node => wrapper.appendChild(node));
+      fragment.appendChild(wrapper);
+    });
+
+    el.article.replaceChildren(fragment);
+  }
+
+  /* ---------------------------------------------------------
+     NAVIGATION AND PROGRESS
+     --------------------------------------------------------- */
+
+  function updateTitleAndButtons() {
+    if (el.title) {
+      el.title.textContent = state.currentPath
+        ? getTitle(state.currentPath)
+        : "Choose a topic";
+    }
+
+    const index = state.currentIndex;
+    const hasPrevious = index > 0;
+    const hasNext = index >= 0 && index < state.notes.length - 1;
+
+    [el.previous].forEach(button => {
+      if (button) button.disabled = !hasPrevious;
+    });
+
+    [el.next, el.footerNext].forEach(button => {
+      if (button) button.disabled = !hasNext;
+    });
+
+    if (el.previous) {
+      el.previous.title = hasPrevious
+        ? `Previous: ${state.notes[index - 1].title}`
+        : "No previous note";
+    }
+
+    if (el.next) {
+      el.next.title = hasNext
+        ? `Next: ${state.notes[index + 1].title}`
+        : "No next note";
+    }
+
+    if (el.banner) {
+      el.banner.hidden = !isCheatSheet(state.currentPath);
+    }
+  }
+
+  async function navigate(offset) {
+    const index = state.currentIndex + offset;
+
+    if (index < 0 || index >= state.notes.length) return;
+
+    await openNote(state.notes[index].path);
+  }
+
+  function updateProgress() {
+    if (!el.workspace) return;
+
+    const distance = el.workspace.scrollHeight - el.workspace.clientHeight;
+    const percentage = distance <= 0
+      ? 100
+      : Math.max(0, Math.min(
+          100,
+          Math.round((el.workspace.scrollTop / distance) * 100)
+        ));
+
+    if (el.progressFill) {
+      el.progressFill.style.width = `${percentage}%`;
+    }
+
+    if (el.progressText) {
+      el.progressText.textContent = `${percentage}% read`;
+    }
+  }
+
+  /* ---------------------------------------------------------
+     OPEN A NOTE
+     --------------------------------------------------------- */
+
+  async function openNote(path, options = {}) {
+    const normalized = normalizePath(path);
+    const note = state.notes.find(item => item.path === normalized);
+
+    if (!note) {
+      showError(`Note not found: ${normalized}`);
+      return;
+    }
+
+    const requestId = ++state.requestId;
+
+    state.currentPath = normalized;
+    state.currentIndex = state.notes.findIndex(
+      item => item.path === normalized
+    );
+
+    if (options.updateHistory !== false) {
+      setURL(normalized, options.replaceHistory === true);
+    }
+
+    renderNotesList();
+    updateTitleAndButtons();
+    closeMobileSidebar();
+    hideError();
+
+    setHidden(el.welcome, true);
+    setHidden(el.card, false);
+
+    if (el.article) {
+      el.article.innerHTML = `
+        <div class="loading-notes">
+          <span class="loading-spinner" aria-hidden="true"></span>
+          <span>Loading your notes...</span>
+        </div>`;
+    }
+
+    if (el.workspace) el.workspace.scrollTop = 0;
+    updateProgress();
+
+    try {
+      await ensureLibraries();
+
+      const markdown = await fetchMarkdown(normalized);
+
+      // Ignore older requests if the user selected another note.
+      if (requestId !== state.requestId) return;
+
+      el.article.innerHTML = renderMarkdown(markdown);
+
+      // Remove duplicate file-name heading if present.
+      const firstHeading = $("h1", el.article);
+      if (
+        firstHeading &&
+        firstHeading.textContent.trim().toLowerCase() ===
+        getTitle(normalized).trim().toLowerCase()
+      ) {
+        firstHeading.remove();
+      }
+
+      if (isCheatSheet(normalized)) {
+        loadChecklist();
+        buildChecklist();
+      }
+
+      configureLinks(el.article);
+      createTOC();
+      renderMath(el.article);
+      updateTitleAndButtons();
+      updateProgress();
+
+      if (location.hash) {
+        requestAnimationFrame(() => {
+          const id = decodeURIComponent(location.hash.slice(1));
+          document.getElementById(id)?.scrollIntoView({
+            behavior: "auto",
+            block: "start"
+          });
+        });
+      }
+    } catch (error) {
+      if (requestId !== state.requestId) return;
+
+      console.error("Xi Notes: note loading failed.", error);
+      showError(
+        `${error.message || "Unable to load this note."} ` +
+        "Check your connection and the Markdown file in GitHub, then try again."
+      );
+    }
+  }
+
+  /* ---------------------------------------------------------
+     EVENT HANDLERS
+     --------------------------------------------------------- */
 
   function bindEvents() {
-    // Menu button: one three-line button handles both open and collapse.
-    document.addEventListener("click", event => {
-      const toggle = event.target.closest("#sidebarToggle");
-
-      if (toggle) {
+    // Both existing three-line buttons operate the same sidebar.
+    [el.sidebarToggle, el.topbarMenu].forEach(button => {
+      button?.addEventListener("click", event => {
         event.preventDefault();
         toggleSidebar();
-        return;
+      });
+    });
+
+    el.backdrop?.addEventListener("click", closeMobileSidebar);
+
+    el.navigation?.addEventListener("click", event => {
+      const link = event.target.closest("[data-note-path]");
+      if (!link) return;
+
+      event.preventDefault();
+      openNote(link.dataset.notePath);
+    });
+
+    el.previous?.addEventListener("click", () => navigate(-1));
+    el.next?.addEventListener("click", () => navigate(1));
+    el.footerNext?.addEventListener("click", () => navigate(1));
+
+    el.start?.addEventListener("click", () => {
+      const path = getRequestedPath() ||
+        state.notes.find(note => isCheatSheet(note.path))?.path ||
+        state.notes[0]?.path;
+
+      if (path) openNote(path);
+    });
+
+    el.search?.addEventListener("input", event => {
+      state.searchTerm = event.target.value || "";
+      renderNotesList();
+    });
+
+    el.search?.addEventListener("keydown", event => {
+      if (event.key === "Escape") {
+        el.search.value = "";
+        state.searchTerm = "";
+        renderNotesList();
+        el.search.blur();
       }
 
-      const noteLink = event.target.closest("[data-note-path]");
-
-      if (noteLink) {
-        event.preventDefault();
-        openNote(noteLink.dataset.notePath);
-        return;
-      }
-
-      const previous = event.target.closest(
-        "#previousButton, #prevButton"
-      );
-
-      if (previous) {
-        event.preventDefault();
-        navigateByOffset(-1);
-        return;
-      }
-
-      const next = event.target.closest("#nextButton");
-
-      if (next) {
-        event.preventDefault();
-        navigateByOffset(1);
-        return;
-      }
-
-      const backdrop = event.target.closest("#sidebarBackdrop");
-
-      if (backdrop) {
-        closeMobileSidebar();
+      if (event.key === "Enter") {
+        const first = $("[data-note-path]", el.navigation);
+        if (first) openNote(first.dataset.notePath);
       }
     });
 
-    if (elements.searchInput) {
-      elements.searchInput.addEventListener("input", event => {
-        state.searchTerm = event.target.value || "";
-        renderNotesList();
-      });
-
-      elements.searchInput.addEventListener("keydown", event => {
-        if (event.key === "Escape") {
-          elements.searchInput.value = "";
-          state.searchTerm = "";
-          renderNotesList();
-          elements.searchInput.blur();
-        }
-
-        if (event.key === "Enter") {
-          const firstNote = elements.notesNavigation?.querySelector(
-            "[data-note-path]"
-          );
-
-          if (firstNote) {
-            openNote(firstNote.dataset.notePath);
-          }
-        }
-      });
-    }
-
-    // Save daily revision checklist changes.
+    // Checklist state persists for the current IST date.
     document.addEventListener("change", event => {
-      const checkbox = event.target.closest(
-        "input[data-revision-key]"
-      );
-
+      const checkbox = event.target.closest("input[data-revision-key]");
       if (!checkbox) return;
 
-      clearDailyChecklistIfNeeded();
+      checkDailyReset();
 
       const key = checkbox.dataset.revisionKey;
-
       state.checkedSections[key] = checkbox.checked;
-      saveChecklistState();
+      saveChecklist();
 
-      const section = checkbox.closest(".cheat-sheet-section");
-
-      section?.classList.toggle("is-checked", checkbox.checked);
+      checkbox.closest(".cheat-sheet-section")
+        ?.classList.toggle("is-checked", checkbox.checked);
     });
 
-    if (elements.workspace) {
-      elements.workspace.addEventListener(
-        "scroll",
-        updateReadingProgress,
-        { passive: true }
-      );
-    }
+    el.workspace?.addEventListener("scroll", updateProgress, {
+      passive: true
+    });
 
     window.addEventListener("resize", () => {
-      syncSidebarState();
-      updateReadingProgress();
+      syncSidebar();
+      updateProgress();
     });
 
     window.addEventListener("popstate", () => {
-      const path = getNoteFromUrl();
+      const path = getRequestedPath();
 
       if (path && state.notes.some(note => note.path === path)) {
         openNote(path, { updateHistory: false });
+      } else if (!path && state.notes.length) {
+        const fallback = state.notes.find(note => isCheatSheet(note.path))
+          || state.notes[0];
+
+        openNote(fallback.path, {
+          updateHistory: false
+        });
       }
     });
 
-    window.addEventListener("focus", clearDailyChecklistIfNeeded);
-    document.addEventListener(
-      "visibilitychange",
-      clearDailyChecklistIfNeeded
-    );
+    window.addEventListener("focus", checkDailyReset);
+    document.addEventListener("visibilitychange", checkDailyReset);
 
-    // Keyboard shortcuts.
     document.addEventListener("keydown", event => {
       const target = event.target;
-      const typing = target instanceof HTMLElement &&
-        (
-          target.isContentEditable ||
-          ["INPUT", "TEXTAREA", "SELECT"].includes(target.tagName)
-        );
+      const typing = target instanceof HTMLElement && (
+        target.isContentEditable ||
+        ["INPUT", "TEXTAREA", "SELECT"].includes(target.tagName)
+      );
 
       if (typing) return;
 
@@ -1637,119 +960,93 @@
         event.key.toLowerCase() === "k"
       ) {
         event.preventDefault();
-        elements.searchInput?.focus();
+        el.search?.focus();
         return;
-      }
-
-      if (event.key === "ArrowLeft" && !event.altKey) {
-        navigateByOffset(-1);
-      }
-
-      if (event.key === "ArrowRight" && !event.altKey) {
-        navigateByOffset(1);
       }
 
       if (event.key === "/" && !event.ctrlKey && !event.metaKey) {
         event.preventDefault();
-        elements.searchInput?.focus();
+        el.search?.focus();
+      }
+
+      if (event.key === "ArrowLeft" && !event.altKey) {
+        navigate(-1);
+      }
+
+      if (event.key === "ArrowRight" && !event.altKey) {
+        navigate(1);
       }
 
       if (event.key === "Escape" && isMobile()) {
         closeMobileSidebar();
       }
     });
+
+    el.retry?.addEventListener("click", () => {
+      if (state.currentPath) {
+        openNote(state.currentPath, { updateHistory: false });
+      } else {
+        initialize();
+      }
+    });
   }
 
-  /* -------------------------------------------------------
-     20. READ NOTE FROM URL
-     ------------------------------------------------------- */
+  /* ---------------------------------------------------------
+     INITIALIZATION
+     --------------------------------------------------------- */
 
-  function getNoteFromUrl() {
-    const params = new URLSearchParams(window.location.search);
-    const requested = params.get("note");
-
-    if (!requested) return "";
-
-    return normalizePath(requested);
-  }
-
-  function chooseInitialNote() {
-    const requested = getNoteFromUrl();
-
-    if (requested && state.notes.some(note => note.path === requested)) {
-      return requested;
-    }
-
-    const cheatSheetPath =
-      `${CONFIG.notesFolder}/${CONFIG.cheatSheet}`;
-
-    const cheatSheetExists = state.notes.some(
-      note => note.path === cheatSheetPath
-    );
-
-    return cheatSheetExists
-      ? cheatSheetPath
-      : state.notes[0]?.path || "";
-  }
-
-  /* -------------------------------------------------------
-     21. INITIALIZE
-     ------------------------------------------------------- */
-
-  async function initializeNotes() {
+  async function initialize() {
     try {
-      await ensureLibraries();
-
       await discoverNotes();
 
-      loadChecklistState();
-      scheduleMidnightReset();
+      loadChecklist();
 
-      const initialPath = chooseInitialNote();
+      const requested = getRequestedPath();
+      const validRequested = state.notes.find(
+        note => note.path.toLowerCase() === requested.toLowerCase()
+      );
 
-      if (!initialPath) {
-        showError(
-          "No notes found",
-          "Add Markdown files to the notes folder in your Xi_Notes GitHub repository."
-        );
+      const defaultNote = state.notes.find(note =>
+        isCheatSheet(note.path)
+      ) || state.notes[0];
+
+      const initialNote = validRequested || defaultNote;
+
+      if (!initialNote) {
+        showError("No Markdown notes were found in the notes folder.");
         return;
       }
 
-      await openNote(initialPath, {
-        replaceHistory: true
-      });
+      await openNote(initialNote.path, { replaceHistory: true });
     } catch (error) {
-      console.error("Xi Notes initialization failed:", error);
-
+      console.error("Xi Notes initialization failed.", error);
       showError(
-        "Unable to load Xi Notes",
-        "The app could not retrieve your notes from GitHub. Please check your connection and try again."
+        `${error.message || "Could not retrieve notes from GitHub."} ` +
+        "Check your internet connection and try again."
       );
     }
   }
 
-  /* -------------------------------------------------------
-     22. START APP
-     ------------------------------------------------------- */
-
   function start() {
-    ensurePageStructure();
+    // Ensure the existing HTML's loading state is replaced.
+    if (el.navigation) {
+      const loading = $("#loadingNotes", el.navigation);
+      loading?.remove();
+    }
+
     bindEvents();
-    syncSidebarState();
+    syncSidebar();
 
-    // Avoid showing an X or separate close button.
-    const closeButtons = $$(
-      "#closeSidebar, .close-sidebar, .sidebar-close, [data-action='close-sidebar']"
-    );
-    closeButtons.forEach(button => button.remove());
+    // Keep the sidebar toggle as a three-line menu.
+    $$(".close-sidebar, .sidebar-close, #closeSidebar").forEach(button => {
+      button.remove();
+    });
 
-    initializeNotes();
+    initialize();
   }
 
   if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", start, {
-      once: true
-    });
+    document.addEventListener("DOMContentLoaded", start, { once: true });
   } else {
     start();
   }
