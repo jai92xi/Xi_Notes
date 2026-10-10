@@ -1,14 +1,16 @@
 
 /* =========================================================
-   XI NOTES — CLEAN REVISION WORKSPACE
-   Theme: Sage green + ivory
+   XI NOTES — COMPLETE APP.JS
+   Theme: Lavender + Mint + Pink
    Features:
-   - Minimal top bar with hamburger and Previous / Next
-   - Flat searchable notes list
-   - GitHub Markdown discovery
-   - Direct note URLs using ?note=notes/example.md
-   - Markdown, formulas and code highlighting
-   - Responsive sidebar
+   - Searchable GitHub Markdown notes
+   - Direct links using ?note=notes/example.md
+   - Previous / Next navigation in the top bar
+   - Collapsible sidebar with hamburger menu
+   - Markdown, LaTeX formulas and code highlighting
+   - Cheat sheet heading checkboxes
+   - Green strike-through for completed sections
+   - Checkbox state saved in localStorage
    ========================================================= */
 
 (() => {
@@ -32,37 +34,51 @@
     index: -1,
     query: "",
     request: 0,
-    sidebarOpen: false,
-    libraries: {}
+    libraries: {},
+    checked: {},
+    mobileOpen: false
   };
 
-  const normalize = path => String(path || "")
-    .replace(/\\/g, "/")
-    .replace(/^\/+/, "")
-    .replace(/^(?:\.\/)+/, "");
+  const STORAGE_KEY = "xi-notes-cheatsheet-checks-v2";
 
-  const encodePath = path => normalize(path)
-    .split("/")
-    .map(encodeURIComponent)
-    .join("/");
+  /* =========================================================
+     HELPERS
+     ========================================================= */
 
-  const titleOf = path => {
-    const name = normalize(path).split("/").pop() || path;
-    return name
+  function normalize(path) {
+    return String(path || "")
+      .replace(/\\/g, "/")
+      .replace(/^\/+/, "")
+      .replace(/^(?:\.\/)+/, "");
+  }
+
+  function encodePath(path) {
+    return normalize(path)
+      .split("/")
+      .map(encodeURIComponent)
+      .join("/");
+  }
+
+  function titleOf(path) {
+    const filename = normalize(path).split("/").pop() || path;
+
+    return filename
       .replace(/\.md$/i, "")
       .replace(/^\d+[-_. ]*/, "")
       .replace(/[-_]/g, " ")
       .replace(/\s+/g, " ")
       .trim() || "Untitled note";
-  };
+  }
 
-  const escapeHTML = value => String(value).replace(/[&<>"']/g, char => ({
-    "&": "&amp;",
-    "<": "&lt;",
-    ">": "&gt;",
-    '"': "&quot;",
-    "'": "&#39;"
-  })[char]);
+  function escapeHTML(value) {
+    return String(value).replace(/[&<>"']/g, character => ({
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      '"': "&quot;",
+      "'": "&#39;"
+    })[character]);
+  }
 
   function icon(name) {
     const paths = {
@@ -73,560 +89,60 @@
       right: '<path d="m9 18 6-6-6-6"/>'
     };
 
-    return `<svg viewBox="0 0 24 24" fill="none"
-      stroke="currentColor" stroke-width="1.8"
-      stroke-linecap="round" stroke-linejoin="round"
-      aria-hidden="true">${paths[name] || paths.file}</svg>`;
-  }
-
-  /* =========================
-     STYLES
-     ========================= */
-
-  function injectStyles() {
-    if ($("#xi-workspace-styles")) return;
-
-    const style = document.createElement("style");
-    style.id = "xi-workspace-styles";
-
-    style.textContent = `
-      :root {
-        --xi-bg: #f1f4ef;
-        --xi-paper: #fffefa;
-        --xi-soft: #f7f8f4;
-        --xi-ink: #25332d;
-        --xi-body: #4c5b52;
-        --xi-muted: #879489;
-        --xi-line: #dfe6dc;
-        --xi-accent: #52745d;
-        --xi-accent-soft: #eaf1e9;
-        --xi-header: 58px;
-        --xi-library: 265px;
-      }
-
-      *, *::before, *::after { box-sizing: border-box; }
-
-      html, body {
-        width: 100%;
-        height: 100%;
-        margin: 0;
-      }
-
-      body {
-        overflow: hidden;
-        background: var(--xi-bg);
-        color: var(--xi-ink);
-        font: 14px/1.55 Inter, -apple-system, BlinkMacSystemFont,
-          "Segoe UI", Arial, sans-serif;
-        -webkit-font-smoothing: antialiased;
-      }
-
-      button, input { font: inherit; }
-      button { color: inherit; }
-
-      button:focus-visible, input:focus-visible {
-        outline: 3px solid #b4cbb8;
-        outline-offset: 2px;
-      }
-
-      #xiApp {
-        height: 100dvh;
-        width: 100%;
-        display: grid;
-        grid-template-rows: var(--xi-header) minmax(0, 1fr);
-        overflow: hidden;
-        background: var(--xi-bg);
-      }
-
-      .xi-topbar {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        min-width: 0;
-        padding: 0 16px;
-        border-bottom: 1px solid var(--xi-line);
-        background: #fbfcf8;
-        z-index: 20;
-      }
-
-      .xi-icon-btn {
-        display: grid;
-        place-items: center;
-        flex: 0 0 36px;
-        width: 36px;
-        height: 36px;
-        padding: 0;
-        border: 1px solid var(--xi-line);
-        border-radius: 8px;
-        background: #fffefa;
-        color: #526858;
-        cursor: pointer;
-      }
-
-      .xi-icon-btn:hover {
-        background: var(--xi-accent-soft);
-      }
-
-      .xi-icon-btn svg,
-      .xi-nav-btn svg {
-        width: 17px;
-        height: 17px;
-      }
-
-      .xi-top-current {
-        min-width: 0;
-        overflow: hidden;
-        color: var(--xi-ink);
-        font-size: 13px;
-        font-weight: 700;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-      }
-
-      .xi-top-spacer { flex: 1; }
-
-      .xi-read-meta {
-        color: var(--xi-muted);
-        font-size: 11px;
-        white-space: nowrap;
-      }
-
-      .xi-nav-btn {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        gap: 5px;
-        min-height: 35px;
-        padding: 7px 11px;
-        border: 1px solid var(--xi-line);
-        border-radius: 8px;
-        background: #fffefa;
-        color: #425448;
-        font-size: 12px;
-        white-space: nowrap;
-        cursor: pointer;
-      }
-
-      .xi-nav-btn:hover:not(:disabled) {
-        background: var(--xi-accent-soft);
-      }
-
-      .xi-nav-btn.primary {
-        border-color: var(--xi-accent);
-        background: var(--xi-accent);
-        color: #fff;
-      }
-
-      .xi-nav-btn.primary:hover:not(:disabled) {
-        background: #42624c;
-      }
-
-      .xi-nav-btn:disabled {
-        opacity: .4;
-        cursor: not-allowed;
-      }
-
-      .xi-layout {
-        display: grid;
-        grid-template-columns: var(--xi-library) minmax(0, 1fr);
-        min-height: 0;
-        overflow: hidden;
-        transition: grid-template-columns .18s ease;
-      }
-
-      #xiApp.xi-collapsed {
-        --xi-library: 0px;
-      }
-
-      .xi-sidebar {
-        display: flex;
-        flex-direction: column;
-        min-width: 0;
-        min-height: 0;
-        overflow: hidden;
-        border-right: 1px solid var(--xi-line);
-        background: #fbfcf8;
-      }
-
-      .xi-library-head {
-        padding: 14px;
-        border-bottom: 1px solid #e9eee6;
-      }
-
-      .xi-search {
-        position: relative;
-        display: flex;
-        align-items: center;
-      }
-
-      .xi-search svg {
-        position: absolute;
-        left: 11px;
-        width: 15px;
-        height: 15px;
-        color: #8c9b8e;
-        pointer-events: none;
-      }
-
-      .xi-search input {
-        width: 100%;
-        height: 38px;
-        padding: 0 12px 0 34px;
-        border: 1px solid var(--xi-line);
-        border-radius: 8px;
-        background: #f3f6f0;
-        color: var(--xi-ink);
-        font-size: 12px;
-        outline: none;
-      }
-
-      .xi-search input:focus {
-        border-color: #9cb7a1;
-        background: #fffefa;
-        box-shadow: 0 0 0 3px #52745d12;
-      }
-
-      .xi-search input::placeholder { color: #95a093; }
-
-      .xi-library-scroll {
-        flex: 1;
-        min-height: 0;
-        overflow-y: auto;
-        padding: 8px;
-        overscroll-behavior: contain;
-        scrollbar-width: thin;
-        scrollbar-color: #d5ded3 transparent;
-      }
-
-      .xi-note-link {
-        display: flex;
-        align-items: center;
-        gap: 9px;
-        width: 100%;
-        min-height: 35px;
-        margin: 2px 0;
-        padding: 7px 9px;
-        border: 1px solid transparent;
-        border-radius: 7px;
-        background: transparent;
-        color: #536257;
-        text-align: left;
-        cursor: pointer;
-      }
-
-      .xi-note-link:hover {
-        background: #f0f4ed;
-        color: #314b38;
-      }
-
-      .xi-note-link.active {
-        border-color: #dce8da;
-        background: #eaf1e9;
-        color: #34543b;
-      }
-
-      .xi-note-file {
-        display: flex;
-        flex: 0 0 15px;
-        color: #91a092;
-      }
-
-      .xi-note-file svg { width: 15px; height: 15px; }
-
-      .xi-note-link.active .xi-note-file { color: var(--xi-accent); }
-
-      .xi-note-name {
-        min-width: 0;
-        flex: 1;
-        overflow: hidden;
-        font-size: 12px;
-        font-weight: 550;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-      }
-
-      .xi-note-link.active .xi-note-name { font-weight: 750; }
-
-      .xi-active-mark {
-        width: 6px;
-        height: 6px;
-        flex: 0 0 6px;
-        border-radius: 50%;
-        background: var(--xi-accent);
-      }
-
-      .xi-empty {
-        padding: 22px 12px;
-        color: var(--xi-muted);
-        font-size: 12px;
-        line-height: 1.7;
-        overflow-wrap: anywhere;
-      }
-
-      .xi-reader {
-        display: flex;
-        flex-direction: column;
-        min-width: 0;
-        min-height: 0;
-        overflow: hidden;
-        background: var(--xi-bg);
-      }
-
-      .xi-reader-scroll {
-        flex: 1;
-        min-height: 0;
-        overflow-y: auto;
-        overflow-x: hidden;
-        padding: 22px 26px 36px;
-        overscroll-behavior: contain;
-        scroll-behavior: smooth;
-        scrollbar-width: thin;
-        scrollbar-color: #d5ded3 transparent;
-      }
-
-      .xi-article-wrap {
-        width: 100%;
-        max-width: 1100px;
-        min-height: 300px;
-        margin: 0 auto;
-        padding: clamp(22px, 3vw, 38px) clamp(20px, 3.5vw, 44px);
-        border: 1px solid #e1e7dd;
-        border-radius: 11px;
-        background: var(--xi-paper);
-        box-shadow: 0 3px 12px #2a3e2e08;
-      }
-
-      .xi-article-header {
-        margin-bottom: 20px;
-        padding-bottom: 17px;
-        border-bottom: 1px solid #e8ede4;
-      }
-
-      .xi-article-title {
-        margin: 0;
-        color: #25332d;
-        font-size: clamp(25px, 3vw, 34px);
-        font-weight: 800;
-        line-height: 1.25;
-        letter-spacing: -.8px;
-        overflow-wrap: anywhere;
-      }
-
-      .xi-article-subtitle { display: none; }
-      .xi-article-kicker { display: none; }
-
-      .xi-markdown {
-        color: #435248;
-        font-size: 13.5px;
-        line-height: 1.65;
-        overflow-wrap: anywhere;
-      }
-
-      .xi-markdown > :first-child { margin-top: 0; }
-
-      .xi-markdown h1,
-      .xi-markdown h2,
-      .xi-markdown h3,
-      .xi-markdown h4,
-      .xi-markdown h5,
-      .xi-markdown h6 {
-        color: #2c3d31;
-        font-weight: 760;
-        line-height: 1.4;
-        scroll-margin-top: 18px;
-      }
-
-      .xi-markdown h1 { margin: 24px 0 10px; font-size: 25px; }
-
-      .xi-markdown h2 {
-        margin: 27px 0 10px;
-        padding-bottom: 7px;
-        border-bottom: 1px solid #e5ebe2;
-        font-size: 20px;
-      }
-
-      .xi-markdown h3 { margin: 21px 0 8px; font-size: 16px; }
-      .xi-markdown h4 { margin: 18px 0 7px; font-size: 14px; }
-      .xi-markdown p { margin: 9px 0 13px; }
-      .xi-markdown strong { color: #2b3b30; font-weight: 760; }
-
-      .xi-markdown a {
-        color: #426c4b;
-        text-decoration-thickness: 1px;
-        text-underline-offset: 3px;
-      }
-
-      .xi-markdown ul,
-      .xi-markdown ol {
-        margin: 8px 0 14px;
-        padding-left: 24px;
-      }
-
-      .xi-markdown li { margin: 3px 0; padding-left: 2px; }
-      .xi-markdown li::marker { color: #78957b; }
-
-      .xi-markdown blockquote {
-        margin: 15px 0;
-        padding: 10px 15px;
-        border-left: 3px solid #7e9e81;
-        border-radius: 0 7px 7px 0;
-        background: #f1f5ef;
-        color: #56675a;
-      }
-
-      .xi-markdown code {
-        padding: 2px 5px;
-        border: 1px solid #e5eae2;
-        border-radius: 4px;
-        background: #f3f6f0;
-        color: #426047;
-        font-family: "SFMono-Regular", Consolas, monospace;
-        font-size: .9em;
-      }
-
-      .xi-markdown pre {
-        overflow: auto;
-        margin: 13px 0 17px;
-        padding: 15px;
-        border: 1px solid #dfe6dc;
-        border-radius: 8px;
-        background: #f5f7f3;
-        line-height: 1.55;
-      }
-
-      .xi-markdown pre code {
-        padding: 0;
-        border: 0;
-        border-radius: 0;
-        background: transparent;
-        color: #35473a;
-        font-size: 12px;
-      }
-
-      .xi-markdown table {
-        width: 100%;
-        margin: 14px 0 18px;
-        border-collapse: collapse;
-        font-size: 12px;
-      }
-
-      .xi-markdown th,
-      .xi-markdown td {
-        padding: 8px 10px;
-        border: 1px solid #dfe6dc;
-        text-align: left;
-        vertical-align: top;
-      }
-
-      .xi-markdown th {
-        background: #edf3ea;
-        color: #304b36;
-      }
-
-      .xi-markdown tr:nth-child(even) td { background: #fafbf8; }
-      .xi-markdown hr { border: 0; border-top: 1px solid #e1e8de; margin: 23px 0; }
-      .xi-markdown img { max-width: 100%; height: auto; }
-
-      .xi-markdown .katex-display {
-        max-width: 100%;
-        overflow-x: auto;
-        overflow-y: hidden;
-        padding: 5px 0;
-      }
-
-      .xi-markdown input[type="checkbox"] { accent-color: var(--xi-accent); }
-
-      .xi-state {
-        padding: 36px 10px;
-        color: var(--xi-body);
-        text-align: center;
-      }
-
-      .xi-state h2 { color: var(--xi-ink); font-size: 18px; }
-      .xi-state p { color: var(--xi-muted); font-size: 12px; }
-
-      .xi-retry {
-        margin-top: 8px;
-        padding: 8px 12px;
-        border: 1px solid var(--xi-line);
-        border-radius: 7px;
-        background: #fffefa;
-        cursor: pointer;
-      }
-
-      .xi-mobile-backdrop { display: none; }
-
-      @media (max-width: 850px) {
-        :root { --xi-library: 245px; }
-        .xi-reader-scroll { padding: 16px; }
-        .xi-article-wrap { padding: 25px 22px; }
-      }
-
-      @media (max-width: 620px) {
-        :root { --xi-header: 54px; }
-
-        .xi-topbar { gap: 6px; padding: 0 8px; }
-        .xi-top-current { display: none; }
-        .xi-read-meta { display: none; }
-
-        .xi-nav-btn { gap: 3px; padding: 7px 8px; font-size: 11px; }
-        .xi-nav-btn svg { width: 14px; height: 14px; }
-
-        .xi-layout {
-          display: block;
-          position: relative;
-        }
-
-        .xi-sidebar {
-          position: absolute;
-          z-index: 12;
-          inset: 0 auto 0 0;
-          width: min(310px, 87vw);
-          box-shadow: 12px 0 35px #25332d20;
-          transform: translateX(-105%);
-          transition: transform .18s ease;
-        }
-
-        #xiApp.xi-mobile-open .xi-sidebar { transform: translateX(0); }
-
-        .xi-mobile-backdrop {
-          position: absolute;
-          z-index: 11;
-          inset: 0;
-          background: #25332d66;
-        }
-
-        #xiApp.xi-mobile-open .xi-mobile-backdrop { display: block; }
-
-        .xi-reader { height: 100%; }
-        .xi-reader-scroll { padding: 10px 8px 20px; }
-
-        .xi-article-wrap {
-          padding: 21px 15px 25px;
-          border-radius: 8px;
-        }
-
-        .xi-article-title { font-size: 25px; }
-        .xi-markdown { font-size: 13px; }
-        .xi-markdown h2 { font-size: 19px; }
-        .xi-markdown h3 { font-size: 16px; }
-        .xi-markdown pre { padding: 12px; font-size: 11px; }
-      }
-
-      @media (prefers-reduced-motion: reduce) {
-        *, *::before, *::after {
-          scroll-behavior: auto !important;
-          transition-duration: .01ms !important;
-        }
-      }
+    return `
+      <svg viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.8"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        aria-hidden="true">
+        ${paths[name] || paths.file}
+      </svg>
     `;
-
-    document.head.appendChild(style);
   }
 
-  /* =========================
+  function isCheatSheet(path) {
+    return /(?:^|\/)1CheatSheet\.md$/i.test(normalize(path));
+  }
+
+  function readRevisionState() {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      state.checked = saved ? JSON.parse(saved) : {};
+
+      if (
+        !state.checked ||
+        typeof state.checked !== "object" ||
+        Array.isArray(state.checked)
+      ) {
+        state.checked = {};
+      }
+    } catch (error) {
+      console.warn("Could not restore revision checklist.", error);
+      state.checked = {};
+    }
+  }
+
+  function saveRevisionState() {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state.checked));
+    } catch (error) {
+      console.warn("Could not save revision checklist.", error);
+    }
+  }
+
+  function revisionKey(path, heading, occurrence) {
+    return [
+      normalize(path).toLowerCase(),
+      String(occurrence),
+      heading.trim().toLowerCase()
+    ].join("::");
+  }
+
+  /* =========================================================
      BUILD INTERFACE
-     ========================= */
+     ========================================================= */
 
   function buildApp() {
     const root = $("#app");
@@ -639,9 +155,13 @@
     root.innerHTML = `
       <div id="xiApp">
         <header class="xi-topbar">
-          <button class="xi-icon-btn" id="xiMenu"
-            type="button" aria-label="Toggle notes sidebar"
-            aria-expanded="true" title="Show or hide notes">
+          <button
+            class="xi-icon-btn"
+            id="xiMenu"
+            type="button"
+            aria-label="Toggle notes sidebar"
+            aria-expanded="true"
+            title="Show or hide notes">
             ${icon("menu")}
           </button>
 
@@ -653,11 +173,19 @@
 
           <span class="xi-read-meta" id="xiReadMeta"></span>
 
-          <button class="xi-nav-btn" id="xiPrevious" type="button" disabled>
+          <button
+            class="xi-nav-btn"
+            id="xiPrevious"
+            type="button"
+            disabled>
             ${icon("left")} Previous
           </button>
 
-          <button class="xi-nav-btn primary" id="xiNext" type="button" disabled>
+          <button
+            class="xi-nav-btn primary"
+            id="xiNext"
+            type="button"
+            disabled>
             Next topic ${icon("right")}
           </button>
         </header>
@@ -667,14 +195,18 @@
             <div class="xi-library-head">
               <label class="xi-search">
                 ${icon("search")}
-                <input id="xiSearch" type="search"
+                <input
+                  id="xiSearch"
+                  type="search"
                   placeholder="Search topics..."
                   autocomplete="off"
                   aria-label="Search notes">
               </label>
             </div>
 
-            <nav class="xi-library-scroll" id="xiLibrary"
+            <nav
+              class="xi-library-scroll"
+              id="xiLibrary"
               aria-label="Notes">
               <div class="xi-empty">Loading notes…</div>
             </nav>
@@ -689,7 +221,9 @@
                   <h1 class="xi-article-title" id="xiArticleTitle">
                     Loading notes…
                   </h1>
-                  <div class="xi-article-subtitle" id="xiArticleSubtitle"></div>
+                  <div
+                    class="xi-article-subtitle"
+                    id="xiArticleSubtitle"></div>
                 </header>
 
                 <article class="xi-markdown" id="xiMarkdown">
@@ -703,13 +237,211 @@
     `;
   }
 
-  /* =========================
+  /* =========================================================
+     GEN-Z THEME
+     Main content styling is also defined in style.css.
+     ========================================================= */
+
+  function injectStyles() {
+    if ($("#xiAppRuntimeStyles")) return;
+
+    const style = document.createElement("style");
+    style.id = "xiAppRuntimeStyles";
+
+    style.textContent = `
+      #xiApp {
+        --xi-bg: #f5efff;
+        --xi-paper: #ffffff;
+        --xi-soft: #fbf7ff;
+        --xi-ink: #29213d;
+        --xi-body: #514765;
+        --xi-muted: #9588aa;
+        --xi-line: #e6dcf5;
+        --xi-accent: #8057d9;
+        --xi-accent-hover: #6840bd;
+        --xi-accent-soft: #f0e8ff;
+
+        background: var(--xi-bg);
+      }
+
+      #xiApp .xi-topbar {
+        background: #fffaff;
+        border-bottom-color: #e6dcf5;
+      }
+
+      #xiApp .xi-icon-btn {
+        background: #f3eaff;
+        border-color: #e2d3ff;
+        color: #744bc6;
+      }
+
+      #xiApp .xi-nav-btn.primary {
+        background: #8057d9;
+        border-color: #8057d9;
+        color: #fff;
+      }
+
+      #xiApp .xi-sidebar {
+        background: #fffaff;
+        border-right-color: #e6dcf5;
+      }
+
+      #xiApp .xi-reader {
+        background: #f5efff;
+      }
+
+      #xiApp .xi-article-wrap {
+        background: #fff;
+        border-color: #e6dcf5;
+      }
+
+      #xiApp .xi-note-link.active {
+        background: #eee4ff;
+        border-color: #dfceff;
+        color: #6037b3;
+      }
+
+      #xiApp .xi-markdown .xi-check-section {
+        margin: 13px 0;
+        padding: 13px 15px;
+        border: 1px solid #e7dcf7;
+        border-radius: 10px;
+        background: #fff;
+        transition: background 160ms ease, border-color 160ms ease;
+      }
+
+      #xiApp .xi-check-heading {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+      }
+
+      #xiApp .xi-check-heading > h1,
+      #xiApp .xi-check-heading > h2,
+      #xiApp .xi-check-heading > h3,
+      #xiApp .xi-check-heading > h4,
+      #xiApp .xi-check-heading > h5,
+      #xiApp .xi-check-heading > h6 {
+        flex: 1;
+        min-width: 0;
+        margin: 0 0 9px !important;
+        padding: 0 !important;
+        border: 0 !important;
+      }
+
+      #xiApp .xi-checkbox {
+        flex: 0 0 17px;
+        width: 17px;
+        height: 17px;
+        margin: 4px 0 0;
+        accent-color: #19a765;
+        cursor: pointer;
+      }
+
+      #xiApp .xi-check-section.is-checked {
+        border-color: #8ce0b4;
+        background: #effdf5;
+      }
+
+      #xiApp .xi-check-section.is-checked
+      > .xi-check-heading > h1,
+      #xiApp .xi-check-section.is-checked
+      > .xi-check-heading > h2,
+      #xiApp .xi-check-section.is-checked
+      > .xi-check-heading > h3,
+      #xiApp .xi-check-section.is-checked
+      > .xi-check-heading > h4,
+      #xiApp .xi-check-section.is-checked
+      > .xi-check-heading > h5,
+      #xiApp .xi-check-section.is-checked
+      > .xi-check-heading > h6,
+      #xiApp .xi-check-section.is-checked > p,
+      #xiApp .xi-check-section.is-checked > ul,
+      #xiApp .xi-check-section.is-checked > ol,
+      #xiApp .xi-check-section.is-checked > blockquote,
+      #xiApp .xi-check-section.is-checked > table,
+      #xiApp .xi-check-section.is-checked > pre,
+      #xiApp .xi-check-section.is-checked > .katex-display {
+        color: #16864a;
+        text-decoration-line: line-through;
+        text-decoration-color: #25ad63;
+        text-decoration-thickness: 2px;
+      }
+
+      #xiApp .xi-check-section.is-checked
+      > .xi-check-section {
+        border-color: #8ce0b4;
+        background: #effdf5;
+      }
+
+      #xiApp .xi-check-section.is-checked
+      > .xi-check-section.is-checked {
+        background: #e4f9ec;
+      }
+
+      #xiApp .xi-mobile-backdrop {
+        display: none;
+      }
+
+      @media (max-width: 620px) {
+        #xiApp .xi-check-section {
+          padding: 11px;
+        }
+
+        #xiApp .xi-topbar {
+          gap: 6px;
+          padding: 0 8px;
+        }
+
+        #xiApp .xi-top-current,
+        #xiApp .xi-read-meta {
+          display: none;
+        }
+
+        #xiApp .xi-layout {
+          position: relative;
+          display: block;
+        }
+
+        #xiApp .xi-sidebar {
+          position: absolute;
+          z-index: 12;
+          inset: 0 auto 0 0;
+          width: min(310px, 87vw);
+          box-shadow: 12px 0 35px #25332d20;
+          transform: translateX(-105%);
+          transition: transform 180ms ease;
+        }
+
+        #xiApp.xi-mobile-open .xi-sidebar {
+          transform: translateX(0);
+        }
+
+        #xiApp .xi-mobile-backdrop {
+          position: absolute;
+          z-index: 11;
+          inset: 0;
+          background: #25332d66;
+        }
+
+        #xiApp.xi-mobile-open .xi-mobile-backdrop {
+          display: block;
+        }
+      }
+    `;
+
+    document.head.appendChild(style);
+  }
+
+  /* =========================================================
      GITHUB NOTE DISCOVERY
-     ========================= */
+     ========================================================= */
 
   async function fetchJSON(url) {
     const response = await fetch(url, {
-      headers: { Accept: "application/vnd.github+json" },
+      headers: {
+        Accept: "application/vnd.github+json"
+      },
       cache: "no-store"
     });
 
@@ -767,7 +499,7 @@
         notes = await listFolder(CFG.folder);
       }
     } catch (error) {
-      console.warn("Using folder discovery fallback:", error);
+      console.warn("Trying folder-based note discovery.", error);
       notes = await listFolder(CFG.folder);
     }
 
@@ -788,9 +520,9 @@
     renderLibrary();
   }
 
-  /* =========================
-     SEARCHABLE NOTES LIST
-     ========================= */
+  /* =========================================================
+     SEARCH AND NOTE LIST
+     ========================================================= */
 
   function renderLibrary() {
     const library = $("#xiLibrary");
@@ -798,30 +530,33 @@
 
     const query = state.query.toLowerCase().trim();
 
-    const notes = state.notes.filter(note =>
+    const filtered = state.notes.filter(note =>
       note.title.toLowerCase().includes(query) ||
       note.path.toLowerCase().includes(query)
     );
 
     library.replaceChildren();
 
-    if (!notes.length) {
+    if (!filtered.length) {
       const empty = document.createElement("div");
       empty.className = "xi-empty";
       empty.textContent = query
         ? "No matching topics. Try another search."
         : "No notes found.";
+
       library.appendChild(empty);
       return;
     }
 
-    for (const note of notes) {
+    filtered.forEach(note => {
       const button = document.createElement("button");
       button.type = "button";
       button.className = "xi-note-link";
       button.dataset.path = note.path;
 
-      if (note.path === state.path) button.classList.add("active");
+      if (note.path === state.path) {
+        button.classList.add("active");
+      }
 
       button.innerHTML = `
         <span class="xi-note-file">${icon("file")}</span>
@@ -834,19 +569,22 @@
       button.title = note.path;
       button.addEventListener("click", () => openNote(note.path));
       library.appendChild(button);
-    }
+    });
   }
 
-  /* =========================
-     MARKDOWN LIBRARIES
-     ========================= */
+  /* =========================================================
+     SCRIPT LOADER
+     Load each library once and wait for it to initialize.
+     ========================================================= */
 
-  function loadScript(src, key) {
-    if (state.libraries[key]) return state.libraries[key];
+  function loadScript(url, key) {
+    if (state.libraries[key]) {
+      return state.libraries[key];
+    }
 
     state.libraries[key] = new Promise((resolve, reject) => {
       const existing = document.querySelector(
-        `script[data-xi-lib="${key}"]`
+        `script[data-xi-library="${key}"]`
       );
 
       if (existing && existing.dataset.loaded === "true") {
@@ -855,9 +593,10 @@
       }
 
       const script = existing || document.createElement("script");
-      script.src = src;
-      script.async = true;
-      script.dataset.xiLib = key;
+
+      script.src = url;
+      script.async = false;
+      script.dataset.xiLibrary = key;
 
       script.onload = () => {
         script.dataset.loaded = "true";
@@ -866,112 +605,309 @@
 
       script.onerror = () => {
         delete state.libraries[key];
-        reject(new Error(`Could not load ${key}.`));
+        script.remove();
+        reject(new Error(`Failed to load ${key}.`));
       };
 
-      if (!existing) document.head.appendChild(script);
+      if (!existing) {
+        document.head.appendChild(script);
+      }
     });
 
     return state.libraries[key];
   }
 
+  /* =========================================================
+     MARKDOWN LIBRARIES
+     ========================================================= */
+
   async function ensureMarkdownLibraries() {
-    if (!window.marked) {
+    if (!window.marked || typeof window.marked.parse !== "function") {
       await loadScript(
         "https://cdn.jsdelivr.net/npm/marked@15.0.7/marked.min.js",
         "marked"
       );
     }
 
-    if (!window.DOMPurify) {
+    if (!window.DOMPurify ||
+        typeof window.DOMPurify.sanitize !== "function") {
       await loadScript(
         "https://cdn.jsdelivr.net/npm/dompurify@3.2.6/dist/purify.min.js",
-        "purify"
+        "dompurify"
       );
+    }
+
+    if (!window.marked || typeof window.marked.parse !== "function") {
+      throw new Error("The Markdown library did not initialize.");
+    }
+
+    if (!window.DOMPurify ||
+        typeof window.DOMPurify.sanitize !== "function") {
+      throw new Error("The HTML sanitizer did not initialize.");
+    }
+  }
+
+  /* =========================================================
+     MATH AND CODE LIBRARIES
+     These are optional. Their failure must not block a note.
+     ========================================================= */
+
+  async function ensureMathLibraries() {
+    try {
+      if (!document.querySelector("#xiKatexStyles")) {
+        const css = document.createElement("link");
+        css.id = "xiKatexStyles";
+        css.rel = "stylesheet";
+        css.href =
+          "https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.css";
+
+        document.head.appendChild(css);
+      }
+
+      // KaTeX core must load before its auto-render extension.
+      if (!window.katex ||
+          typeof window.katex.render !== "function") {
+        await loadScript(
+          "https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.js",
+          "katex"
+        );
+      }
+
+      if (!window.katex ||
+          typeof window.katex.render !== "function") {
+        throw new Error("KaTeX core failed to initialize.");
+      }
+
+      if (typeof window.renderMathInElement !== "function") {
+        await loadScript(
+          "https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/contrib/auto-render.min.js",
+          "katex-auto-render"
+        );
+      }
+
+      if (typeof window.renderMathInElement !== "function") {
+        throw new Error("KaTeX auto-render did not initialize.");
+      }
+    } catch (error) {
+      console.warn(
+        "Formula rendering is unavailable; the note can still be read.",
+        error
+      );
+    }
+  }
+
+  async function ensureCodeHighlighting() {
+    try {
+      if (!document.querySelector("#xiHighlightStyles")) {
+        const css = document.createElement("link");
+        css.id = "xiHighlightStyles";
+        css.rel = "stylesheet";
+        css.href =
+          "https://cdn.jsdelivr.net/npm/highlight.js@11.11.1/styles/github.min.css";
+
+        document.head.appendChild(css);
+      }
+
+      if (!window.hljs ||
+          typeof window.hljs.highlightElement !== "function") {
+        await loadScript(
+          "https://cdn.jsdelivr.net/npm/highlight.js@11.11.1/lib/common.min.js",
+          "highlight-js"
+        );
+      }
+    } catch (error) {
+      console.warn("Syntax highlighting is unavailable.", error);
     }
   }
 
   async function enhanceMarkdown(article) {
-    if (window.renderMathInElement) {
-      window.renderMathInElement(article, {
-        delimiters: [
-          { left: "$$", right: "$$", display: true },
-          { left: "\\[", right: "\\]", display: true },
-          { left: "\\(", right: "\\)", display: false },
-          { left: "$", right: "$", display: false }
-        ],
-        throwOnError: false
+    // External links should open in a new tab.
+    article.querySelectorAll("a[href]").forEach(link => {
+      const href = link.getAttribute("href") || "";
+
+      if (/^https?:\/\//i.test(href)) {
+        link.target = "_blank";
+        link.rel = "noopener noreferrer";
+      }
+    });
+
+    // Code highlighting is optional.
+    if (window.hljs &&
+        typeof window.hljs.highlightElement === "function") {
+      article.querySelectorAll("pre code").forEach(code => {
+        try {
+          window.hljs.highlightElement(code);
+        } catch (error) {
+          console.warn("Could not highlight this code block.", error);
+        }
       });
     }
 
-    if (window.hljs) {
-      article.querySelectorAll("pre code").forEach(block => {
-        window.hljs.highlightElement(block);
+    // Render LaTeX only if both KaTeX components are available.
+    if (
+      window.katex &&
+      typeof window.katex.render === "function" &&
+      typeof window.renderMathInElement === "function"
+    ) {
+      try {
+        window.renderMathInElement(article, {
+          delimiters: [
+            { left: "$$", right: "$$", display: true },
+            { left: "\\[", right: "\\]", display: true },
+            { left: "\\(", right: "\\)", display: false },
+            { left: "$", right: "$", display: false }
+          ],
+          throwOnError: false,
+          strict: "ignore",
+          ignoredTags: [
+            "script", "noscript", "style", "textarea", "pre", "code"
+          ]
+        });
+      } catch (error) {
+        // This avoids the ParseError failure breaking navigation.
+        console.warn(
+          "Formula rendering failed; keeping the Markdown note available.",
+          error
+        );
+      }
+    }
+  }
+
+  /* =========================================================
+     CHEAT SHEET CHECKLIST
+     Only enabled for notes/1CheatSheet.md.
+     Each heading owns the content until the next heading at
+     the same or higher level. Nested sections remain nested.
+     ========================================================= */
+
+  function buildDailyChecklist(article) {
+    if (!isCheatSheet(state.path)) return;
+
+    const originalNodes = Array.from(article.childNodes);
+    const rootBlocks = [];
+    const stack = [];
+    let occurrence = 0;
+
+    function headingLevel(node) {
+      if (!node || node.nodeType !== Node.ELEMENT_NODE) return 0;
+
+      const match = node.tagName.match(/^H([1-6])$/);
+      return match ? Number(match[1]) : 0;
+    }
+
+    originalNodes.forEach(node => {
+      const level = headingLevel(node);
+
+      if (!level) {
+        const parent = stack[stack.length - 1];
+        (parent ? parent.blocks : rootBlocks).push(node);
+        return;
+      }
+
+      while (
+        stack.length &&
+        stack[stack.length - 1].level >= level
+      ) {
+        stack.pop();
+      }
+
+      const item = {
+        heading: node,
+        level,
+        blocks: [],
+        occurrence: occurrence++
+      };
+
+      const parent = stack[stack.length - 1];
+      (parent ? parent.blocks : rootBlocks).push(item);
+      stack.push(item);
+    });
+
+    function makeSection(item) {
+      const headingText = item.heading.textContent.trim();
+
+      const key = revisionKey(
+        state.path,
+        headingText,
+        item.occurrence
+      );
+
+      const wrapper = document.createElement("section");
+      wrapper.className = "xi-check-section";
+      wrapper.dataset.revisionKey = key;
+
+      const headingRow = document.createElement("div");
+      headingRow.className = "xi-check-heading";
+
+      const checkbox = document.createElement("input");
+      checkbox.type = "checkbox";
+      checkbox.className = "xi-checkbox";
+      checkbox.checked = Boolean(state.checked[key]);
+      checkbox.setAttribute(
+        "aria-label",
+        `Mark ${headingText} as revised`
+      );
+
+      if (checkbox.checked) {
+        wrapper.classList.add("is-checked");
+      }
+
+      checkbox.addEventListener("change", () => {
+        state.checked[key] = checkbox.checked;
+        wrapper.classList.toggle("is-checked", checkbox.checked);
+        saveRevisionState();
       });
+
+      headingRow.appendChild(checkbox);
+      headingRow.appendChild(item.heading);
+      wrapper.appendChild(headingRow);
+
+      item.blocks.forEach(block => {
+        if (
+          block &&
+          typeof block === "object" &&
+          Array.isArray(block.blocks) &&
+          block.heading
+        ) {
+          wrapper.appendChild(makeSection(block));
+        } else {
+          wrapper.appendChild(block);
+        }
+      });
+
+      return wrapper;
     }
+
+    const fragment = document.createDocumentFragment();
+
+    rootBlocks.forEach(block => {
+      if (
+        block &&
+        typeof block === "object" &&
+        Array.isArray(block.blocks) &&
+        block.heading
+      ) {
+        fragment.appendChild(makeSection(block));
+      } else {
+        fragment.appendChild(block);
+      }
+    });
+
+    article.replaceChildren(fragment);
   }
 
-  async function loadOptionalLibraries() {
-    const tasks = [];
-
-    if (!window.katex) {
-      if (!document.querySelector("#xiKatexCss")) {
-        const css = document.createElement("link");
-        css.id = "xiKatexCss";
-        css.rel = "stylesheet";
-        css.href =
-          "https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.css";
-        document.head.appendChild(css);
-      }
-
-      tasks.push(
-        loadScript(
-          "https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.js",
-          "katex"
-        )
-      );
-    }
-
-    if (!window.renderMathInElement) {
-      tasks.push(
-        loadScript(
-          "https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/contrib/auto-render.min.js",
-          "katex-render"
-        )
-      );
-    }
-
-    if (!window.hljs) {
-      if (!document.querySelector("#xiHighlightCss")) {
-        const css = document.createElement("link");
-        css.id = "xiHighlightCss";
-        css.rel = "stylesheet";
-        css.href =
-          "https://cdn.jsdelivr.net/npm/highlight.js@11.11.1/styles/github.min.css";
-        document.head.appendChild(css);
-      }
-
-      tasks.push(
-        loadScript(
-          "https://cdn.jsdelivr.net/npm/highlight.js@11.11.1/lib/common.min.js",
-          "highlight"
-        )
-      );
-    }
-
-    await Promise.allSettled(tasks);
-  }
-
-  /* =========================
-     URL HANDLING
-     ========================= */
+  /* =========================================================
+     URL MANAGEMENT
+     ========================================================= */
 
   function requestedNote() {
-    return normalize(new URLSearchParams(location.search).get("note") || "");
+    return normalize(
+      new URLSearchParams(window.location.search).get("note") || ""
+    );
   }
 
   function setNoteURL(path, replace = false) {
-    const url = new URL(location.href);
+    const url = new URL(window.location.href);
     url.searchParams.set("note", normalize(path));
 
     if (replace) {
@@ -981,9 +917,9 @@
     }
   }
 
-  /* =========================
-     NAVIGATION
-     ========================= */
+  /* =========================================================
+     TOP NAVIGATION
+     ========================================================= */
 
   function updateNavigation() {
     const previous = $("#xiPrevious");
@@ -992,26 +928,18 @@
 
     if (previous) {
       previous.disabled = state.index <= 0;
-      previous.onclick = () => {
-        if (state.index > 0) {
-          openNote(state.notes[state.index - 1].path);
-        }
-      };
     }
 
     if (next) {
       next.disabled =
-        state.index < 0 || state.index >= state.notes.length - 1;
-
-      next.onclick = () => {
-        if (state.index >= 0 && state.index < state.notes.length - 1) {
-          openNote(state.notes[state.index + 1].path);
-        }
-      };
+        state.index < 0 ||
+        state.index >= state.notes.length - 1;
     }
 
     const current = $("#xiTopCurrent");
-    if (current) current.textContent = note ? note.title : "Revision notes";
+    if (current) {
+      current.textContent = note ? note.title : "Revision notes";
+    }
 
     const meta = $("#xiReadMeta");
     if (meta) {
@@ -1023,16 +951,16 @@
     renderLibrary();
   }
 
-  /* =========================
-     LOAD AND DISPLAY A NOTE
-     ========================= */
+  /* =========================================================
+     NOTE LOADING
+     ========================================================= */
 
   async function fetchMarkdown(path) {
     const url = `${CFG.raw}/${encodePath(path)}`;
     const response = await fetch(url, { cache: "no-store" });
 
     if (!response.ok) {
-      throw new Error(`Could not load note (HTTP ${response.status}).`);
+      throw new Error(`Could not load the note (HTTP ${response.status}).`);
     }
 
     return response.text();
@@ -1045,36 +973,62 @@
     if (heading) heading.textContent = title;
 
     if (article) {
-      article.innerHTML = `
-        <div class="xi-state">
-          <h2>${escapeHTML(title)}</h2>
-          <p>${escapeHTML(message)}</p>
-          ${retry ? '<button class="xi-retry" id="xiRetry">Try again</button>' : ""}
-        </div>`;
-    }
+      article.replaceChildren();
 
-    const retryButton = $("#xiRetry");
-    if (retryButton) {
-      retryButton.addEventListener("click", () => {
-        if (state.path) openNote(state.path, { updateHistory: false });
-        else initialize();
-      });
+      const stateBox = document.createElement("div");
+      stateBox.className = "xi-state";
+
+      const stateHeading = document.createElement("h2");
+      stateHeading.textContent = title;
+
+      const paragraph = document.createElement("p");
+      paragraph.textContent = message;
+
+      stateBox.append(stateHeading, paragraph);
+
+      if (retry) {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "xi-retry";
+        button.textContent = "Try again";
+
+        button.addEventListener("click", () => {
+          if (state.path) {
+            openNote(state.path, { updateHistory: false });
+          } else {
+            initialize();
+          }
+        });
+
+        stateBox.appendChild(button);
+      }
+
+      article.appendChild(stateBox);
     }
   }
 
   async function openNote(path, options = {}) {
     const normalized = normalize(path);
-    const note = state.notes.find(item => item.path === normalized);
+
+    const note = state.notes.find(item =>
+      item.path === normalized
+    );
 
     if (!note) {
-      showMessage("Note not found", "This note is not in the current GitHub notes list.", true);
+      showMessage(
+        "Note not found",
+        "This note is not present in the current GitHub notes list.",
+        true
+      );
       return;
     }
 
     const requestId = ++state.request;
 
     state.path = normalized;
-    state.index = state.notes.findIndex(item => item.path === normalized);
+    state.index = state.notes.findIndex(item =>
+      item.path === normalized
+    );
 
     if (options.updateHistory !== false) {
       setNoteURL(normalized, options.replaceHistory === true);
@@ -1092,26 +1046,32 @@
     const scroller = $("#xiReaderScroll");
 
     if (heading) heading.textContent = note.title;
-    if (article) article.innerHTML = '<p>Loading note…</p>';
+    if (article) article.innerHTML = "<p>Loading note…</p>";
     if (scroller) scroller.scrollTop = 0;
 
     try {
+      // Required libraries: Markdown parser and HTML sanitizer.
       await ensureMarkdownLibraries();
+
       const markdown = await fetchMarkdown(normalized);
 
       if (requestId !== state.request) return;
 
-      const html = window.marked.parse(markdown, {
+      const parsed = window.marked.parse(markdown, {
         gfm: true,
         breaks: false
       });
 
-      article.innerHTML = window.DOMPurify
-        ? window.DOMPurify.sanitize(html)
-        : html;
+      // Sanitize rendered Markdown before inserting it into the page.
+      const safeHTML = window.DOMPurify.sanitize(parsed, {
+        USE_PROFILES: { html: true }
+      });
 
-      // Avoid showing the same title twice when the note starts with # title.
+      article.innerHTML = safeHTML;
+
+      // Avoid duplicate display of the note's title.
       const firstHeading = $("#xiMarkdown h1");
+
       if (
         firstHeading &&
         firstHeading.textContent.trim().toLowerCase() ===
@@ -1120,11 +1080,22 @@
         firstHeading.remove();
       }
 
-      await loadOptionalLibraries();
+      // Optional libraries must never prevent a note from opening.
+      await Promise.allSettled([
+        ensureMathLibraries(),
+        ensureCodeHighlighting()
+      ]);
 
       if (requestId !== state.request) return;
 
+      // Add checkboxes only for the cheat sheet.
+      if (isCheatSheet(normalized)) {
+        buildDailyChecklist(article);
+      }
+
       await enhanceMarkdown(article);
+
+      if (requestId !== state.request) return;
 
       if (heading) heading.textContent = note.title;
 
@@ -1136,22 +1107,25 @@
       if (requestId !== state.request) return;
 
       console.error("Xi Notes loading error:", error);
+
       showMessage(
         "Unable to open this note",
-        `${error.message || "A loading error occurred."} Check your connection and try again.`,
+        `${error.message || "An unexpected error occurred."} Check your connection and try again.`,
         true
       );
     }
   }
 
-  /* =========================
-     EVENTS
-     ========================= */
+  /* =========================================================
+     EVENT HANDLERS
+     ========================================================= */
 
   function bindEvents() {
     const menu = $("#xiMenu");
     const search = $("#xiSearch");
     const backdrop = $("#xiBackdrop");
+    const previous = $("#xiPrevious");
+    const next = $("#xiNext");
 
     menu.addEventListener("click", () => {
       const app = $("#xiApp");
@@ -1159,18 +1133,17 @@
 
       if (mobile) {
         const open = app.classList.toggle("xi-mobile-open");
+        state.mobileOpen = open;
         menu.setAttribute("aria-expanded", String(open));
       } else {
-        app.classList.toggle("xi-collapsed");
-        menu.setAttribute(
-          "aria-expanded",
-          String(!app.classList.contains("xi-collapsed"))
-        );
+        const collapsed = app.classList.toggle("xi-collapsed");
+        menu.setAttribute("aria-expanded", String(!collapsed));
       }
     });
 
     backdrop.addEventListener("click", () => {
       $("#xiApp").classList.remove("xi-mobile-open");
+      state.mobileOpen = false;
       menu.setAttribute("aria-expanded", "false");
     });
 
@@ -1193,6 +1166,18 @@
       }
     });
 
+    previous.addEventListener("click", () => {
+      if (state.index > 0) {
+        openNote(state.notes[state.index - 1].path);
+      }
+    });
+
+    next.addEventListener("click", () => {
+      if (state.index >= 0 && state.index < state.notes.length - 1) {
+        openNote(state.notes[state.index + 1].path);
+      }
+    });
+
     window.addEventListener("popstate", () => {
       const requested = requestedNote();
 
@@ -1208,11 +1193,13 @@
     window.addEventListener("resize", () => {
       if (!window.matchMedia("(max-width: 620px)").matches) {
         $("#xiApp").classList.remove("xi-mobile-open");
+        state.mobileOpen = false;
       }
     });
 
     document.addEventListener("keydown", event => {
       const target = event.target;
+
       const typing = target instanceof HTMLElement && (
         target.isContentEditable ||
         ["INPUT", "TEXTAREA", "SELECT"].includes(target.tagName)
@@ -1225,7 +1212,10 @@
         return;
       }
 
-      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "k") {
+      if (
+        (event.ctrlKey || event.metaKey) &&
+        event.key.toLowerCase() === "k"
+      ) {
         event.preventDefault();
         search.focus();
         return;
@@ -1234,32 +1224,38 @@
       if (event.key === "/") {
         event.preventDefault();
         search.focus();
+        return;
       }
 
       if (event.key === "ArrowLeft" && state.index > 0) {
         openNote(state.notes[state.index - 1].path);
       }
 
-      if (event.key === "ArrowRight" && state.index >= 0 &&
-          state.index < state.notes.length - 1) {
+      if (
+        event.key === "ArrowRight" &&
+        state.index >= 0 &&
+        state.index < state.notes.length - 1
+      ) {
         openNote(state.notes[state.index + 1].path);
       }
 
       if (event.key === "Escape") {
         $("#xiApp").classList.remove("xi-mobile-open");
+        state.mobileOpen = false;
       }
     });
   }
 
-  /* =========================
+  /* =========================================================
      INITIALIZATION
-     ========================= */
+     ========================================================= */
 
   async function initialize() {
     try {
       await discoverNotes();
 
       const requested = requestedNote();
+
       const selected =
         state.notes.find(note => note.path === requested) ||
         state.notes.find(note =>
@@ -1279,16 +1275,23 @@
       console.error("Xi Notes initialization failed:", error);
 
       const library = $("#xiLibrary");
-      if (library) {
-        library.innerHTML = `
-          <div class="xi-empty">
-            Could not load notes.<br><br>
-            ${escapeHTML(error.message || "Check your internet connection.")}
-            <br><br>
-            <button class="xi-retry" id="xiRetryLibrary">Retry loading</button>
-          </div>`;
 
-        $("#xiRetryLibrary").addEventListener("click", initialize);
+      if (library) {
+        library.replaceChildren();
+
+        const box = document.createElement("div");
+        box.className = "xi-empty";
+        box.textContent =
+          `Could not load notes. ${error.message || "Check your connection."} `;
+
+        const retry = document.createElement("button");
+        retry.type = "button";
+        retry.className = "xi-retry";
+        retry.textContent = "Retry loading";
+        retry.addEventListener("click", initialize);
+
+        box.appendChild(retry);
+        library.appendChild(box);
       }
 
       showMessage(
@@ -1299,6 +1302,7 @@
   }
 
   function start() {
+    readRevisionState();
     injectStyles();
     buildApp();
 
