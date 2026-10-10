@@ -2049,3 +2049,328 @@ pre {
     margin-left: 0;
     margin-right: auto;
 }
+
+/* =========================================================
+   XI NOTES — REVISION UPDATE
+   ========================================================= */
+
+/* Remove branding and footer elements */
+.xi-brand,
+.xi-sidebar-footer,
+.xi-sidebar-actions {
+  display: none !important;
+}
+
+/* Compact sidebar */
+.xi-sidebar {
+  padding-top: 15px;
+}
+
+.xi-search-wrap {
+  margin-top: 4px;
+  margin-bottom: 20px;
+}
+
+/* Shorter fixed navigation bar */
+:root {
+  --topbar-height: 58px;
+}
+
+.xi-topbar {
+  height: var(--topbar-height);
+  padding-right: 22px;
+  padding-left: 22px;
+}
+
+.xi-workspace {
+  padding-top: calc(var(--topbar-height) + 26px);
+}
+
+/* Filename appears once, in the top breadcrumb */
+.xi-breadcrumb {
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.xi-article-title {
+  display: none;
+}
+
+/* More visible content card border */
+.xi-content-card {
+  border: 2px solid #ded7f2;
+  border-radius: 25px;
+  box-shadow:
+    0 10px 34px rgba(68, 48, 120, 0.07),
+    0 2px 5px rgba(68, 48, 120, 0.035);
+}
+
+/* In-note content index */
+.xi-toc {
+  margin: 0 0 30px;
+  overflow: hidden;
+  border: 1px solid #e3dcf8;
+  border-radius: 15px;
+  background: #fbfaff;
+}
+
+.xi-toc-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  min-height: 48px;
+  padding: 12px 16px;
+  border: 0;
+  background: transparent;
+  color: #51446f;
+  text-align: left;
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.xi-toc-toggle:hover {
+  background: #f4f0ff;
+}
+
+.xi-toc-toggle-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.xi-toc-icon {
+  color: #8b78f9;
+  font-size: 17px;
+}
+
+.xi-toc-count {
+  display: inline-grid;
+  min-width: 21px;
+  height: 21px;
+  padding: 0 6px;
+  place-items: center;
+  border-radius: 7px;
+  background: #eee9ff;
+  color: #7660d9;
+  font-size: 10px;
+}
+
+.xi-toc-chevron {
+  color: #9386bd;
+  font-size: 17px;
+}
+
+.xi-toc-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 5px 12px 14px;
+  border-top: 1px solid #eee9fa;
+}
+
+.xi-toc-link {
+  display: block;
+  padding: 5px 8px 5px
+    calc(8px + max(0px, var(--xi-toc-level, 0) - 1) * 14px);
+  border-radius: 7px;
+  color: #777089;
+  font-size: 11px;
+  line-height: 1.6;
+  text-decoration: none;
+}
+
+.xi-toc-link:hover {
+  background: #f0ebff;
+  color: #7057d8;
+}
+
+/* Daily cheat-sheet banner */
+.xi-cheat-sheet-banner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0 0 24px;
+  padding: 14px 16px;
+  border: 1px solid #dcefe5;
+  border-radius: 13px;
+  background: #f4fcf7;
+}
+
+.xi-cheat-sheet-icon {
+  display: grid;
+  flex-shrink: 0;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  border-radius: 11px;
+  background: #dff7e9;
+  color: #23885c;
+  font-size: 17px;
+  font-weight: 800;
+}
+
+.xi-cheat-sheet-banner strong,
+.xi-cheat-sheet-banner span {
+  display: block;
+}
+
+.xi-cheat-sheet-banner strong {
+  color: #35674e;
+  font-size: 12px;
+}
+
+.xi-cheat-sheet-banner div > span {
+  margin-top: 3px;
+  color: #789687;
+  font-size: 10px;
+  line-height: 1.6;
+}
+
+/* Daily topic checkboxes */
+.xi-cheat-sheet .xi-check-section {
+  margin: 0 0 16px;
+  padding: 5px 0 10px;
+  border-bottom: 1px solid #f0edf6;
+  transition: opacity 160ms ease;
+}
+
+.xi-cheat-sheet .xi-check-section > h1,
+.xi-cheat-sheet .xi-check-section > h2,
+.xi-cheat-sheet .xi-check-section > h3,
+.xi-cheat-sheet .xi-check-section > h4,
+.xi-cheat-sheet .xi-check-section > h5,
+.xi-cheat-sheet .xi-check-section > h6 {
+  display: flex;
+  align-items: flex-start;
+  gap: 11px;
+}
+
+/* Checkbox stays normal when a topic is completed */
+.xi-topic-check {
+  position: relative;
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 27px;
+  margin-top: 1px;
+  cursor: pointer;
+}
+
+.xi-topic-check input {
+  position: absolute;
+  width: 22px;
+  height: 22px;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.xi-custom-check {
+  display: grid;
+  width: 19px;
+  height: 19px;
+  place-items: center;
+  border: 1.5px solid #c9c0e4;
+  border-radius: 6px;
+  background: white;
+  transition:
+    background 150ms ease,
+    border-color 150ms ease,
+    box-shadow 150ms ease;
+}
+
+.xi-topic-check:hover .xi-custom-check {
+  border-color: #9580f5;
+  box-shadow: 0 0 0 3px rgba(139, 120, 249, 0.1);
+}
+
+.xi-topic-check input:focus-visible + .xi-custom-check {
+  outline: 3px solid rgba(139, 120, 249, 0.4);
+  outline-offset: 3px;
+}
+
+.xi-topic-check input:checked + .xi-custom-check {
+  border-color: #7e69e8;
+  background: #8b78f9;
+}
+
+.xi-topic-check input:checked + .xi-custom-check::after {
+  content: "✓";
+  color: white;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+/* Strike through the heading and its associated content */
+.xi-cheat-sheet .xi-check-section.is-checked > h1,
+.xi-cheat-sheet .xi-check-section.is-checked > h2,
+.xi-cheat-sheet .xi-check-section.is-checked > h3,
+.xi-cheat-sheet .xi-check-section.is-checked > h4,
+.xi-cheat-sheet .xi-check-section.is-checked > h5,
+.xi-cheat-sheet .xi-check-section.is-checked > h6,
+.xi-cheat-sheet .xi-check-section.is-checked > p,
+.xi-cheat-sheet .xi-check-section.is-checked > ul,
+.xi-cheat-sheet .xi-check-section.is-checked > ol,
+.xi-cheat-sheet .xi-check-section.is-checked > blockquote,
+.xi-cheat-sheet .xi-check-section.is-checked > pre,
+.xi-cheat-sheet .xi-check-section.is-checked > .xi-table-wrap,
+.xi-cheat-sheet .xi-check-section.is-checked > .xi-highlight,
+.xi-cheat-sheet .xi-check-section.is-checked > hr {
+  opacity: 0.48;
+  text-decoration: line-through;
+  text-decoration-color: #a49abf;
+  text-decoration-thickness: 1.3px;
+}
+
+/* Avoid striking through formula glyphs */
+.xi-cheat-sheet .xi-check-section.is-checked .katex {
+  opacity: 0.65;
+}
+
+/* Keep checkbox clickable and visible when checked */
+.xi-cheat-sheet .xi-check-section.is-checked .xi-topic-check {
+  opacity: 1;
+  text-decoration: none;
+}
+
+/* Compact footer */
+.xi-bottom-bar {
+  min-height: 34px;
+  padding-top: 5px;
+  padding-bottom: 5px;
+}
+
+@media (max-width: 900px) {
+  .xi-topbar {
+    padding-right: 12px;
+    padding-left: 12px;
+  }
+
+  .xi-workspace {
+    padding-top: calc(var(--topbar-height) + 17px);
+  }
+}
+
+@media (max-width: 560px) {
+  .xi-topbar {
+    height: 55px;
+  }
+
+  :root {
+    --topbar-height: 55px;
+  }
+
+  .xi-content-card {
+    border-width: 1.5px;
+    border-radius: 18px;
+  }
+
+  .xi-toc-link {
+    font-size: 11px;
+  }
+}
