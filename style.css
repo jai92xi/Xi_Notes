@@ -2374,3 +2374,126 @@ pre {
     font-size: 11px;
   }
 }
+
+
+/* ===== Gen Z refresh ===== */
+
+:root {
+  --bg: #f3edff;
+  --sidebar-bg: #e8ddff;
+  --surface: #ffffff;
+  --border: #c5aaff;
+  --hover: #e0d2ff;
+  --accent: #7542f5;
+  --accent-bg: #e4d7ff;
+  --callout-pink: #ffd8ed;
+  --callout-purple: #e2d4ff;
+  --callout-blue: #ccecff;
+}
+
+/* More vibrant page background */
+body {
+  background:
+    radial-gradient(ellipse at 85% 5%, #ffc9e8 0, transparent 32%),
+    radial-gradient(ellipse at 5% 85%, #c8d8ff 0, transparent 34%),
+    #f3edff;
+}
+
+/* Wider content card — around 70% of laptop screen */
+.xi-workspace {
+  padding-right: 3vw;
+  padding-left: 3vw;
+}
+
+.xi-content-card {
+  width: 100%;
+  max-width: none;
+  border: 2px solid #9d7aff;
+  border-radius: 24px;
+  background: #ffffff;
+  box-shadow: 0 12px 36px rgba(91, 48, 190, 0.13);
+}
+
+/* Make the main reading area wider while preserving mobile layout */
+@media (min-width: 901px) {
+  .xi-content-card {
+    width: 100%;
+  }
+
+  .xi-article-body {
+    padding-right: clamp(28px, 4vw, 68px);
+    padding-left: clamp(28px, 4vw, 68px);
+  }
+}
+
+@media (max-width: 900px) {
+  .xi-workspace {
+    padding-right: 16px;
+    padding-left: 16px;
+  }
+}
+
+/* Remove Content index completely from view */
+.xi-toc {
+  display: none !important;
+}
+
+/* Compact daily revision message */
+.xi-cheat-sheet-banner {
+  display: flex;
+  align-items: center;
+  margin-bottom: 18px;
+  padding: 10px 14px;
+  border: 1px solid #a9e8ce;
+  border-radius: 10px;
+  background: #d9ffed;
+}
+
+.xi-cheat-sheet-banner strong {
+  color: #075e46;
+  font-size: 12px;
+  font-weight: 750;
+}
+
+.xi-cheat-sheet-banner .xi-cheat-sheet-icon,
+.xi-cheat-sheet-banner div > span {
+  display: none !important;
+}
+
+/* Remove decorative diamond/sparkle before content headings */
+.xi-markdown h1::before,
+.xi-markdown h2::before,
+.xi-markdown h3::before,
+.xi-article-title::before,
+.xi-note-category::before,
+.xi-note-number::before {
+  content: none !important;
+  display: none !important;
+}
+
+/* Stronger Gen Z heading accents */
+.xi-markdown h2 {
+  border-bottom-color: #d5c2ff;
+}
+
+.xi-markdown li::marker {
+  color: #7542f5;
+}
+
+.xi-markdown a {
+  color: #6935db;
+}
+
+.xi-markdown mark,
+.xi-markdown .xi-highlight {
+  background: #fff078;
+  color: #332600;
+}
+
+/* Keep the card comfortable on smaller screens */
+@media (max-width: 560px) {
+  .xi-content-card {
+    border-width: 1.5px;
+    border-radius: 18px;
+  }
+}
