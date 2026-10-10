@@ -1,57 +1,78 @@
 
 /* =========================================================
-   XI NOTES — STYLE.CSS
-   Theme: Sage Green + Ivory
-   Designed for the updated app.js
+   XI NOTES — COMPLETE STYLE.CSS
+   Theme: Lavender + Mint + Pink
    ========================================================= */
 
-/* ---------- Theme variables ---------- */
+/* -------------------- Reset -------------------- */
 
-:root {
-  --xi-bg: #f1f4ef;
-  --xi-paper: #fffefa;
-  --xi-soft: #f7f8f4;
-
-  --xi-ink: #25332d;
-  --xi-body: #4c5b52;
-  --xi-muted: #879489;
-
-  --xi-line: #dfe6dc;
-  --xi-accent: #52745d;
-  --xi-accent-hover: #42624c;
-  --xi-accent-soft: #eaf1e9;
-
-  --xi-header: 58px;
-  --xi-library: 265px;
-
-  --xi-radius: 8px;
-  --xi-transition: 180ms ease;
-}
-
-/* ---------- Reset ---------- */
-
-*,
-*::before,
-*::after {
+* {
   box-sizing: border-box;
 }
 
-html,
-body {
-  width: 100%;
-  height: 100%;
-  margin: 0;
+:root {
+  color-scheme: light;
+
+  --bg: #f5efff;
+  --paper: #ffffff;
+  --paper-soft: #fffaff;
+  --lavender: #8057d9;
+  --lavender-dark: #6840bd;
+  --lavender-soft: #eee4ff;
+  --lavender-border: #e3d5fb;
+
+  --mint: #c9f4dc;
+  --mint-dark: #16864a;
+  --mint-soft: #effdf5;
+  --mint-border: #8ce0b4;
+
+  --pink: #ffe2ef;
+  --pink-dark: #c64d83;
+
+  --ink: #29213d;
+  --body: #514765;
+  --muted: #9588aa;
+
+  --line: #e6dcf5;
+  --shadow: 0 5px 24px rgba(71, 45, 119, 0.055);
+
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+
+  --topbar-height: 58px;
+  --sidebar-width: 265px;
+
+  font-family:
+    Inter,
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+html {
+  min-width: 320px;
+  min-height: 100%;
+  background: var(--bg);
+  scroll-behavior: smooth;
 }
 
 body {
-  overflow: hidden;
-  background: var(--xi-bg);
-  color: var(--xi-ink);
-  font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI",
-    Arial, sans-serif;
+  min-width: 320px;
+  min-height: 100vh;
+  margin: 0;
+  background: var(--bg);
+  color: var(--body);
   font-size: 14px;
   line-height: 1.55;
-  -webkit-font-smoothing: antialiased;
 }
 
 button,
@@ -66,91 +87,119 @@ button {
 }
 
 button:focus-visible,
-input:focus-visible {
-  outline: 3px solid #b4cbb8;
-  outline-offset: 2px;
+input:focus-visible,
+a:focus-visible {
+  outline: 3px solid rgba(128, 87, 217, 0.35);
+  outline-offset: 3px;
 }
 
-::selection {
-  background: #dce9da;
-  color: var(--xi-ink);
+a {
+  color: var(--lavender-dark);
+  text-decoration: none;
 }
 
-/* ---------- App container ---------- */
+a:hover {
+  color: #51329b;
+  text-decoration: underline;
+}
+
+button:disabled {
+  cursor: not-allowed !important;
+  opacity: 0.38;
+}
+
+/* -------------------- App shell -------------------- */
 
 #app {
-  width: 100%;
-  height: 100%;
-  min-height: 0;
+  min-height: 100vh;
 }
 
 #xiApp {
-  display: grid;
-  grid-template-rows: var(--xi-header) minmax(0, 1fr);
+  display: flex;
+  flex-direction: column;
   width: 100%;
-  height: 100dvh;
+  height: 100vh;
+  min-height: 450px;
   overflow: hidden;
-  background: var(--xi-bg);
+  background: var(--bg);
+  color: var(--body);
 }
 
-/* ---------- Top navigation ---------- */
+/* -------------------- Top navigation -------------------- */
 
 .xi-topbar {
+  position: relative;
   z-index: 20;
+
   display: flex;
   align-items: center;
   gap: 10px;
+
+  flex: 0 0 var(--topbar-height);
   min-width: 0;
-  padding: 0 16px;
-  border-bottom: 1px solid var(--xi-line);
-  background: #fbfcf8;
+  height: var(--topbar-height);
+  padding: 0 18px;
+
+  background: var(--paper-soft);
+  border-bottom: 1px solid var(--line);
 }
 
 .xi-icon-btn {
-  display: grid;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
   flex: 0 0 36px;
-  place-items: center;
   width: 36px;
   height: 36px;
   padding: 0;
-  border: 1px solid var(--xi-line);
-  border-radius: var(--xi-radius);
-  background: var(--xi-paper);
-  color: #526858;
+
+  border: 1px solid var(--lavender-border);
+  border-radius: 10px;
+  background: var(--lavender-soft);
+  color: var(--lavender-dark);
+
   cursor: pointer;
   transition:
-    background var(--xi-transition),
-    border-color var(--xi-transition);
+    background 150ms ease,
+    transform 150ms ease;
 }
 
 .xi-icon-btn:hover {
-  border-color: #cbdac9;
-  background: var(--xi-accent-soft);
+  background: #e7d8ff;
 }
 
-.xi-icon-btn svg,
-.xi-nav-btn svg {
-  width: 17px;
-  height: 17px;
+.xi-icon-btn:active {
+  transform: scale(0.96);
+}
+
+.xi-icon-btn svg {
+  display: block;
+  width: 19px;
+  height: 19px;
 }
 
 .xi-top-current {
   min-width: 0;
   overflow: hidden;
-  color: var(--xi-ink);
+
+  color: var(--ink);
   font-size: 13px;
-  font-weight: 700;
+  font-weight: 650;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .xi-top-spacer {
-  flex: 1;
+  flex: 1 1 auto;
+  min-width: 8px;
 }
 
 .xi-read-meta {
-  color: var(--xi-muted);
+  flex: 0 0 auto;
+  color: var(--muted);
   font-size: 11px;
+  font-weight: 600;
   white-space: nowrap;
 }
 
@@ -159,191 +208,241 @@ input:focus-visible {
   align-items: center;
   justify-content: center;
   gap: 5px;
-  min-height: 35px;
-  padding: 7px 11px;
-  border: 1px solid var(--xi-line);
-  border-radius: var(--xi-radius);
-  background: var(--xi-paper);
-  color: #425448;
+
+  flex: 0 0 auto;
+  min-height: 34px;
+  padding: 0 11px;
+
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: #ffffff;
+  color: var(--body);
+
   font-size: 12px;
+  font-weight: 600;
   white-space: nowrap;
   cursor: pointer;
+
   transition:
-    background var(--xi-transition),
-    border-color var(--xi-transition),
-    color var(--xi-transition);
+    background 150ms ease,
+    border-color 150ms ease,
+    transform 150ms ease;
 }
 
 .xi-nav-btn:hover:not(:disabled) {
-  background: var(--xi-accent-soft);
-  border-color: #cbdac9;
+  border-color: #d3c0f5;
+  background: #f7f1ff;
+}
+
+.xi-nav-btn:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.xi-nav-btn svg {
+  display: block;
+  width: 15px;
+  height: 15px;
 }
 
 .xi-nav-btn.primary {
-  border-color: var(--xi-accent);
-  background: var(--xi-accent);
-  color: #fff;
+  border-color: var(--lavender);
+  background: var(--lavender);
+  color: #ffffff;
 }
 
 .xi-nav-btn.primary:hover:not(:disabled) {
-  border-color: var(--xi-accent-hover);
-  background: var(--xi-accent-hover);
+  border-color: var(--lavender-dark);
+  background: var(--lavender-dark);
 }
 
-.xi-nav-btn:disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
-}
-
-/* ---------- Main layout ---------- */
+/* -------------------- Main layout -------------------- */
 
 .xi-layout {
-  display: grid;
-  grid-template-columns: var(--xi-library) minmax(0, 1fr);
-  min-height: 0;
-  overflow: hidden;
-  transition: grid-template-columns var(--xi-transition);
-}
-
-#xiApp.xi-collapsed {
-  --xi-library: 0px;
-}
-
-#xiApp.xi-collapsed .xi-sidebar {
-  visibility: hidden;
-  border-right: 0;
-}
-
-.xi-sidebar {
   display: flex;
-  flex-direction: column;
+  flex: 1 1 auto;
   min-width: 0;
   min-height: 0;
   overflow: hidden;
-  border-right: 1px solid var(--xi-line);
-  background: #fbfcf8;
+}
+
+/* -------------------- Sidebar -------------------- */
+
+.xi-sidebar {
+  display: flex;
+  flex: 0 0 var(--sidebar-width);
+  flex-direction: column;
+
+  width: var(--sidebar-width);
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+
+  background: var(--paper-soft);
+  border-right: 1px solid var(--line);
+
+  transition:
+    width 180ms ease,
+    flex-basis 180ms ease,
+    border-color 180ms ease;
 }
 
 .xi-library-head {
-  padding: 14px;
-  border-bottom: 1px solid #e9eee6;
+  flex: 0 0 auto;
+  padding: 13px 12px 10px;
+  border-bottom: 1px solid #f0e8fa;
 }
 
-/* ---------- Search ---------- */
-
 .xi-search {
-  position: relative;
   display: flex;
   align-items: center;
+  gap: 8px;
+
   width: 100%;
+  min-height: 37px;
+  padding: 0 10px;
+
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: #ffffff;
+  color: var(--muted);
+
+  transition:
+    border-color 150ms ease,
+    box-shadow 150ms ease;
+}
+
+.xi-search:focus-within {
+  border-color: #b99be9;
+  box-shadow: 0 0 0 3px rgba(128, 87, 217, 0.09);
 }
 
 .xi-search svg {
-  position: absolute;
-  left: 11px;
-  width: 15px;
-  height: 15px;
-  color: #8c9b8e;
-  pointer-events: none;
+  display: block;
+  flex: 0 0 16px;
+  width: 16px;
+  height: 16px;
 }
 
 .xi-search input {
   width: 100%;
-  height: 38px;
-  padding: 0 12px 0 34px;
-  border: 1px solid var(--xi-line);
-  border-radius: var(--xi-radius);
+  min-width: 0;
+  height: 34px;
+  padding: 0;
+
+  border: 0;
   outline: none;
-  background: #f3f6f0;
-  color: var(--xi-ink);
+  background: transparent;
+  color: var(--ink);
+
   font-size: 12px;
-  transition:
-    border-color var(--xi-transition),
-    background var(--xi-transition),
-    box-shadow var(--xi-transition);
 }
 
 .xi-search input::placeholder {
-  color: #95a093;
+  color: #a79ab9;
 }
 
-.xi-search input:focus {
-  border-color: #9cb7a1;
-  background: var(--xi-paper);
-  box-shadow: 0 0 0 3px #52745d12;
+.xi-search input:focus-visible {
+  outline: none;
 }
-
-/* ---------- Notes list ---------- */
 
 .xi-library-scroll {
-  flex: 1;
+  flex: 1 1 auto;
   min-height: 0;
+  padding: 8px;
   overflow-x: hidden;
   overflow-y: auto;
-  padding: 8px;
   overscroll-behavior: contain;
   scrollbar-width: thin;
-  scrollbar-color: #d5ded3 transparent;
+  scrollbar-color: #d8c8ef transparent;
+}
+
+.xi-library-scroll::-webkit-scrollbar,
+.xi-reader-scroll::-webkit-scrollbar {
+  width: 7px;
+}
+
+.xi-library-scroll::-webkit-scrollbar-thumb,
+.xi-reader-scroll::-webkit-scrollbar-thumb {
+  border-radius: 20px;
+  background: #d8c8ef;
+}
+
+.xi-library-scroll::-webkit-scrollbar-track,
+.xi-reader-scroll::-webkit-scrollbar-track {
+  background: transparent;
 }
 
 .xi-note-link {
   display: flex;
   align-items: center;
   gap: 9px;
+
   width: 100%;
+  min-width: 0;
   min-height: 35px;
   margin: 2px 0;
   padding: 7px 9px;
+
   border: 1px solid transparent;
-  border-radius: 7px;
+  border-radius: 9px;
   background: transparent;
-  color: #536257;
+  color: var(--body);
+
   text-align: left;
   cursor: pointer;
+
   transition:
-    background var(--xi-transition),
-    border-color var(--xi-transition),
-    color var(--xi-transition);
+    background 120ms ease,
+    border-color 120ms ease,
+    color 120ms ease;
 }
 
 .xi-note-link:hover {
-  background: #f0f4ed;
-  color: #314b38;
+  background: #f5eeff;
+  color: var(--ink);
 }
 
 .xi-note-link.active {
-  border-color: #dce8da;
-  background: var(--xi-accent-soft);
-  color: #34543b;
+  border-color: #dfceff;
+  background: var(--lavender-soft);
+  color: #6037b3;
 }
 
 .xi-note-file {
-  display: flex;
-  flex: 0 0 15px;
-  color: #91a092;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  flex: 0 0 17px;
+  width: 17px;
+  height: 17px;
+  color: #a28bcf;
 }
 
 .xi-note-file svg {
+  display: block;
   width: 15px;
   height: 15px;
 }
 
 .xi-note-link.active .xi-note-file {
-  color: var(--xi-accent);
+  color: var(--lavender);
 }
 
 .xi-note-name {
-  flex: 1;
+  flex: 1 1 auto;
   min-width: 0;
+
   overflow: hidden;
   font-size: 12px;
-  font-weight: 550;
+  font-weight: 500;
+  line-height: 1.4;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .xi-note-link.active .xi-note-name {
-  font-weight: 750;
+  font-weight: 650;
 }
 
 .xi-active-mark {
@@ -351,79 +450,107 @@ input:focus-visible {
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: var(--xi-accent);
+  background: var(--lavender);
 }
 
 .xi-empty {
-  padding: 22px 12px;
-  color: var(--xi-muted);
+  padding: 16px 10px;
+  color: var(--muted);
   font-size: 12px;
-  line-height: 1.7;
-  overflow-wrap: anywhere;
+  line-height: 1.6;
 }
 
-/* ---------- Reader ---------- */
+/* -------------------- Collapsed sidebar -------------------- */
+
+#xiApp.xi-collapsed .xi-sidebar {
+  flex-basis: 0;
+  width: 0;
+  border-right-color: transparent;
+}
+
+#xiApp.xi-collapsed .xi-sidebar > * {
+  visibility: hidden;
+}
+
+#xiApp.xi-collapsed .xi-reader {
+  min-width: 0;
+}
+
+/* -------------------- Reader -------------------- */
 
 .xi-reader {
   display: flex;
+  flex: 1 1 auto;
   flex-direction: column;
+
   min-width: 0;
   min-height: 0;
   overflow: hidden;
-  background: var(--xi-bg);
+
+  background: var(--bg);
 }
 
 .xi-reader-scroll {
-  flex: 1;
+  flex: 1 1 auto;
+  min-width: 0;
   min-height: 0;
-  overflow-x: hidden;
-  overflow-y: auto;
-  padding: 22px 26px 36px;
+  padding: 20px 24px 36px;
+  overflow: auto;
   overscroll-behavior: contain;
-  scroll-behavior: smooth;
   scrollbar-width: thin;
-  scrollbar-color: #d5ded3 transparent;
+  scrollbar-color: #d8c8ef transparent;
 }
+
+/*
+  The content width expands with the available viewport.
+  It does not stay constrained to a narrow reading column.
+*/
 
 .xi-article-wrap {
   width: 100%;
-  max-width: 1100px;
-  min-height: 300px;
+  max-width: 1500px;
+  min-width: 0;
   margin: 0 auto;
-  padding: clamp(22px, 3vw, 38px) clamp(20px, 3.5vw, 44px);
-  border: 1px solid #e1e7dd;
-  border-radius: 11px;
-  background: var(--xi-paper);
-  box-shadow: 0 3px 12px #2a3e2e08;
+  padding: 25px 34px 42px;
+
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: var(--paper);
+  box-shadow: var(--shadow);
 }
 
+/* -------------------- Article header -------------------- */
+
 .xi-article-header {
-  margin-bottom: 20px;
-  padding-bottom: 17px;
-  border-bottom: 1px solid #e8ede4;
+  margin: 0 0 18px;
+  padding: 0 0 13px;
+  border-bottom: 1px solid #f0e8fa;
 }
 
 .xi-article-title {
   margin: 0;
-  color: var(--xi-ink);
-  font-size: clamp(25px, 3vw, 34px);
-  font-weight: 800;
+
+  color: var(--ink);
+  font-size: clamp(24px, 2.2vw, 34px);
+  font-weight: 760;
+  letter-spacing: -0.85px;
   line-height: 1.25;
-  letter-spacing: -0.8px;
   overflow-wrap: anywhere;
 }
 
-.xi-article-subtitle,
-.xi-article-kicker {
-  display: none;
+.xi-article-subtitle {
+  margin-top: 6px;
+  color: var(--muted);
+  font-size: 12px;
 }
 
-/* ---------- Markdown content ---------- */
+/* -------------------- Markdown base -------------------- */
 
 .xi-markdown {
-  color: #435248;
-  font-size: 13.5px;
-  line-height: 1.65;
+  min-width: 0;
+  color: var(--body);
+  font-size: 14px;
+  line-height: 1.62;
   overflow-wrap: anywhere;
 }
 
@@ -431,63 +558,88 @@ input:focus-visible {
   margin-top: 0;
 }
 
+.xi-markdown > :last-child {
+  margin-bottom: 0;
+}
+
+.xi-markdown p {
+  margin: 7px 0 11px;
+}
+
+.xi-markdown strong,
+.xi-markdown b {
+  color: #382b52;
+  font-weight: 700;
+}
+
+.xi-markdown em {
+  color: #6d527e;
+}
+
+.xi-markdown hr {
+  height: 1px;
+  margin: 20px 0;
+  border: 0;
+  background: var(--line);
+}
+
+/* -------------------- Markdown headings -------------------- */
+
 .xi-markdown h1,
 .xi-markdown h2,
 .xi-markdown h3,
 .xi-markdown h4,
 .xi-markdown h5,
 .xi-markdown h6 {
-  color: #2c3d31;
-  font-weight: 760;
-  line-height: 1.4;
-  scroll-margin-top: 18px;
+  position: relative;
+  color: var(--ink);
+  font-weight: 730;
+  line-height: 1.35;
+  letter-spacing: -0.3px;
+  overflow-wrap: anywhere;
 }
 
 .xi-markdown h1 {
-  margin: 24px 0 10px;
+  margin: 25px 0 11px;
+  padding-bottom: 7px;
+  border-bottom: 1px solid #e9ddfb;
   font-size: 25px;
 }
 
 .xi-markdown h2 {
-  margin: 27px 0 10px;
-  padding-bottom: 7px;
-  border-bottom: 1px solid #e5ebe2;
-  font-size: 20px;
+  margin: 22px 0 9px;
+  padding-bottom: 5px;
+  border-bottom: 1px solid #f0e8fa;
+  font-size: 21px;
 }
 
 .xi-markdown h3 {
-  margin: 21px 0 8px;
-  font-size: 16px;
+  margin: 17px 0 7px;
+  font-size: 17px;
 }
 
 .xi-markdown h4 {
-  margin: 18px 0 7px;
+  margin: 14px 0 6px;
+  font-size: 15px;
+}
+
+.xi-markdown h5 {
+  margin: 12px 0 5px;
   font-size: 14px;
 }
 
-.xi-markdown p {
-  margin: 9px 0 13px;
+.xi-markdown h6 {
+  margin: 10px 0 5px;
+  color: #746487;
+  font-size: 13px;
 }
 
-.xi-markdown strong {
-  color: #2b3b30;
-  font-weight: 760;
-}
-
-.xi-markdown a {
-  color: #426c4b;
-  text-decoration-thickness: 1px;
-  text-underline-offset: 3px;
-}
-
-.xi-markdown a:hover {
-  color: #2d5136;
-}
+/* -------------------- Lists -------------------- */
 
 .xi-markdown ul,
 .xi-markdown ol {
-  margin: 8px 0 14px;
-  padding-left: 24px;
+  margin: 7px 0 12px;
+  padding-left: 25px;
 }
 
 .xi-markdown li {
@@ -495,153 +647,382 @@ input:focus-visible {
   padding-left: 2px;
 }
 
-.xi-markdown li::marker {
-  color: #78957b;
+.xi-markdown li > ul,
+.xi-markdown li > ol {
+  margin-top: 3px;
+  margin-bottom: 5px;
 }
+
+.xi-markdown ul li::marker {
+  color: #9a76df;
+}
+
+.xi-markdown ol li::marker {
+  color: #8057d9;
+  font-weight: 650;
+}
+
+/* -------------------- Blockquotes -------------------- */
 
 .xi-markdown blockquote {
-  margin: 15px 0;
+  margin: 12px 0;
   padding: 10px 15px;
-  border-left: 3px solid #7e9e81;
-  border-radius: 0 7px 7px 0;
-  background: #f1f5ef;
-  color: #56675a;
+
+  border-left: 4px solid #b89be9;
+  border-radius: 0 9px 9px 0;
+  background: #f8f3ff;
+  color: #625476;
 }
 
-.xi-markdown code {
-  padding: 2px 5px;
-  border: 1px solid #e5eae2;
-  border-radius: 4px;
-  background: #f3f6f0;
-  color: #426047;
-  font-family: "SFMono-Regular", Consolas, monospace;
-  font-size: 0.9em;
+.xi-markdown blockquote > :first-child {
+  margin-top: 0;
 }
+
+.xi-markdown blockquote > :last-child {
+  margin-bottom: 0;
+}
+
+/* -------------------- Inline code -------------------- */
+
+.xi-markdown :not(pre) > code {
+  padding: 2px 5px;
+  border: 1px solid #eadff8;
+  border-radius: 5px;
+  background: #f6f0ff;
+  color: #7845b5;
+
+  font-family:
+    "SFMono-Regular",
+    Consolas,
+    "Liberation Mono",
+    monospace;
+  font-size: 0.9em;
+  overflow-wrap: anywhere;
+}
+
+/* -------------------- Code blocks -------------------- */
 
 .xi-markdown pre {
-  overflow: auto;
-  margin: 13px 0 17px;
-  padding: 15px;
-  border: 1px solid #dfe6dc;
-  border-radius: 8px;
-  background: #f5f7f3;
+  max-width: 100%;
+  margin: 11px 0 15px;
+  padding: 14px 16px;
+
+  overflow-x: auto;
+  border: 1px solid #e7dcf7;
+  border-radius: 10px;
+  background: #faf8ff;
+  color: #342a49;
+
+  font-size: 12.5px;
   line-height: 1.55;
+  tab-size: 4;
+  scrollbar-width: thin;
 }
 
 .xi-markdown pre code {
+  display: block;
   padding: 0;
   border: 0;
-  border-radius: 0;
   background: transparent;
-  color: #35473a;
-  font-size: 12px;
+  color: inherit;
+
+  font-family:
+    "SFMono-Regular",
+    Consolas,
+    "Liberation Mono",
+    monospace;
+  font-size: inherit;
+  line-height: inherit;
+  white-space: pre;
+  overflow-wrap: normal;
 }
+
+.xi-markdown pre code.hljs {
+  padding: 0;
+  background: transparent;
+}
+
+/* -------------------- Tables -------------------- */
 
 .xi-markdown table {
   width: 100%;
-  margin: 14px 0 18px;
-  border-collapse: collapse;
-  font-size: 12px;
+  margin: 12px 0 16px;
+  border-collapse: separate;
+  border-spacing: 0;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  overflow: hidden;
+
+  font-size: 12.5px;
+  line-height: 1.5;
+}
+
+.xi-markdown thead {
+  background: #f1e9ff;
 }
 
 .xi-markdown th,
 .xi-markdown td {
-  padding: 8px 10px;
-  border: 1px solid #dfe6dc;
+  padding: 9px 12px;
+  border-right: 1px solid #eee5f8;
+  border-bottom: 1px solid #eee5f8;
   text-align: left;
   vertical-align: top;
+  overflow-wrap: anywhere;
 }
 
 .xi-markdown th {
-  background: #edf3ea;
-  color: #304b36;
+  color: #49356e;
   font-weight: 700;
 }
 
-.xi-markdown tr:nth-child(even) td {
-  background: #fafbf8;
+.xi-markdown tr:last-child td {
+  border-bottom: 0;
 }
 
-.xi-markdown hr {
-  margin: 23px 0;
-  border: 0;
-  border-top: 1px solid #e1e8de;
+.xi-markdown th:last-child,
+.xi-markdown td:last-child {
+  border-right: 0;
 }
+
+.xi-markdown tbody tr:nth-child(even) {
+  background: #fdfbff;
+}
+
+.xi-markdown tbody tr:hover {
+  background: #f8f2ff;
+}
+
+/* -------------------- Images -------------------- */
 
 .xi-markdown img {
+  display: block;
   max-width: 100%;
   height: auto;
-  border-radius: 5px;
+  margin: 12px auto;
+  border: 1px solid #eee5f8;
+  border-radius: 10px;
 }
 
-.xi-markdown input[type="checkbox"] {
-  accent-color: var(--xi-accent);
+/* -------------------- LaTeX / KaTeX -------------------- */
+
+.xi-markdown .katex {
+  font-size: 1.03em;
 }
 
 .xi-markdown .katex-display {
   max-width: 100%;
+  margin: 13px 0;
+  padding: 10px 8px;
   overflow-x: auto;
   overflow-y: hidden;
-  padding: 5px 0;
+  border-radius: 8px;
+  background: #fcfaff;
+  scrollbar-width: thin;
 }
 
-/* ---------- Loading and error messages ---------- */
+.xi-markdown .katex-display > .katex {
+  white-space: nowrap;
+}
+
+/* -------------------- Task list checkboxes in Markdown -------------------- */
+
+.xi-markdown input[type="checkbox"]:not(.xi-checkbox) {
+  margin-right: 7px;
+  accent-color: var(--lavender);
+}
+
+/* =========================================================
+   CHEAT SHEET REVISION CHECKLIST
+   These selectors match the nested structure built by app.js.
+   ========================================================= */
+
+.xi-markdown .xi-check-section {
+  min-width: 0;
+  margin: 11px 0;
+  padding: 12px 15px;
+
+  border: 1px solid #e7dcf7;
+  border-radius: 10px;
+  background: #ffffff;
+
+  transition:
+    background 160ms ease,
+    border-color 160ms ease;
+}
+
+.xi-markdown .xi-check-section:hover {
+  border-color: #d8c4f6;
+}
+
+.xi-markdown .xi-check-heading {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  min-width: 0;
+}
+
+.xi-markdown .xi-check-heading > h1,
+.xi-markdown .xi-check-heading > h2,
+.xi-markdown .xi-check-heading > h3,
+.xi-markdown .xi-check-heading > h4,
+.xi-markdown .xi-check-heading > h5,
+.xi-markdown .xi-check-heading > h6 {
+  flex: 1 1 auto;
+  min-width: 0;
+  margin: 0 0 8px !important;
+  padding: 0 !important;
+  border: 0 !important;
+}
+
+.xi-markdown .xi-checkbox {
+  flex: 0 0 17px;
+  width: 17px;
+  height: 17px;
+  margin: 3px 0 0;
+  accent-color: #19a765;
+  cursor: pointer;
+}
+
+.xi-markdown .xi-check-section.is-checked {
+  border-color: var(--mint-border);
+  background: var(--mint-soft);
+}
+
+/*
+  Strike through the completed section's own heading and content.
+  Do not strike the checkbox itself.
+*/
+
+.xi-markdown .xi-check-section.is-checked
+> .xi-check-heading > h1,
+.xi-markdown .xi-check-section.is-checked
+> .xi-check-heading > h2,
+.xi-markdown .xi-check-section.is-checked
+> .xi-check-heading > h3,
+.xi-markdown .xi-check-section.is-checked
+> .xi-check-heading > h4,
+.xi-markdown .xi-check-section.is-checked
+> .xi-check-heading > h5,
+.xi-markdown .xi-check-section.is-checked
+> .xi-check-heading > h6,
+.xi-markdown .xi-check-section.is-checked
+> p,
+.xi-markdown .xi-check-section.is-checked
+> ul,
+.xi-markdown .xi-check-section.is-checked
+> ol,
+.xi-markdown .xi-check-section.is-checked
+> blockquote,
+.xi-markdown .xi-check-section.is-checked
+> table,
+.xi-markdown .xi-check-section.is-checked
+> pre,
+.xi-markdown .xi-check-section.is-checked
+> .katex-display {
+  color: var(--mint-dark);
+  text-decoration-line: line-through;
+  text-decoration-color: #25ad63;
+  text-decoration-thickness: 2px;
+}
+
+/* Nested headings and nested section content */
+
+.xi-markdown .xi-check-section.is-checked
+> .xi-check-section {
+  border-color: #b2e9c8;
+  background: #f3fff7;
+}
+
+.xi-markdown .xi-check-section.is-checked
+> .xi-check-section.is-checked {
+  border-color: #8ce0b4;
+  background: #e4f9ec;
+}
+
+/* Avoid striking nested checkbox controls. */
+
+.xi-markdown .xi-check-section .xi-checkbox {
+  text-decoration: none;
+}
+
+/* -------------------- Loading and error states -------------------- */
 
 .xi-state {
-  padding: 36px 10px;
-  color: var(--xi-body);
+  max-width: 700px;
+  margin: 30px auto;
+  padding: 24px;
+
+  border: 1px solid var(--line);
+  border-radius: 13px;
+  background: #fcfaff;
   text-align: center;
 }
 
 .xi-state h2 {
-  color: var(--xi-ink);
-  font-size: 18px;
+  margin: 0 0 8px;
+  color: var(--ink);
+  font-size: 20px;
 }
 
 .xi-state p {
-  color: var(--xi-muted);
-  font-size: 12px;
+  color: var(--muted);
+  font-size: 13px;
 }
 
 .xi-retry {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  min-height: 36px;
   margin-top: 8px;
-  padding: 8px 12px;
-  border: 1px solid var(--xi-line);
-  border-radius: 7px;
-  background: var(--xi-paper);
+  padding: 0 14px;
+
+  border: 1px solid var(--lavender);
+  border-radius: 9px;
+  background: var(--lavender);
+  color: #ffffff;
+
+  font-size: 12px;
+  font-weight: 650;
   cursor: pointer;
 }
 
 .xi-retry:hover {
-  background: var(--xi-accent-soft);
+  background: var(--lavender-dark);
 }
 
-/* ---------- Hide removed interface elements ---------- */
-
-.xi-brand,
-.xi-help,
-.xi-breadcrumb,
-.xi-reader-footer,
-.xi-library-tools,
-.xi-library-title,
-.xi-library-label,
-.xi-filter,
-.xi-top-divider,
-.xi-top-status {
-  display: none !important;
-}
-
-/* ---------- Mobile backdrop ---------- */
+/* -------------------- Mobile backdrop -------------------- */
 
 .xi-mobile-backdrop {
   display: none;
 }
 
-/* ---------- Tablet ---------- */
+/* =========================================================
+   RESPONSIVE LAYOUT
+   ========================================================= */
 
-@media (max-width: 850px) {
+@media (min-width: 1600px) {
   :root {
-    --xi-library: 245px;
+    --sidebar-width: 285px;
+  }
+
+  .xi-reader-scroll {
+    padding-right: 30px;
+    padding-left: 30px;
+  }
+
+  .xi-article-wrap {
+    max-width: 1700px;
+    padding-right: 42px;
+    padding-left: 42px;
+  }
+}
+
+@media (max-width: 1000px) {
+  :root {
+    --sidebar-width: 235px;
   }
 
   .xi-reader-scroll {
@@ -649,81 +1030,42 @@ input:focus-visible {
   }
 
   .xi-article-wrap {
-    padding: 25px 22px;
+    padding: 23px 24px 32px;
   }
 }
 
-/* ---------- Mobile ---------- */
-
-@media (max-width: 620px) {
+@media (max-width: 700px) {
   :root {
-    --xi-header: 54px;
+    --topbar-height: 54px;
   }
 
   .xi-topbar {
-    gap: 6px;
-    padding: 0 8px;
+    gap: 7px;
+    padding: 0 10px;
   }
 
-  .xi-top-current,
+  .xi-top-current {
+    max-width: 25vw;
+    font-size: 12px;
+  }
+
   .xi-read-meta {
     display: none;
   }
 
   .xi-nav-btn {
-    gap: 3px;
-    padding: 7px 8px;
+    min-height: 32px;
+    padding: 0 8px;
     font-size: 11px;
   }
 
-  .xi-nav-btn svg {
-    width: 14px;
-    height: 14px;
-  }
-
-  .xi-layout {
-    position: relative;
-    display: block;
-  }
-
-  .xi-sidebar {
-    position: absolute;
-    z-index: 12;
-    inset: 0 auto 0 0;
-    width: min(310px, 87vw);
-    border-right: 1px solid var(--xi-line);
-    box-shadow: 12px 0 35px #25332d20;
-    transform: translateX(-105%);
-    transition: transform var(--xi-transition);
-    visibility: visible !important;
-  }
-
-  #xiApp.xi-mobile-open .xi-sidebar {
-    transform: translateX(0);
-  }
-
-  .xi-mobile-backdrop {
-    position: absolute;
-    z-index: 11;
-    inset: 0;
-    background: #25332d66;
-  }
-
-  #xiApp.xi-mobile-open .xi-mobile-backdrop {
-    display: block;
-  }
-
-  .xi-reader {
-    height: 100%;
-  }
-
   .xi-reader-scroll {
-    padding: 10px 8px 20px;
+    padding: 12px;
   }
 
   .xi-article-wrap {
-    padding: 21px 15px 25px;
-    border-radius: 8px;
+    padding: 20px 17px 28px;
+    border-radius: 12px;
   }
 
   .xi-article-title {
@@ -731,7 +1073,11 @@ input:focus-visible {
   }
 
   .xi-markdown {
-    font-size: 13px;
+    font-size: 13.5px;
+  }
+
+  .xi-markdown h1 {
+    font-size: 22px;
   }
 
   .xi-markdown h2 {
@@ -741,20 +1087,133 @@ input:focus-visible {
   .xi-markdown h3 {
     font-size: 16px;
   }
+}
 
-  .xi-markdown pre {
-    padding: 12px;
-    font-size: 11px;
+@media (max-width: 620px) {
+  #xiApp .xi-layout {
+    position: relative;
+    display: block;
   }
 
-  .xi-markdown table {
+  #xiApp .xi-sidebar {
+    position: absolute;
+    z-index: 12;
+    inset: 0 auto 0 0;
+
+    width: min(310px, 87vw);
+    height: 100%;
+    max-height: 100%;
+
+    border-right: 1px solid var(--line);
+    box-shadow: 12px 0 35px rgba(37, 33, 61, 0.13);
+
+    transform: translateX(-105%);
+    transition: transform 180ms ease;
+  }
+
+  #xiApp.xi-mobile-open .xi-sidebar {
+    transform: translateX(0);
+  }
+
+  #xiApp.xi-collapsed .xi-sidebar {
+    width: min(310px, 87vw);
+    flex-basis: auto;
+  }
+
+  #xiApp.xi-collapsed .xi-sidebar > * {
+    visibility: visible;
+  }
+
+  #xiApp .xi-mobile-backdrop {
+    position: absolute;
+    z-index: 11;
+    inset: 0;
     display: block;
-    overflow-x: auto;
-    white-space: normal;
+
+    background: rgba(35, 27, 51, 0.35);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 180ms ease;
+  }
+
+  #xiApp.xi-mobile-open .xi-mobile-backdrop {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  #xiApp .xi-reader {
+    width: 100%;
+    height: 100%;
+  }
+
+  #xiApp .xi-top-current {
+    display: none;
+  }
+
+  #xiApp .xi-read-meta {
+    display: none;
+  }
+
+  #xiApp .xi-top-spacer {
+    min-width: 0;
+  }
+
+  #xiApp .xi-nav-btn {
+    gap: 3px;
+    padding: 0 7px;
+  }
+
+  #xiApp .xi-article-wrap {
+    min-height: 100%;
   }
 }
 
-/* ---------- Reduced motion ---------- */
+@media (max-width: 400px) {
+  .xi-topbar {
+    gap: 5px;
+    padding: 0 7px;
+  }
+
+  .xi-icon-btn {
+    flex-basis: 33px;
+    width: 33px;
+    height: 33px;
+  }
+
+  .xi-nav-btn {
+    padding: 0 6px;
+    font-size: 10px;
+  }
+
+  .xi-reader-scroll {
+    padding: 8px;
+  }
+
+  .xi-article-wrap {
+    padding: 16px 12px 24px;
+    border-radius: 10px;
+  }
+
+  .xi-article-title {
+    font-size: 22px;
+  }
+
+  .xi-markdown pre {
+    padding: 11px;
+    font-size: 11.5px;
+  }
+
+  .xi-markdown table {
+    font-size: 11px;
+  }
+
+  .xi-markdown th,
+  .xi-markdown td {
+    padding: 7px 8px;
+  }
+}
+
+/* -------------------- Reduced motion -------------------- */
 
 @media (prefers-reduced-motion: reduce) {
   *,
