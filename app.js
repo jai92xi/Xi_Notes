@@ -1395,7 +1395,12 @@
       throw new Error("No Markdown files were found in the notes folder.");
     }
 
-    $("#xiNoteCount").textContent = state.notes.length;
+    
+const noteCountElement = $("#xiNoteCount");
+
+if (noteCountElement) {
+  noteCountElement.textContent = String(state.notes.length);
+}
     renderLibrary();
   }
 
