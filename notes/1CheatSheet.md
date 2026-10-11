@@ -36,8 +36,10 @@
 2. **Backward Propagation** - learns from **prediction error** and **updates model weights**.
 
 #### <mark>🧠 Masked Language Modeling (MLM) in BERT</mark>
-BERT uses **bidirectional self-attention** to learn from both left and right context. During **pretraining**, MLM selects approximately **15% of tokens for prediction** (**80% `[MASK]`, 10% random, 10% unchanged**).
-⚙️ BERT learns word relationships by predicting original tokens and minimizing prediction errors. At inference, it assigns probabilities to candidate tokens and predicts the highest-scoring token (e.g., `motor`).
+- BERT uses **bidirectional self-attention** to learn from both left and right context.
+- During **pretraining**, MLM selects approximately **15% of tokens for prediction** (**80% `[MASK]`, 10% random, 10% unchanged**).
+- BERT learns word relationships by predicting original tokens and minimizing prediction errors.
+- At inference, it assigns probabilities to candidate tokens and predicts the highest-scoring token (e.g., The policyholder filed a `[MASK]` claim after the accident. >> `motor`).
 
 #### <mark>**VANISHING GRADIENT**</mark>
 * During **backpropagation**, gradients become **extremely small** toward **earlier layers**, causing **very small weight updates** and **slow learning**.
