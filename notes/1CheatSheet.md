@@ -1,6 +1,32 @@
 #### <mark>**OVERFITTING**</mark>
 * Model **memorizes the training data excessively** - including **noise** - it **performs well on training data** but **poorly on new/unseen data**.
 * solution: More training data, Data Augmentation; reduce model complexity (reduce layers/neurons); Early Stopping; Dropout, L1/L2 regularization, Batch Normalization; cross validation.
+---
+#### <mark>**High Recall (95%), Low Accuracy (65%) in RAG**</mark>
+
+- **Problem:** Recall@20 = 95%, Answer Accuracy = 62%.
+- **Root Cause:** The correct chunk is retrieved but ignored or misinterpreted by the LLM.
+
+##### <mark>**Why Does It Happen?**</mark>
+- **Lost in the Middle:** Relevant chunks are buried at positions 8–14.
+- **Irrelevant Context:** Top-ranked chunks distract the model.
+- **Missed Details:** Exceptions, eligibility rules, or dates are overlooked.
+- **High Token Cost:** Too many chunks increase noise and cost.
+
+##### <mark>**Solutions**</mark>
+1. **Reranking:** Move the most relevant chunks to the top using a cross-encoder.
+2. **Context Optimization:** Pass only the top 3–5 relevant chunks after evaluation.
+3. **Prompt Engineering:** Prioritize direct evidence and policy exceptions.
+4. **Hybrid Search:** Combine BM25 keyword search with vector search.
+5. **Evaluation:** Track Recall@K, MRR/NDCG, answer accuracy, faithfulness, and token cost.
+
+#### <mark>**RRF (Reciprocal Rank Fusion)**</mark>
+- is **Rank-aggregation algorithm**.
+- **Combines results from multiple retrievers** like BM25, Vector Search rankings.
+- **Why?** Scores use different scales.
+- Uses **ranks, not raw scores**.
+- **Formula:** `RRF(d) = Σ 1 / (k + rank(d))` 🧮
+- `k` is typically 60.
 ----
 #### <mark>**EARLY STOPPING:**</mark>
 * A **regularization** technique - that prevents **overfitting** - by **stopping training** when **validation performance stops improving**.
