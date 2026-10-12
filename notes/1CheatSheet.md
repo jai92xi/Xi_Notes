@@ -191,4 +191,15 @@ Ensemble learning means **combining multiple ML models** to get a better and mor
 - **Elastic Net:** Need **both L1 and L2** behavior
 
 
+### <mark>🍋‍🟩Serving Llama-3.1-70B Using vLLM </mark>
 
+The problem is **OOM (Out of Memory)** when serving a 70B model on **2 × A100 80GB GPUs** with 40 concurrent users and 4K-token contexts.
+
+**Why Does It Fail?**
+- FP16 weights require ~140GB, leaving insufficient memory for the KV cache and runtime overhead.
+
+**Solution: 4-Bit Quantization**
+- Use a compatible **AWQ/GPTQ checkpoint** to reduce weight memory to roughly 40GB.
+
+**vLLM Configuration:**
+- Set `--tensor-parallel-size 2` and `--gpu-memory-utilization 0.90` to distribute computation across both GPUs and manage memory usage.
