@@ -49,6 +49,16 @@
 * During **backpropagation**, gradients become **extremely large**, causing **huge weight updates**, **unstable training**, and sometimes **Inf/NaN loss**.
 * Methods: **Gradient Clipping**; Reduce Learning Rate; Batch/Layer Normalization; Proper Weight Initialization; Residual Connection (ResNet).
 
+#### <mark>**Types of Drift in Machine Learning**</mark>
+| Type of Drift | Definition | Example | What Changed? |
+|---|---|---|---|
+| **Data Drift (Feature Drift)** | The distribution of input data changes over time. | Earlier, most customers were aged 25–35. Now, most are aged 50–60. | Customer age distribution |
+| **Concept Drift** | The relationship between input features and the outcome changes. | Earlier, customers visiting a store five times usually purchased a phone. Now, they visit five times just to compare prices and rarely buy. | Customer behavior and the relationship between visits and purchases |
+| **Label Drift (Prior Probability Shift)** | The overall proportion of outcome classes changes over time. | Earlier, 30% of customers purchased a phone. Now, only 10% purchase one due to an economic slowdown. | Purchase rate |
+| **Prediction Drift (Score Drift)** | The distribution of model predictions or scores changes over time. | Earlier, predicted purchase probabilities were mostly around 60%. Now, most are around 90%. | Distribution of model scores |
+| **Model Performance Drift** | The predictive performance of a model deteriorates over time. | Earlier, the model's accuracy was 90%. Now, it is 70% when evaluated against actual outcomes. | Model performance |
+
+
 #### <mark>**CONFUSION MATRIX**</mark>
 * **Confusion Matrix**: An **N×N grid** used to **evaluate a classification model** by comparing **actual labels** vs **predicted labels**.
 * **Metrics:** Accuracy, Precision, Recall, F1-Score, Specificity, ROC-AUC, PR-AUC, Balanced Accuracy, FPR, FNR
