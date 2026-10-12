@@ -67,6 +67,12 @@
 * Use the **same embedding model** for both queries and documents - (a) can have different dimensions - so dimension-mismatch error. (b) same dimension but different vector coordinates - irrelevant chunks.
 * or use a **pair of encoders explicitly trained to produce embeddings in the same shared space**, such as **DPR**
 
+#### <mark>**Handling Long Documents with BERT**</mark>
+- **Problem:** BERT limit = 512 tokens; an 8,000-token contract may contain risky clauses anywhere; current F1 = 0.64.
+- **Solution:** Sliding windows (512 size, 384 stride, 128 overlap) create ~21 chunks; process in GPU batches using FP16.
+- **Aggregation:** Max pooling detects any risky clause; mean pooling reduces isolated false positives; threshold predicts **High Risk / Normal**.
+- **Optimization:** Reuse fine-tuned BERT, benchmark end-to-end latency against 300 ms, and validate F1. Alternatives: Longformer or long-context LLMs.
+
 #### <mark>**POSITIONAL ENCODING**</mark>
 * **RNN** : processes **tokens sequentially** → order is naturally captured.
 **Transformer**: processes **all tokens in parallel** → self-attention alone **doesn't know token order**. >> “Dog🐶 bites man” ≠ “Man bites dog🐶” same
