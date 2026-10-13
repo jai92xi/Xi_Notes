@@ -83,13 +83,13 @@
 #### <mark>**HALLUCINATION**</mark>
 Hallucination happens when the **retrieved context doesn't contain enough relevant information**, causing the model to **generate unsupported information** instead. So, use methods to **prevent invention and improve retrieval quality**. 
 | Prevent Invention | Improve Query | Improve Retrieval | Improve Context | Verify Answer |
-||||||
-| Grounding prompt | Query rewriting | Chunking | Remove irrelevant chunks | Claim verification |
-| Abstention | Query decomposition | Parent-child retrieval | Remove duplicate chunks | Citation/evidence verification |
-| "Don't guess" | HyDE | Hybrid search | Context compression | Groundedness check |
-|  |  | Reranker | Conflict resolution | Retry / regenerate / abstain |
-|  |  | MMR |  |  |
--
+|---|---|---|---|---|
+| Grounding Prompt | Query Rewriting | Chunking | Remove Irrelevant Chunks | Claim Verification |
+| Abstention | Query Decomposition | Parent-Child Retrieval | Remove Duplicate Chunks | Citation/Evidence Verification |
+| "Don't Guess" | HyDE | Hybrid Search | Context Compression | Groundedness Check |
+|  |  | Reranker | Conflict Resolution | Retry / Regenerate / Abstain |
+|  |  | MMR (Maximal Marginal Relevance) |  |  |
+
 #### <mark>**RAG EVALUATION**</mark>
 * **Retrieval**  :  Recall@K, Precision@K, Hit Rate@K, MRR, nDCG@K, MAP@K, Retrieval Latency
 * **Context** 	 : 	Context Recall [Ragas], Context Precision [Ragas], Redundancy/Diversity
