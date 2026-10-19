@@ -7,18 +7,18 @@
 #### **Why is KV Cache needed?**
 Without caching, the growing prefix is processed repeatedly:
 ```
-Step 1: [A]       → B
-Step 2: [A B]     → C
-Step 3: [A B C]   → D
+
+Step 1: \[A\] → B Step 2: \[A B\] → C Step 3: \[A B C\] → D
+
 ```
 So K/V for `A`, `B`, etc. are repeatedly recomputed.
 
 **With KV Cache:**
 ```
-Step 1: A → K₁,V₁ → cache
-Step 2: B → K₂,V₂ → Q₂ attends to K₁,K₂
-Step 3: C → K₃,V₃ → Q₃ attends to K₁,K₂,K₃
-```
+
+Step 1: A → K₁,V₁ → cache Step 2: B → K₂,V₂ → Q₂ attends to K₁,K₂ Step 3: C → K₃,V₃ → Q₃ attends to K₁,K₂,K₃
+
+````
 **Compute K/V once → store → reuse.**
 
 ---
@@ -31,43 +31,72 @@ Because during inference:
 
 ---
 
-> A Transformer doesn’t automatically remember intermediate results between steps, so **without KV caching, it has to recompute K/V for previous tokens each time.**
+> A Transformer doesn't automatically remember intermediate results between steps, so **without KV caching, it has to recompute K/V for previous tokens each time.**
 
 ---
 
-#### Why don't we cache Q?
-At each decoding step, we need the new token's Q to determine what information it should retrieve from previous tokens. The previous tokens' Q values have already served their purpose
+#### **Why don't we cache Q?**
+At each decoding step, we need the new token's Q to determine what information it should retrieve from previous tokens. The previous tokens' Q values have already served their purpose.
 
 ---
 
-#### Does KV Cache eliminate attention?
-**No.** The new Q still attends to all cached K/V:
+#### **Does KV Cache eliminate attention?**
+**No.** The new Q still attends to all cached K/V.
 
 ---
+
+#### **KV Cache Memory Calculation**
+
 > 🧠 A model has **32 layers**, **32 query heads**, and uses **Grouped-Query Attention (GQA)** with **8 KV heads**. The **head dimension** is **128**, and the KV cache is stored in **FP16**. You serve a **batch of 4 sequences**, each with **8,192 tokens** in context.
 
-> **KV Cache** = 2 × **layers** × **sequence length** × **batch** × **KV heads** × **head dimension** × **bytes**
+> **KV Cache** = 2 × **layers** × **sequence length** × **batch** × **KV heads** × **head dimension** × **bytes per element**
 
 > = 2 × **32** × **8192** × **4** × **8** × **128** × **2 bytes**
-> **≈ 4 GB** 🚀
+
+> **≈ 4 GiB** 🚀
 
 ---
-This memory requirement can become a major bottleneck for long-context or high-concurrency inference. 
-Techniques such as **GQA/MQA, KV-cache quantization**, and **PagedAttention** help reduce or efficiently manage KV-cache memory.
+
+This memory requirement can become a major bottleneck for long-context or high-concurrency inference.
+
+Techniques such as **GQA/MQA, MLA, KV-cache quantization, and PagedAttention** help reduce or efficiently manage KV-cache memory.
+
+#### **KV Cache Optimizations**
 
 - **GQA/MQA** → Reduce **K/V heads** → 📉 smaller cache.
   - **MQA** → All query heads share **one K/V head**.
   - **GQA** → Query heads are grouped, with each group sharing **one K/V head**.
-  - _Example:_ **32 Query heads → 8 KV heads**.
+  - _Example:_ **32 query heads → 8 KV heads**.
 
-- **KV Quantization** → Use fewer bits → 📉 smaller cache.
+- **MLA (Multi-Head Latent Attention)** → Compresses **K/V representations into a low-dimensional latent vector** → 📉 smaller cache.
+  - Stores the **compressed KV latent representation** instead of full K/V tensors.
+  - K/V representations are reconstructed through projections when needed.
+  - **Key idea:** Reduce KV-cache memory without simply reducing the number of query heads.
+  - Used in **DeepSeek models**.
+
+- **KV Quantization** → Use fewer bits per element → 📉 smaller cache.
   - _FP16 = 2 bytes_ | _INT8 = 1 byte_ 💾
+  - INT8 uses roughly half the storage of FP16, excluding additional quantization metadata.
 
 - **PagedAttention** → 🧩 Efficient **KV-cache memory management**.
   - Divides cache into fixed-size **blocks/pages**, allowing requests to use non-contiguous blocks.
-  - `Request A → Block 1 → Block 4 → Block 7`
-  - `Request B → Block 2`
-  - `Request C → Block 3 → Block 5 → Block 6`
+  - Example:
+    ```
+    Request A → Block 1 → Block 4 → Block 7
+    Request B → Block 2
+    Request C → Block 3 → Block 5 → Block 6
+    ```
   - 🎯 **Key idea:** Allocate memory **on demand** → less fragmentation + better GPU utilization.
 
 ---
+
+#### **Quick Revision**
+
+| Technique | Main idea | Benefit |
+|---|---|---|
+| **GQA/MQA** | Share K/V heads | Smaller cache |
+| **MLA** | Compress K/V into latent representation | Smaller cache |
+| **KV Quantization** | Reduce bits per element | Lower memory |
+| **PagedAttention** | Manage cache in blocks | Less fragmentation |
+
+> 🧠 **Remember:** GQA/MQA reduce the number of stored K/V heads, MLA compresses the KV representation, quantization reduces storage per element, and PagedAttention improves memory allocation.
