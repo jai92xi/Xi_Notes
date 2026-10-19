@@ -63,6 +63,14 @@
 * **Confusion Matrix**: An **N×N grid** used to **evaluate a classification model** by comparing **actual labels** vs **predicted labels**.
 * **Metrics:** Accuracy, Precision, Recall, F1-Score, Specificity, ROC-AUC, PR-AUC, Balanced Accuracy, FPR, FNR
 
+#### <mark>**Where do Q, K, V Come From?**</mark>
+
+- **Self-attention:** Q, K, V come from the same input sequence.  
+  **Example:** Understand a sentence → words attend to other words in the same sentence.
+
+- **Cross-attention:** Q comes from the decoder; K, V come from the encoder.  
+  **Example:** Translate a sentence → encoder understands the input (K, V); decoder asks what information it needs (Q) to generate the next word.
+
 #### <mark>**DIFFERENT EMBEDDING MODELS FOR QUERY AND VECTOR**</mark>
 * Use the **same embedding model** for both queries and documents - (a) can have different dimensions - so dimension-mismatch error. (b) same dimension but different vector coordinates - irrelevant chunks.
 * or use a **pair of encoders explicitly trained to produce embeddings in the same shared space**, such as **DPR**
