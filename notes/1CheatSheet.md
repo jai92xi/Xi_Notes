@@ -63,7 +63,7 @@
 * **Confusion Matrix**: An **N×N grid** used to **evaluate a classification model** by comparing **actual labels** vs **predicted labels**.
 * **Metrics:** Accuracy, Precision, Recall, F1-Score, Specificity, ROC-AUC, PR-AUC, Balanced Accuracy, FPR, FNR
 
-#### <mark>**Where do Q, K, V Come From?**</mark>
+#### <mark>**Where do Q, K, V Come From in self attention vs cross attention?**</mark>
 
 - **Self-attention:** Q, K, V come from the same input sequence.  
   **Example:** Understand a sentence → words attend to other words in the same sentence.
@@ -97,6 +97,21 @@ Hallucination happens when the **retrieved context doesn't contain enough releva
 | "Don't Guess" | HyDE | Hybrid Search | Context Compression | Groundedness Check |
 |  |  | Reranker | Conflict Resolution | Retry / Regenerate / Abstain |
 |  |  | MMR (Maximal Marginal Relevance) |  |  |
+
+#### <mark>**Transformer Normalization - Pre-Norm; Post-Norm; Sandwich-Norm**</mark>
+- **Pre-Norm:** <mark>LN before</mark> each sublayer; better gradient flow in deep models.
+
+  $$h=x+\operatorname{Attn}(\operatorname{LN}(x))$$
+
+- **Post-Norm:** <mark>LN after</mark> residual addition; used in the original Transformer.
+
+  $$h=\operatorname{LN}(x+\operatorname{Attn}(x))$$
+
+- **Sandwich-Norm:** <mark>LN before and after</mark> each sublayer; adds normalization overhead.
+
+  $$h=x+\operatorname{LN}(\operatorname{Attn}(\operatorname{LN}(x)))$$
+
+**Memory trick:** Pre = Before | Post = After | Sandwich = Both
 
 #### <mark>**RAG EVALUATION**</mark>
 * **Retrieval**  :  Recall@K, Precision@K, Hit Rate@K, MRR, nDCG@K, MAP@K, Retrieval Latency
