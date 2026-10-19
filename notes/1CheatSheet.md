@@ -127,6 +127,7 @@ Hallucination happens when the **retrieved context doesn't contain enough releva
 
 #### <mark>**OPTIMIZATIONS**</mark>
 - **GQA/MQA** → Fewer **K/V heads** → 📉 smaller cache.
+- **MLA** → Compresses **K/V into a latent representation** → 📉 smaller cache.
 - **KV Quantization** → Fewer **bits per K/V** → 📉 lower memory.
 - **PagedAttention** → Efficiently **manages KV-cache memory** → less fragmentation.
 
