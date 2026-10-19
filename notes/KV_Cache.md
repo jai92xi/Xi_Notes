@@ -8,7 +8,9 @@
 Without caching, the growing prefix is processed repeatedly:
 ```
 
-Step 1: \[A\] → B Step 2: \[A B\] → C Step 3: \[A B C\] → D
+Step 1: [A] → B 
+Step 2: [A B] → C 
+Step 3: [A B C] → D
 
 ```
 So K/V for `A`, `B`, etc. are repeatedly recomputed.
@@ -16,7 +18,9 @@ So K/V for `A`, `B`, etc. are repeatedly recomputed.
 **With KV Cache:**
 ```
 
-Step 1: A → K₁,V₁ → cache Step 2: B → K₂,V₂ → Q₂ attends to K₁,K₂ Step 3: C → K₃,V₃ → Q₃ attends to K₁,K₂,K₃
+Step 1: A → K₁,V₁ → cache 
+Step 2: B → K₂,V₂ → Q₂ attends to K₁,K₂ 
+Step 3: C → K₃,V₃ → Q₃ attends to K₁,K₂,K₃
 
 ````
 **Compute K/V once → store → reuse.**
