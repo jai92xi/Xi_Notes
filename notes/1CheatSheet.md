@@ -2,13 +2,12 @@
 
 **Input Raw Text → Tokenizer → Tokens with Token IDs → Embeddings → Transformer**
 
-######## Types of Transformer Models and Tokenizers
+**Types of Transformer Models and Tokenizers**
 - **Encoder-only model** — **BERT** uses **WordPiece**.
 - **Encoder–Decoder model** — **T5** uses **SentencePiece**.
 - **Decoder-only (Generative) model** — **GPT** and **LLaMA 🦙** use **BPE (Byte Pair Encoding)**.
 
-######## Tokenizer Vocabulary Size
-
+**Tokenizer Vocabulary Size**
 - **Too Large:** Fewer tokens → less attention computation, but larger embedding table and more memory.
 - **Too Small:** More tokens → more attention computation, but smaller embedding table and less memory.
 
