@@ -1,10 +1,24 @@
 #### <mark>**Tokenizer**</mark>
+
 **Input Raw Text → Tokenizer → Tokens with Token IDs → Embeddings → Transformer**
 
-##### Types of Transformer Models and Tokenizers
+######## Types of Transformer Models and Tokenizers
 - **Encoder-only model** — **BERT** uses **WordPiece**.
 - **Encoder–Decoder model** — **T5** uses **SentencePiece**.
 - **Decoder-only (Generative) model** — **GPT** and **LLaMA 🦙** use **BPE (Byte Pair Encoding)**.
+
+######## Tokenizer Vocabulary Size
+
+- **Too Large:** Fewer tokens → less attention computation, but larger embedding table and more memory.
+- **Too Small:** More tokens → more attention computation, but smaller embedding table and less memory.
+
+##### Examples
+- **LLaMA 2 7B:** 32K vocabulary → 131M embedding parameters (~262 MB FP16).
+- **LLaMA 3.1 8B:** 128K vocabulary → 524M embedding parameters (~1.05 GB FP16).
+
+**Attention complexity:** \(O(n^2 \times d)\)
+
+**Key Takeaway:** Balance **sequence length, memory, and performance**.
 
 
 #### <mark>**OVERFITTING**</mark>
