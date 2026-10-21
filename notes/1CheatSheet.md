@@ -1,3 +1,12 @@
+#### <mark>**Tokenizer**</mark>
+**Input Raw Text → Tokenizer → Tokens with Token IDs → Embeddings → Transformer**
+
+##### Types of Transformer Models and Tokenizers
+- **Encoder-only model** — **BERT** uses **WordPiece**.
+- **Encoder–Decoder model** — **T5** uses **SentencePiece**.
+- **Decoder-only (Generative) model** — **GPT** and **LLaMA 🦙** use **BPE (Byte Pair Encoding)**.
+
+
 #### <mark>**OVERFITTING**</mark>
 * Model **memorizes the training data excessively** - including **noise** - it **performs well on training data** but **poorly on new/unseen data**.
 * solution: More training data, Data Augmentation; reduce model complexity (reduce layers/neurons); Early Stopping; Dropout, L1/L2 regularization, Batch Normalization; cross validation.
