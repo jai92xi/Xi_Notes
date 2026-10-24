@@ -50,6 +50,14 @@
 - **Formula:** `RRF(d) = Σ 1 / (k + rank(d))` 🧮
 - `k` is typically 60.
 
+### <mark>**Speculative Decoding**</mark>
+
+Checking multiple tokens in parallel takes almost the same GPU time as generating just one token.
+
+- **Draft model — LLaMA 3.1 8B:** Quickly guesses multiple tokens.
+- **Target model — LLaMA 3.1 70B:** Verifies guesses in parallel and corrects rejected tokens.
+- **Benefit:** 🚀 Faster generation with **no change to the target model's output distribution**, using rejection sampling.
+
 #### <mark>**EARLY STOPPING:**</mark>
 * A **regularization** technique - that prevents **overfitting** - by **stopping training** when **validation performance stops improving**.
 
