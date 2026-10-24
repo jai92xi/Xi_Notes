@@ -7,3 +7,5 @@
 **What if we use the Llama 3.1 80B model to review tokens instead of generating every token itself?** We can use a smaller, faster model, such as **Llama 3.1 8B**, to generate several token guesses, while the larger 80B model <mark>**verifies them together**</mark> and corrects any incorrect guesses.
 
 This is the idea behind <mark>**speculative decoding**</mark>. The smaller model makes quick predictions, and the larger model checks multiple tokens in parallel. If the guesses are correct, <mark>**multiple tokens can be accepted in a single step**</mark>, dramatically speeding up generation while preserving the output quality of the larger model.
+
+https://jai92xi.github.io/AIBrainBox/?id=XI-00044
