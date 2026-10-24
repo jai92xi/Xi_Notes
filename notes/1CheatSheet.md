@@ -50,9 +50,10 @@
 - **Formula:** `RRF(d) = Σ 1 / (k + rank(d))` 🧮
 - `k` is typically 60.
 
-### <mark>**Speculative Decoding**</mark>
+#### <mark>**Speculative Decoding**</mark>
 
 Checking multiple tokens in parallel takes almost the same GPU time as generating just one token.
+**Llama 3.1 80B** generates text **one token at a time**. For every new token, it must repeatedly access its large set of **model weights** from GPU memory and perform computations. This makes generation <mark>**memory-bandwidth-bound**</mark>, meaning the GPU spends much of its time moving data rather than computing. As a result, generating text token by token can be slow.
 
 - **Draft model — LLaMA 3.1 8B:** Quickly guesses multiple tokens.
 - **Target model — LLaMA 3.1 70B:** Verifies guesses in parallel and corrects rejected tokens.
