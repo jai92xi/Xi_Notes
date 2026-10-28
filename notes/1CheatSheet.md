@@ -65,8 +65,7 @@
 
 #### <mark>LLM Serving Optimization</mark>
 
-##### <mark>Problem</mark>
-Peak traffic + long sequences → **KV-cache growth** → **GPU memory pressure** → **CUDA OOM + high p99 latency**.
+<mark>**Problem**</mark>: Peak traffic + long sequences → **KV-cache growth** → **GPU memory pressure** → **CUDA OOM + high p99 latency**.
 
 ##### <mark>Methods</mark>
 - <mark>Admission control</mark>: Limit memory-intensive concurrent requests; queue excess.
@@ -74,8 +73,7 @@ Peak traffic + long sequences → **KV-cache growth** → **GPU memory pressure*
 - <mark>Paged KV cache</mark>: Reduce memory waste and fragmentation.
 - <mark>Memory profiling</mark>: Monitor KV cache, p99 latency, and OOM errors.
 
-##### <mark>Key Takeaway</mark>
-**Admission control = Stability | Continuous batching = Throughput | Paged KV cache = Memory efficiency**
+**Key Takeaway**: **Admission control = Stability** | **Continuous batching = Throughput** | **Paged KV cache = Memory efficiency**
 
 #### <mark>**FORWARD PROPAGATION VS BACKWARD PROPAGATION**</mark>
 1. **Forward Propagation**  - makes **predictions**.
