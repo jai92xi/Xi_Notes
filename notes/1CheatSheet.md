@@ -52,7 +52,8 @@
 
 #### <mark>**Speculative Decoding**</mark>
 
-Checking multiple tokens in parallel takes almost the same GPU time as generating just one token.
+**Checking multiple tokens in parallel takes almost the same GPU time as generating just one token.**
+
 **Llama 3.1 80B** generates text **one token at a time**. For every new token, it must repeatedly access its large set of **model weights** from GPU memory and perform computations. This makes generation <mark>**memory-bandwidth-bound**</mark>, meaning the GPU spends much of its time moving data rather than computing. As a result, generating text token by token can be slow.
 
 - **Draft model — LLaMA 3.1 8B:** Quickly guesses multiple tokens.
@@ -61,6 +62,20 @@ Checking multiple tokens in parallel takes almost the same GPU time as generatin
 
 #### <mark>**EARLY STOPPING:**</mark>
 * A **regularization** technique - that prevents **overfitting** - by **stopping training** when **validation performance stops improving**.
+
+<mark>#### LLM Serving Optimization</mark>
+
+<mark>##### Problem</mark>
+Peak traffic + long sequences → **KV-cache growth** → **GPU memory pressure** → **CUDA OOM + high p99 latency**.
+
+<mark>##### Methods</mark>
+- <mark>Admission control</mark>: Limit memory-intensive concurrent requests; queue excess.
+- <mark>Continuous batching</mark>: Add requests as others finish to improve throughput.
+- <mark>Paged KV cache</mark>: Reduce memory waste and fragmentation.
+- <mark>Memory profiling</mark>: Monitor KV cache, p99 latency, and OOM errors.
+
+<mark>##### Key Takeaway</mark>
+**Admission control = Stability | Continuous batching = Throughput | Paged KV cache = Memory efficiency**
 
 #### <mark>**FORWARD PROPAGATION VS BACKWARD PROPAGATION**</mark>
 1. **Forward Propagation**  - makes **predictions**.
