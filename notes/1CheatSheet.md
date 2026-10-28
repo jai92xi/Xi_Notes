@@ -63,18 +63,18 @@
 #### <mark>**EARLY STOPPING:**</mark>
 * A **regularization** technique - that prevents **overfitting** - by **stopping training** when **validation performance stops improving**.
 
-<mark>#### LLM Serving Optimization</mark>
+#### <mark>LLM Serving Optimization</mark>
 
-<mark>##### Problem</mark>
+##### <mark>Problem</mark>
 Peak traffic + long sequences → **KV-cache growth** → **GPU memory pressure** → **CUDA OOM + high p99 latency**.
 
-<mark>##### Methods</mark>
+##### <mark>Methods</mark>
 - <mark>Admission control</mark>: Limit memory-intensive concurrent requests; queue excess.
 - <mark>Continuous batching</mark>: Add requests as others finish to improve throughput.
 - <mark>Paged KV cache</mark>: Reduce memory waste and fragmentation.
 - <mark>Memory profiling</mark>: Monitor KV cache, p99 latency, and OOM errors.
 
-<mark>##### Key Takeaway</mark>
+##### <mark>Key Takeaway</mark>
 **Admission control = Stability | Continuous batching = Throughput | Paged KV cache = Memory efficiency**
 
 #### <mark>**FORWARD PROPAGATION VS BACKWARD PROPAGATION**</mark>
