@@ -51,3 +51,7 @@ scores = cross_val_score(pipeline, X, y, cv=5)
 
 print(scores.mean())
 ```
+
+https://jai92xi.github.io/AIBrainBox/?id=XI-00046
+
+https://jai92xi.github.io/AIBrainBox/?id=XI-00047
