@@ -56,3 +56,22 @@
 > - Combines ranked results from multiple retrievers.
 > - Uses **rank positions**, not raw relevance scores.
 > - Formula: `RRF(d) = Σ 1 / (k + rank(d))` (`k = 60`).
+---
+> ### What is Reranking?
+> - Reorders retrieved chunks by **query relevance**.
+> - Most relevant chunks → Top ranks.
+
+> ### Cross-Encoder
+> - Input: **Query + Document Chunk** (together).
+> - Output: **Relevance Score** per query–chunk pair.
+> 
+> - Models: `BAAI/bge-reranker-v2-m3`, `cross-encoder/ms-marco-MiniLM-L-6-v2`, `Cohere Rerank`.
+
+> ### Why Not Rerank Entire Database?
+> - Each chunk compared with user query - High **computational cost + latency**.
+
+> ### Two-Stage Retrieval Pipeline
+> 1. **Initial Retrieval:** BM25 / Dense / Hybrid Search → Top 20–100 candidates.
+> 2. **Reranking:** Cross-Encoder → Top-N relevant chunks → LLM.
+
+---
