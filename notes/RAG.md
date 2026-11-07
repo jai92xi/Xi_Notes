@@ -19,17 +19,21 @@
 > - **Cohere                :** `embed-v4.0`
 > - **BGE                   :** `BAAI/bge-large-en-v1.5`
 > - **Sentence Transformers :** `all-MiniLM-L6-v2`
-
-> **Vector Databases / Search Engines:** Azure AI Search, Pinecone, FAISS, Chroma, Weaviate, Milvus.
-
-> **Similarity Metrics:** Cosine Similarity, Dot Product, Euclidean Distance (L2).
 ---
-> ### Same embedding model for Document & Query Embeddings?
-> - **Dimension Mismatch:** Different vector dimensions → Search errors.
-> - **Semantic Space Incompatibility:** Same dimensions do not guarantee compatible vectors → Poor retrieval.
+> **Vector Databases / Search Engines:** Azure AI Search, Pinecone, FAISS, Chroma, Weaviate, Milvus.
+---
+> **Similarity Metrics:**
+> - **Cosine Similarity:** Measures angle between vectors → **Direction** (ignores magnitude).
+> - **Euclidean Distance (L2):** Straight-line distance → **Direction + Magnitude**.
+> - **Dot Product:** Measures alignment + vector magnitudes.
+---
+> ### Same embedding model for Document & Query Embeddings. If different:
+>   - **Dimension Mismatch:** Different vector dimensions → Search errors.
+>   - **Semantic Space Incompatibility:** Same dimensions do not guarantee compatible vectors → Poor retrieval.
+>     
 > - **Model Upgrade:** Regenerate existing document embeddings.
 >
-> **use a pair of encoders** explicitly trained to produce embeddings in the same shared space, such as **DPR**
+> **Use a pair of encoders** explicitly trained to produce embeddings in the same shared space, such as **DPR**
 
 ---
 > ### Retrieval Methods
