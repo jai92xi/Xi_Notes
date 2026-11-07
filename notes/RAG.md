@@ -75,3 +75,9 @@
 > 2. **Reranking:** Cross-Encoder → Top-N relevant chunks → LLM.
 
 ---
+> ### Maximal Marginal Relevance (MMR)
+> - Balances **Relevance + Diversity** during retrieval.
+> - Selects chunks relevant to the query while avoiding redundant information.
+> - Reduces **duplicate / overlapping context** in RAG.
+
+---
