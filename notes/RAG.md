@@ -1,13 +1,11 @@
-### 1. What is Tokenization?
+> ### 1. What is Tokenization?
+> 
+> Breaks text into smaller units (**words, subwords, characters**) and converts them into numerical **Token IDs** for LLM processing.
 
-Breaks text into smaller units (**words, subwords, characters**) and converts them into numerical **Token IDs** for LLM processing.
-
-**Tokenization Algorithms:**
-1. **Encoder-only Transformer – BERT:** WordPiece
-2. **Decoder-only Transformer – GPT:** Byte Pair Encoding (BPE)
-3. **Encoder-Decoder Transformer – T5:** SentencePiece
-
-<mark>**Text → Tokens → Token IDs**</mark>
+> **Tokenization Algorithms:**
+> 1. **Encoder-only Transformer – BERT:** WordPiece
+> 2. **Decoder-only Transformer – GPT:** Byte Pair Encoding (BPE)
+> 3. **Encoder-Decoder Transformer – T5:** SentencePiece
 
 ### 2. What are Embeddings?
 
